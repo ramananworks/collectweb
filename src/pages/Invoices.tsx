@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { mockInvoices, formatCurrency } from "@/lib/mock-data";
 import { InvoiceStatus } from "@/types";
+import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 
 const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue"];
 
@@ -25,9 +25,7 @@ export default function Invoices() {
           <h1 className="text-2xl font-bold">Invoices & Loans</h1>
           <p className="text-sm text-muted-foreground">{mockInvoices.length} total records</p>
         </div>
-        <Button className="gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> Create Invoice
-        </Button>
+        <CreateInvoiceDialog />
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

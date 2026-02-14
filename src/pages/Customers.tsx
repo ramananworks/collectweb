@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Plus, Search, Phone, MapPin } from "lucide-react";
+import { Search, Phone, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { mockCustomers, formatCurrency } from "@/lib/mock-data";
+import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
@@ -19,9 +19,7 @@ export default function Customers() {
           <h1 className="text-2xl font-bold">Customers</h1>
           <p className="text-sm text-muted-foreground">{mockCustomers.length} parties registered</p>
         </div>
-        <Button className="gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> Add Customer
-        </Button>
+        <AddCustomerDialog />
       </div>
 
       <div className="relative max-w-sm">
