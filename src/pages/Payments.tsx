@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
 import { mockPayments, formatCurrency } from "@/lib/mock-data";
+import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 
 export default function Payments() {
   const [search, setSearch] = useState("");
@@ -18,9 +18,7 @@ export default function Payments() {
           <h1 className="text-2xl font-bold">Payments</h1>
           <p className="text-sm text-muted-foreground">{mockPayments.length} payments recorded</p>
         </div>
-        <Button className="gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> Record Payment
-        </Button>
+        <RecordPaymentDialog />
       </div>
 
       <div className="relative max-w-sm">
