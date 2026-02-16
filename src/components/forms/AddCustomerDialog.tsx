@@ -9,10 +9,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
+const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
 const customerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
   phone: z.string().trim().min(10, "Enter a valid phone number").max(15, "Phone number is too long"),
   address: z.string().trim().min(5, "Address must be at least 5 characters").max(200, "Address is too long"),
+  gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"),
 });
 
@@ -22,7 +25,7 @@ export default function AddCustomerDialog() {
   const [open, setOpen] = useState(false);
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: { name: "", phone: "", address: "", credit_limit: 0 },
+    defaultValues: { name: "", phone: "", address: "", gstin: "", credit_limit: 0 },
   });
 
   function onSubmit(values: CustomerFormValues) {
@@ -63,6 +66,13 @@ export default function AddCustomerDialog() {
               <FormItem>
                 <FormLabel>Address</FormLabel>
                 <FormControl><Input placeholder="15 MG Road, Pune" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="gstin" render={({ field }) => (
+              <FormItem>
+                <FormLabel>GSTIN <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
+                <FormControl><Input placeholder="27AABCP1234A1Z5" maxLength={15} {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
