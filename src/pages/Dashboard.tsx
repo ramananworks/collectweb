@@ -64,9 +64,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Payments */}
+      {/* Recent Collections */}
       <div className="rounded-xl bg-card p-5 stat-card-shadow">
-        <h2 className="text-base font-semibold mb-4">Recent Payments</h2>
+        <h2 className="text-base font-semibold mb-4">Recent Collections</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

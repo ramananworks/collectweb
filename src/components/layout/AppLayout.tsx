@@ -19,7 +19,7 @@ const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/customers", icon: Users, label: "Customers" },
   { to: "/invoices", icon: FileText, label: "Invoices" },
-  { to: "/payments", icon: CreditCard, label: "Payments" },
+  { to: "/collections", icon: CreditCard, label: "Collections" },
   { to: "/reports", icon: BarChart3, label: "Reports" },
   { to: "/users", icon: UserCog, label: "Team" },
 ];
