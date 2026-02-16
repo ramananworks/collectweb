@@ -14,6 +14,8 @@ import { mockCustomers } from "@/lib/mock-data";
 
 const invoiceSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
+  invoice_number: z.string().trim().min(1, "Invoice number is required").max(50, "Invoice number is too long"),
+  invoice_date: z.string().min(1, "Invoice date is required"),
   amount: z.coerce.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"),
   due_date: z.string().min(1, "Due date is required"),
   description: z.string().trim().max(500, "Description is too long").optional(),
@@ -25,7 +27,7 @@ export default function CreateInvoiceDialog() {
   const [open, setOpen] = useState(false);
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
-    defaultValues: { customer_id: "", amount: 0, due_date: "", description: "" },
+    defaultValues: { customer_id: "", invoice_number: "", invoice_date: "", amount: 0, due_date: "", description: "" },
   });
 
   function onSubmit(values: InvoiceFormValues) {
@@ -62,6 +64,20 @@ export default function CreateInvoiceDialog() {
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="invoice_number" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Invoice Number</FormLabel>
+                <FormControl><Input placeholder="INV-2025-007" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="invoice_date" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Invoice Date</FormLabel>
+                <FormControl><Input type="date" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />

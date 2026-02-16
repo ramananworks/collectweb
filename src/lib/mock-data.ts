@@ -27,12 +27,12 @@ export const mockCustomers: Customer[] = [
 ];
 
 export const mockInvoices: Invoice[] = [
-  { id: "inv1", company_id: "c1", customer_id: "cu1", customer_name: "Amit Patel", amount: 75000, paid_amount: 25000, due_date: "2025-01-15", created_at: "2024-12-15", status: "overdue" },
-  { id: "inv2", company_id: "c1", customer_id: "cu2", customer_name: "Priya Electronics", amount: 200000, paid_amount: 60000, due_date: "2025-02-28", created_at: "2025-01-10", status: "partial" },
-  { id: "inv3", company_id: "c1", customer_id: "cu4", customer_name: "Metro Wholesale", amount: 320000, paid_amount: 0, due_date: "2025-03-01", created_at: "2025-01-20", status: "pending" },
-  { id: "inv4", company_id: "c1", customer_id: "cu5", customer_name: "Lakshmi Stores", amount: 85000, paid_amount: 85000, due_date: "2025-01-31", created_at: "2025-01-01", status: "paid" },
-  { id: "inv5", company_id: "c1", customer_id: "cu1", customer_name: "Amit Patel", amount: 50000, paid_amount: 0, due_date: "2024-11-30", created_at: "2024-10-30", status: "overdue" },
-  { id: "inv6", company_id: "c1", customer_id: "cu6", customer_name: "Rajan Distributors", amount: 195000, paid_amount: 50000, due_date: "2025-02-15", created_at: "2025-01-05", status: "partial" },
+  { id: "inv1", company_id: "c1", customer_id: "cu1", customer_name: "Amit Patel", invoice_number: "INV-2024-001", invoice_date: "2024-12-15", amount: 75000, paid_amount: 25000, due_date: "2025-01-15", created_at: "2024-12-15", status: "overdue" },
+  { id: "inv2", company_id: "c1", customer_id: "cu2", customer_name: "Priya Electronics", invoice_number: "INV-2025-002", invoice_date: "2025-01-10", amount: 200000, paid_amount: 60000, due_date: "2025-02-28", created_at: "2025-01-10", status: "partial" },
+  { id: "inv3", company_id: "c1", customer_id: "cu4", customer_name: "Metro Wholesale", invoice_number: "INV-2025-003", invoice_date: "2025-01-20", amount: 320000, paid_amount: 0, due_date: "2025-03-01", created_at: "2025-01-20", status: "pending" },
+  { id: "inv4", company_id: "c1", customer_id: "cu5", customer_name: "Lakshmi Stores", invoice_number: "INV-2025-004", invoice_date: "2025-01-01", amount: 85000, paid_amount: 85000, due_date: "2025-01-31", created_at: "2025-01-01", status: "paid" },
+  { id: "inv5", company_id: "c1", customer_id: "cu1", customer_name: "Amit Patel", invoice_number: "INV-2024-005", invoice_date: "2024-10-30", amount: 50000, paid_amount: 0, due_date: "2024-11-30", created_at: "2024-10-30", status: "overdue" },
+  { id: "inv6", company_id: "c1", customer_id: "cu6", customer_name: "Rajan Distributors", invoice_number: "INV-2025-006", invoice_date: "2025-01-05", amount: 195000, paid_amount: 50000, due_date: "2025-02-15", created_at: "2025-01-05", status: "partial" },
 ];
 
 export const mockPayments: Payment[] = [
