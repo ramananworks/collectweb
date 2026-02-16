@@ -10,32 +10,43 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { mockInvoices, mockStaff, formatCurrency } from "@/lib/mock-data";
+import { mockInvoices, mockCustomers, mockStaff, formatCurrency } from "@/lib/mock-data";
 
-const paymentSchema = z.object({
+const collectionSchema = z.object({
+  customer_id: z.string().min(1, "Select a customer"),
   invoice_id: z.string().min(1, "Select an invoice"),
   amount: z.coerce.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"),
-  date: z.string().min(1, "Payment date is required"),
-  mode: z.enum(["cash", "upi", "bank_transfer"], { required_error: "Select payment mode" }),
+  date: z.string().min(1, "Collection date is required"),
+  mode: z.enum(["cash", "upi", "bank_transfer"], { required_error: "Select collection mode" }),
   collected_by: z.string().min(1, "Select collector"),
   notes: z.string().trim().max(500, "Notes too long").optional(),
 });
 
-type PaymentFormValues = z.infer<typeof paymentSchema>;
+type CollectionFormValues = z.infer<typeof collectionSchema>;
 
 export default function RecordPaymentDialog() {
   const [open, setOpen] = useState(false);
-  const form = useForm<PaymentFormValues>({
-    resolver: zodResolver(paymentSchema),
-    defaultValues: { invoice_id: "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: "", notes: "" },
+  const form = useForm<CollectionFormValues>({
+    resolver: zodResolver(collectionSchema),
+    defaultValues: { customer_id: "", invoice_id: "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: "", notes: "" },
   });
 
-  const unpaidInvoices = mockInvoices.filter((inv) => inv.status !== "paid");
+  const selectedCustomerId = form.watch("customer_id");
 
-  function onSubmit(values: PaymentFormValues) {
-    const invoice = mockInvoices.find((i) => i.id === values.invoice_id);
-    console.log("New payment:", values);
-    toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${invoice?.customer_name}.` });
+  // Customers who have unpaid invoices
+  const customersWithDues = mockCustomers.filter((c) =>
+    mockInvoices.some((inv) => inv.customer_id === c.id && inv.status !== "paid")
+  );
+
+  // Invoices for selected customer
+  const customerInvoices = mockInvoices.filter(
+    (inv) => inv.customer_id === selectedCustomerId && inv.status !== "paid"
+  );
+
+  function onSubmit(values: CollectionFormValues) {
+    const customer = mockCustomers.find((c) => c.id === values.customer_id);
+    console.log("New collection:", values);
+    toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${customer?.name}.` });
     form.reset();
     setOpen(false);
   }
@@ -53,17 +64,38 @@ export default function RecordPaymentDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Customer first */}
+            <FormField control={form.control} name="customer_id" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Customer</FormLabel>
+                <Select onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); }} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {customersWithDues.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            {/* Invoice filtered by customer */}
             <FormField control={form.control} name="invoice_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Invoice</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCustomerId}>
                   <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select invoice" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder={selectedCustomerId ? "Select invoice" : "Select customer first"} />
+                    </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {unpaidInvoices.map((inv) => (
+                    {customerInvoices.map((inv) => (
                       <SelectItem key={inv.id} value={inv.id}>
-                        {inv.customer_name} — {formatCurrency(inv.amount - inv.paid_amount)} due
+                        {inv.invoice_number} — {formatCurrency(inv.amount - inv.paid_amount)} due
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -71,6 +103,7 @@ export default function RecordPaymentDialog() {
                 <FormMessage />
               </FormItem>
             )} />
+
             <FormField control={form.control} name="amount" render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount (₹)</FormLabel>
@@ -80,14 +113,14 @@ export default function RecordPaymentDialog() {
             )} />
             <FormField control={form.control} name="date" render={({ field }) => (
               <FormItem>
-                <FormLabel>Payment Date</FormLabel>
+                <FormLabel>Collection Date</FormLabel>
                 <FormControl><Input type="date" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="mode" render={({ field }) => (
               <FormItem>
-                <FormLabel>Payment Mode</FormLabel>
+                <FormLabel>Collection Mode</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger><SelectValue placeholder="Select mode" /></SelectTrigger>
@@ -120,7 +153,7 @@ export default function RecordPaymentDialog() {
             <FormField control={form.control} name="notes" render={({ field }) => (
               <FormItem>
                 <FormLabel>Notes (optional)</FormLabel>
-                <FormControl><Textarea placeholder="Payment notes..." className="resize-none" {...field} /></FormControl>
+                <FormControl><Textarea placeholder="Collection notes..." className="resize-none" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
