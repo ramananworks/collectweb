@@ -9,7 +9,7 @@ import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
 import Customers from "@/pages/Customers";
 import Invoices from "@/pages/Invoices";
-import Payments from "@/pages/Payments";
+import Collections from "@/pages/Collections";
 import Reports from "@/pages/Reports";
 import UserManagement from "@/pages/UserManagement";
 import NotFound from "./pages/NotFound";
@@ -33,7 +33,7 @@ const App = () => (
           <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
           <Route path="/customers" element={<ProtectedLayout><Customers /></ProtectedLayout>} />
           <Route path="/invoices" element={<ProtectedLayout><Invoices /></ProtectedLayout>} />
-          <Route path="/payments" element={<ProtectedLayout><Payments /></ProtectedLayout>} />
+          <Route path="/collections" element={<ProtectedLayout><Collections /></ProtectedLayout>} />
           <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
           <Route path="/users" element={<ProtectedLayout><UserManagement /></ProtectedLayout>} />
           <Route path="*" element={<NotFound />} />

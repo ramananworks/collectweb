@@ -35,7 +35,7 @@ export default function RecordPaymentDialog() {
   function onSubmit(values: PaymentFormValues) {
     const invoice = mockInvoices.find((i) => i.id === values.invoice_id);
     console.log("New payment:", values);
-    toast({ title: "Payment recorded", description: `${formatCurrency(values.amount)} recorded for ${invoice?.customer_name}.` });
+    toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${invoice?.customer_name}.` });
     form.reset();
     setOpen(false);
   }
@@ -44,12 +44,12 @@ export default function RecordPaymentDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> Record Payment
+          <Plus className="h-4 w-4" /> Record Collection
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Record Payment</DialogTitle>
+          <DialogTitle>Record Collection</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -126,7 +126,7 @@ export default function RecordPaymentDialog() {
             )} />
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" className="gradient-primary text-primary-foreground">Record Payment</Button>
+              <Button type="submit" className="gradient-primary text-primary-foreground">Record Collection</Button>
             </div>
           </form>
         </Form>
