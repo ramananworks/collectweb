@@ -38,6 +38,8 @@ export interface Invoice {
   company_id: string;
   customer_id: string;
   customer_name: string;
+  invoice_number: string;
+  invoice_date: string;
   amount: number;
   paid_amount: number;
   due_date: string;

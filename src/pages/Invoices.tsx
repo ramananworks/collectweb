@@ -55,7 +55,9 @@ export default function Invoices() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50 text-left">
+                <th className="px-4 py-3 font-medium text-muted-foreground">Invoice #</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Customer</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Invoice Date</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Paid</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Balance</th>
@@ -66,7 +68,9 @@ export default function Invoices() {
             <tbody>
               {filtered.map((inv) => (
                 <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer">
+                  <td className="px-4 py-3 font-mono text-xs">{inv.invoice_number}</td>
                   <td className="px-4 py-3 font-medium">{inv.customer_name}</td>
+                  <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{inv.invoice_date}</td>
                   <td className="px-4 py-3">{formatCurrency(inv.amount)}</td>
                   <td className="px-4 py-3 hidden sm:table-cell text-success">{formatCurrency(inv.paid_amount)}</td>
                   <td className="px-4 py-3 hidden md:table-cell font-semibold">{formatCurrency(inv.amount - inv.paid_amount)}</td>
