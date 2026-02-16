@@ -47,9 +47,13 @@ export default function Customers() {
                 <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
               <MapPin className="h-3 w-3 shrink-0" /> {c.address}
             </div>
+            {c.gstin && (
+              <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
+            )}
+            {!c.gstin && <div className="mb-3" />}
             <div className="flex items-center justify-between pt-3 border-t border-border">
               <span className="text-xs text-muted-foreground">
                 Credit Limit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
