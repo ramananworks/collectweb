@@ -7,6 +7,7 @@ import {
   CreditCard,
   BarChart3,
   UserCog,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -22,6 +23,7 @@ const navItems = [
   { to: "/collections", icon: CreditCard, label: "Collections" },
   { to: "/reports", icon: BarChart3, label: "Reports" },
   { to: "/users", icon: UserCog, label: "Team" },
+  { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
