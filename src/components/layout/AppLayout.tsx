@@ -23,7 +23,7 @@ const navItems = [
   { to: "/collections", icon: CreditCard, label: "Collections" },
   { to: "/reports", icon: BarChart3, label: "Reports" },
   { to: "/users", icon: UserCog, label: "Team" },
-  { to: "/settings", icon: Settings, label: "Settings" },
+  { to: "/settings", icon: Settings, label: "Company Settings" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
