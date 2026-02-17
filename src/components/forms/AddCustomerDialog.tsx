@@ -17,6 +17,7 @@ const customerSchema = z.object({
   address: z.string().trim().min(5, "Address must be at least 5 characters").max(200, "Address is too long"),
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"),
+  default_due_days: z.coerce.number().min(0).max(365).optional(),
 });
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
@@ -25,7 +26,7 @@ export default function AddCustomerDialog() {
   const [open, setOpen] = useState(false);
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: { name: "", phone: "", address: "", gstin: "", credit_limit: 0 },
+    defaultValues: { name: "", phone: "", address: "", gstin: "", credit_limit: 0, default_due_days: undefined },
   });
 
   function onSubmit(values: CustomerFormValues) {
@@ -80,6 +81,14 @@ export default function AddCustomerDialog() {
               <FormItem>
                 <FormLabel>Credit Limit (₹)</FormLabel>
                 <FormControl><Input type="number" placeholder="500000" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="default_due_days" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Due Days <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
+                <FormControl><Input type="number" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} /></FormControl>
+                <p className="text-xs text-muted-foreground">Overrides company default when creating invoices for this customer.</p>
                 <FormMessage />
               </FormItem>
             )} />
