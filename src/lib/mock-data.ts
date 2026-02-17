@@ -5,6 +5,7 @@ export const mockCompany: Company = {
   name: "Sharma Traders Pvt Ltd",
   plan: "pro",
   status: "active",
+  default_due_days: 30,
   created_at: "2024-01-15",
 };
 
@@ -18,12 +19,12 @@ export const mockUser: User = {
 };
 
 export const mockCustomers: Customer[] = [
-  { id: "cu1", company_id: "c1", name: "Amit Patel", phone: "+91 99887 11234", address: "15 MG Road, Pune", gstin: "27AABCP1234A1Z5", credit_limit: 500000, outstanding: 125000, created_at: "2024-02-01" },
-  { id: "cu2", company_id: "c1", name: "Priya Electronics", phone: "+91 98123 45678", address: "22 Station Rd, Mumbai", gstin: "27AAECE5678B2Z3", credit_limit: 1000000, outstanding: 340000, created_at: "2024-01-20" },
+  { id: "cu1", company_id: "c1", name: "Amit Patel", phone: "+91 99887 11234", address: "15 MG Road, Pune", gstin: "27AABCP1234A1Z5", credit_limit: 500000, outstanding: 125000, default_due_days: 45, created_at: "2024-02-01" },
+  { id: "cu2", company_id: "c1", name: "Priya Electronics", phone: "+91 98123 45678", address: "22 Station Rd, Mumbai", gstin: "27AAECE5678B2Z3", credit_limit: 1000000, outstanding: 340000, default_due_days: 60, created_at: "2024-01-20" },
   { id: "cu3", company_id: "c1", name: "Suresh & Sons", phone: "+91 87654 32100", address: "8 Gandhi Nagar, Delhi", credit_limit: 300000, outstanding: 0, created_at: "2024-03-10" },
   { id: "cu4", company_id: "c1", name: "Metro Wholesale", phone: "+91 77889 90012", address: "45 Industrial Area, Ahmedabad", gstin: "24AABCM9012C1Z1", credit_limit: 750000, outstanding: 520000, created_at: "2024-01-05" },
   { id: "cu5", company_id: "c1", name: "Lakshmi Stores", phone: "+91 91234 56789", address: "3 Bazaar St, Chennai", credit_limit: 200000, outstanding: 85000, created_at: "2024-04-12" },
-  { id: "cu6", company_id: "c1", name: "Rajan Distributors", phone: "+91 80011 22334", address: "67 Ring Road, Bangalore", gstin: "29AABCR3456D1Z7", credit_limit: 600000, outstanding: 195000, created_at: "2024-02-28" },
+  { id: "cu6", company_id: "c1", name: "Rajan Distributors", phone: "+91 80011 22334", address: "67 Ring Road, Bangalore", gstin: "29AABCR3456D1Z7", credit_limit: 600000, outstanding: 195000, default_due_days: 15, created_at: "2024-02-28" },
 ];
 
 export const mockInvoices: Invoice[] = [
