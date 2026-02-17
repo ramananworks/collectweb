@@ -1,17 +1,25 @@
 import { useState } from "react";
-import { Search, Phone, MapPin } from "lucide-react";
+import { Search, Phone, MapPin, MapPinned } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { mockCustomers, formatCurrency } from "@/lib/mock-data";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { mockCustomers, mockAreas, formatCurrency } from "@/lib/mock-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
-  const filtered = mockCustomers.filter(
-    (c) =>
+  const [areaFilter, setAreaFilter] = useState("all");
+
+  const filtered = mockCustomers.filter((c) => {
+    const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone.includes(search)
-  );
+      c.phone.includes(search);
+    const matchesArea = areaFilter === "all" || c.area === areaFilter;
+    return matchesSearch && matchesArea;
+  });
+
+  // Group by area for display
+  const areas = [...new Set(filtered.map((c) => c.area))].sort();
 
   return (
     <div className="space-y-6">
@@ -26,49 +34,78 @@ export default function Customers() {
         </div>
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search by name or phone..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search by name or phone..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={areaFilter} onValueChange={setAreaFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Areas</SelectItem>
+            {mockAreas.map((a) => (
+              <SelectItem key={a} value={a}>{a}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {filtered.map((c) => (
-          <div key={c.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in cursor-pointer">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-semibold">{c.name}</h3>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                  <Phone className="h-3 w-3" /> {c.phone}
-                </div>
-              </div>
-              <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
-                <p className="text-xs text-muted-foreground">Outstanding</p>
-                <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-              <MapPin className="h-3 w-3 shrink-0" /> {c.address}
-            </div>
-            {c.gstin && (
-              <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
-            )}
-            {!c.gstin && <div className="mb-3" />}
-            <div className="flex items-center justify-between pt-3 border-t border-border">
-              <span className="text-xs text-muted-foreground">
-                Credit Limit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
-              </span>
-              <span className={`text-xs font-medium ${c.outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
-                {((c.outstanding / c.credit_limit) * 100).toFixed(0)}% used
-              </span>
-            </div>
+      {areas.map((area) => (
+        <div key={area} className="space-y-3">
+          <div className="flex items-center gap-2">
+            <MapPinned className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-primary">{area}</h2>
+            <span className="text-xs text-muted-foreground">
+              ({filtered.filter((c) => c.area === area).length} parties)
+            </span>
           </div>
-        ))}
-      </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {filtered
+              .filter((c) => c.area === area)
+              .map((c) => (
+                <div key={c.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold">{c.name}</h3>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                        <Phone className="h-3 w-3" /> {c.phone}
+                      </div>
+                    </div>
+                    <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
+                      <p className="text-xs text-muted-foreground">Outstanding</p>
+                      <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                    <MapPin className="h-3 w-3 shrink-0" /> {c.address}
+                  </div>
+                  {c.gstin && (
+                    <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
+                  )}
+                  {!c.gstin && <div className="mb-3" />}
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <span className="text-xs text-muted-foreground">
+                      Credit Limit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
+                    </span>
+                    <span className={`text-xs font-medium ${c.outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
+                      {((c.outstanding / c.credit_limit) * 100).toFixed(0)}% used
+                    </span>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      ))}
+      {filtered.length === 0 && (
+        <div className="p-8 text-center text-muted-foreground">No customers found</div>
+      )}
     </div>
   );
 }

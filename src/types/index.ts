@@ -28,6 +28,7 @@ export interface Customer {
   name: string;
   phone: string;
   address: string;
+  area: string;
   gstin?: string;
   credit_limit: number;
   outstanding: number;

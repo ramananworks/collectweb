@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/StatusBadges";
-import { mockInvoices, formatCurrency } from "@/lib/mock-data";
+import { mockInvoices, mockAreas, mockCustomers, formatCurrency, getCustomerArea } from "@/lib/mock-data";
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
@@ -12,11 +13,13 @@ const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "
 export default function Invoices() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
+  const [areaFilter, setAreaFilter] = useState("all");
 
   const filtered = mockInvoices.filter((inv) => {
     const matchesSearch = inv.customer_name.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
+    return matchesSearch && matchesStatus && matchesArea;
   });
 
   return (
@@ -37,6 +40,17 @@ export default function Invoices() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
+        <Select value={areaFilter} onValueChange={setAreaFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Areas</SelectItem>
+            {mockAreas.map((a) => (
+              <SelectItem key={a} value={a}>{a}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="flex gap-1.5 flex-wrap">
           {statusFilters.map((s) => (
             <button
@@ -61,6 +75,7 @@ export default function Invoices() {
               <tr className="border-b border-border bg-muted/50 text-left">
                 <th className="px-4 py-3 font-medium text-muted-foreground">Invoice #</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Customer</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Area</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Invoice Date</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Paid</th>
@@ -74,6 +89,7 @@ export default function Invoices() {
                 <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer">
                   <td className="px-4 py-3 font-mono text-xs">{inv.invoice_number}</td>
                   <td className="px-4 py-3 font-medium">{inv.customer_name}</td>
+                  <td className="px-4 py-3 hidden lg:table-cell text-xs text-muted-foreground">{getCustomerArea(inv.customer_id)}</td>
                   <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{inv.invoice_date}</td>
                   <td className="px-4 py-3">{formatCurrency(inv.amount)}</td>
                   <td className="px-4 py-3 hidden sm:table-cell text-success">{formatCurrency(inv.paid_amount)}</td>
