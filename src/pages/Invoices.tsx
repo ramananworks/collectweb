@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/shared/StatusBadges";
 import { mockInvoices, formatCurrency } from "@/lib/mock-data";
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
+import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
 
 const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue"];
 
@@ -25,7 +26,10 @@ export default function Invoices() {
           <h1 className="text-2xl font-bold">Invoices & Loans</h1>
           <p className="text-sm text-muted-foreground">{mockInvoices.length} total records</p>
         </div>
-        <CreateInvoiceDialog />
+        <div className="flex gap-2">
+          <BulkImportInvoicesDialog />
+          <CreateInvoiceDialog />
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

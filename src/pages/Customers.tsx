@@ -3,6 +3,7 @@ import { Search, Phone, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { mockCustomers, formatCurrency } from "@/lib/mock-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
+import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
@@ -19,7 +20,10 @@ export default function Customers() {
           <h1 className="text-2xl font-bold">Customers</h1>
           <p className="text-sm text-muted-foreground">{mockCustomers.length} parties registered</p>
         </div>
-        <AddCustomerDialog />
+        <div className="flex gap-2">
+          <BulkImportCustomersDialog />
+          <AddCustomerDialog />
+        </div>
       </div>
 
       <div className="relative max-w-sm">
