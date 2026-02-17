@@ -8,6 +8,7 @@ export interface Company {
   name: string;
   plan: CompanyPlan;
   status: "active" | "inactive";
+  default_due_days: number;
   created_at: string;
 }
 
@@ -30,6 +31,7 @@ export interface Customer {
   gstin?: string;
   credit_limit: number;
   outstanding: number;
+  default_due_days?: number;
   created_at: string;
 }
 
