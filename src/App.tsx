@@ -12,6 +12,7 @@ import Invoices from "@/pages/Invoices";
 import Collections from "@/pages/Collections";
 import Reports from "@/pages/Reports";
 import UserManagement from "@/pages/UserManagement";
+import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/collections" element={<ProtectedLayout><Collections /></ProtectedLayout>} />
           <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
           <Route path="/users" element={<ProtectedLayout><UserManagement /></ProtectedLayout>} />
+          <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
