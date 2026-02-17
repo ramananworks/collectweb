@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Check, X, MapPin } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, MapPin, Settings as SettingsIcon, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { mockAreas } from "@/lib/mock-data";
+import { Label } from "@/components/ui/label";
+import { mockAreas, mockCompany } from "@/lib/mock-data";
 import { toast } from "@/hooks/use-toast";
 
 export default function Settings() {
@@ -10,7 +11,18 @@ export default function Settings() {
   const [newArea, setNewArea] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [defaultDueDays, setDefaultDueDays] = useState(mockCompany.default_due_days);
+  const [isEditingDueDays, setIsEditingDueDays] = useState(false);
 
+  function handleSaveCompanySettings() {
+    if (defaultDueDays < 1 || defaultDueDays > 365) {
+      toast({ title: "Invalid value", description: "Due days must be between 1 and 365.", variant: "destructive" });
+      return;
+    }
+    mockCompany.default_due_days = defaultDueDays;
+    setIsEditingDueDays(false);
+    toast({ title: "Settings saved", description: `Company default due days set to ${defaultDueDays}.` });
+  }
   function handleAddArea() {
     const trimmed = newArea.trim();
     if (!trimmed) return;
@@ -60,8 +72,43 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">Manage application configuration</p>
+        <h1 className="text-2xl font-bold">Company Settings</h1>
+        <p className="text-sm text-muted-foreground">Manage company-wide configuration</p>
+      </div>
+
+      {/* Default Due Days */}
+      <div className="rounded-xl bg-card p-5 stat-card-shadow max-w-xl">
+        <div className="flex items-center gap-2 mb-4">
+          <SettingsIcon className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Default Due Days</h2>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="space-y-2 flex-1 max-w-xs">
+            <Label htmlFor="default_due_days">Company-wide Default</Label>
+            <p className="text-xs text-muted-foreground">Applied when no invoice or customer-level due date is set.</p>
+            <Input
+              id="default_due_days"
+              type="number"
+              min={1}
+              max={365}
+              value={defaultDueDays}
+              disabled={!isEditingDueDays}
+              onChange={(e) => setDefaultDueDays(Number(e.target.value))}
+            />
+          </div>
+          {isEditingDueDays ? (
+            <div className="flex gap-2">
+              <Button onClick={handleSaveCompanySettings} className="gradient-primary text-primary-foreground gap-2">
+                <Save className="h-4 w-4" /> Save
+              </Button>
+              <Button variant="outline" onClick={() => { setDefaultDueDays(mockCompany.default_due_days); setIsEditingDueDays(false); }}>
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" onClick={() => setIsEditingDueDays(true)}>Edit</Button>
+          )}
+        </div>
       </div>
 
       {/* Area Management */}
