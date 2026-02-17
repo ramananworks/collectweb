@@ -1,28 +1,60 @@
+import { useState } from "react";
 import { IndianRupee, TrendingUp, AlertTriangle, Users } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StatCard from "@/components/dashboard/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadges";
-import { dashboardStats, ageingData, mockInvoices, mockPayments, formatCurrency } from "@/lib/mock-data";
+import { dashboardStats, ageingData, mockInvoices, mockPayments, mockCustomers, mockAreas, formatCurrency, getCustomerArea } from "@/lib/mock-data";
 
 const barColors = ["hsl(160, 84%, 39%)", "hsl(38, 92%, 50%)", "hsl(25, 85%, 55%)", "hsl(0, 72%, 51%)"];
 
 export default function Dashboard() {
-  const recentInvoices = mockInvoices.slice(0, 4);
-  const recentPayments = mockPayments.slice(0, 4);
+  const [areaFilter, setAreaFilter] = useState("all");
+
+  const filteredCustomerIds = areaFilter === "all"
+    ? mockCustomers.map((c) => c.id)
+    : mockCustomers.filter((c) => c.area === areaFilter).map((c) => c.id);
+
+  const filteredInvoices = mockInvoices.filter((inv) => filteredCustomerIds.includes(inv.customer_id));
+  const filteredPayments = mockPayments.filter((p) => {
+    const inv = mockInvoices.find((i) => i.id === p.invoice_id);
+    return inv && filteredCustomerIds.includes(inv.customer_id);
+  });
+
+  const totalOutstanding = filteredInvoices.reduce((a, i) => a + (i.amount - i.paid_amount), 0);
+  const todayCollection = filteredPayments.reduce((a, p) => a + p.amount, 0);
+  const overdueAmount = filteredInvoices.filter((i) => i.status === "overdue").reduce((a, i) => a + (i.amount - i.paid_amount), 0);
+  const customerCount = new Set(filteredInvoices.map((i) => i.customer_id)).size;
+
+  const recentInvoices = filteredInvoices.slice(0, 4);
+  const recentPayments = filteredPayments.slice(0, 4);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Overview of your collections and outstanding</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Overview of your collections and outstanding</p>
+        </div>
+        <Select value={areaFilter} onValueChange={setAreaFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Areas</SelectItem>
+            {mockAreas.map((a) => (
+              <SelectItem key={a} value={a}>{a}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Total Outstanding" value={dashboardStats.totalOutstanding} icon={IndianRupee} variant="default" />
-        <StatCard title="Today's Collection" value={dashboardStats.todayCollection} icon={TrendingUp} variant="success" />
-        <StatCard title="Overdue Amount" value={dashboardStats.overdueAmount} icon={AlertTriangle} variant="destructive" />
-        <StatCard title="Active Customers" value={dashboardStats.customerCount} icon={Users} isCurrency={false} variant="default" />
+        <StatCard title="Total Outstanding" value={totalOutstanding} icon={IndianRupee} variant="default" />
+        <StatCard title="Today's Collection" value={todayCollection} icon={TrendingUp} variant="success" />
+        <StatCard title="Overdue Amount" value={overdueAmount} icon={AlertTriangle} variant="destructive" />
+        <StatCard title="Active Customers" value={customerCount} icon={Users} isCurrency={false} variant="default" />
       </div>
 
       {/* Chart + Recent */}
@@ -52,7 +84,7 @@ export default function Dashboard() {
               <div key={inv.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                 <div>
                   <p className="text-sm font-medium">{inv.customer_name}</p>
-                  <p className="text-xs text-muted-foreground">Due {inv.due_date}</p>
+                  <p className="text-xs text-muted-foreground">Due {inv.due_date} · {getCustomerArea(inv.customer_id)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold">{formatCurrency(inv.amount)}</span>

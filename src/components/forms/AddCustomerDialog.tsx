@@ -5,9 +5,11 @@ import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { mockAreas } from "@/lib/mock-data";
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
@@ -15,6 +17,7 @@ const customerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
   phone: z.string().trim().min(10, "Enter a valid phone number").max(15, "Phone number is too long"),
   address: z.string().trim().min(5, "Address must be at least 5 characters").max(200, "Address is too long"),
+  area: z.string().min(1, "Select an area"),
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"),
   default_due_days: z.coerce.number().min(0).max(365).optional(),
@@ -26,7 +29,7 @@ export default function AddCustomerDialog() {
   const [open, setOpen] = useState(false);
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: { name: "", phone: "", address: "", gstin: "", credit_limit: 0, default_due_days: undefined },
+    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined },
   });
 
   function onSubmit(values: CustomerFormValues) {
@@ -67,6 +70,22 @@ export default function AddCustomerDialog() {
               <FormItem>
                 <FormLabel>Address</FormLabel>
                 <FormControl><Input placeholder="15 MG Road, Pune" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="area" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Area</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {mockAreas.map((a) => (
+                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )} />
