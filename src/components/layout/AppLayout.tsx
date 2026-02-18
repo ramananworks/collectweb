@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -13,8 +13,9 @@ import {
   X,
   Building2,
 } from "lucide-react";
-import { mockUser, mockCompany } from "@/lib/mock-data";
+import { mockCompany } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -29,6 +30,17 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile, role, signOut } = useAuth();
+
+  const displayName = profile?.name || "User";
+  const displayEmail = profile?.email || "";
+  const displayRole = role || "staff";
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -55,7 +67,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-sm font-bold text-sidebar-accent-foreground truncate">
               {mockCompany.name}
             </h1>
-            <p className="text-xs text-sidebar-foreground">{mockUser.role}</p>
+            <p className="text-xs text-sidebar-foreground">{displayRole}</p>
           </div>
           <button
             className="ml-auto lg:hidden text-sidebar-foreground"
@@ -91,15 +103,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="border-t border-sidebar-border px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-accent text-xs font-semibold text-sidebar-accent-foreground">
-              {mockUser.name.split(" ").map((n) => n[0]).join("")}
+              {displayName.split(" ").map((n) => n[0]).join("")}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-sidebar-accent-foreground truncate">
-                {mockUser.name}
+                {displayName}
               </p>
-              <p className="text-xs text-sidebar-foreground truncate">{mockUser.email}</p>
+              <p className="text-xs text-sidebar-foreground truncate">{displayEmail}</p>
             </div>
-            <button className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors">
+            <button onClick={handleSignOut} className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors">
               <LogOut className="h-4 w-4" />
             </button>
           </div>
