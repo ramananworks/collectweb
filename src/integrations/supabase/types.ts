@@ -14,6 +14,226 @@ export type Database = {
   }
   public: {
     Tables: {
+      areas: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "areas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          created_at: string
+          default_due_days: number
+          id: string
+          name: string
+          plan: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          default_due_days?: number
+          id?: string
+          name: string
+          plan?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          default_due_days?: number
+          id?: string
+          name?: string
+          plan?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          address: string
+          area: string
+          company_id: string
+          created_at: string
+          credit_limit: number
+          default_due_days: number | null
+          gstin: string | null
+          id: string
+          name: string
+          outstanding: number
+          phone: string
+        }
+        Insert: {
+          address?: string
+          area?: string
+          company_id: string
+          created_at?: string
+          credit_limit?: number
+          default_due_days?: number | null
+          gstin?: string | null
+          id?: string
+          name: string
+          outstanding?: number
+          phone?: string
+        }
+        Update: {
+          address?: string
+          area?: string
+          company_id?: string
+          created_at?: string
+          credit_limit?: number
+          default_due_days?: number | null
+          gstin?: string | null
+          id?: string
+          name?: string
+          outstanding?: number
+          phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          customer_id: string
+          customer_name: string
+          description: string | null
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          paid_amount: number
+          status: string
+        }
+        Insert: {
+          amount?: number
+          company_id: string
+          created_at?: string
+          customer_id: string
+          customer_name: string
+          description?: string | null
+          due_date: string
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          paid_amount?: number
+          status?: string
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          customer_id?: string
+          customer_name?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          paid_amount?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          collected_by: string
+          company_id: string
+          created_at: string
+          customer_name: string
+          date: string
+          id: string
+          invoice_id: string
+          mode: string
+          notes: string | null
+        }
+        Insert: {
+          amount?: number
+          collected_by?: string
+          company_id: string
+          created_at?: string
+          customer_name: string
+          date?: string
+          id?: string
+          invoice_id: string
+          mode?: string
+          notes?: string | null
+        }
+        Update: {
+          amount?: number
+          collected_by?: string
+          company_id?: string
+          created_at?: string
+          customer_name?: string
+          date?: string
+          id?: string
+          invoice_id?: string
+          mode?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -45,7 +265,15 @@ export type Database = {
           phone?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
