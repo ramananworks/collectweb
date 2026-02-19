@@ -3,70 +3,81 @@ import { Plus, Pencil, Trash2, Check, X, MapPin, Settings as SettingsIcon, Save 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { mockAreas, mockCompany } from "@/lib/mock-data";
+import { useCompany, useAreas, useAddArea, useUpdateArea, useDeleteArea, useUpdateCompany } from "@/hooks/use-data";
 import { toast } from "@/hooks/use-toast";
 
 export default function Settings() {
-  const [areas, setAreas] = useState<string[]>([...mockAreas]);
+  const { data: company } = useCompany();
+  const { data: areas = [] } = useAreas();
+  const addArea = useAddArea();
+  const updateArea = useUpdateArea();
+  const deleteArea = useDeleteArea();
+  const updateCompany = useUpdateCompany();
+
   const [newArea, setNewArea] = useState("");
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [defaultDueDays, setDefaultDueDays] = useState(mockCompany.default_due_days);
+  const [defaultDueDays, setDefaultDueDays] = useState<number | null>(null);
   const [isEditingDueDays, setIsEditingDueDays] = useState(false);
 
+  const currentDueDays = defaultDueDays ?? company?.default_due_days ?? 30;
+
   function handleSaveCompanySettings() {
-    if (defaultDueDays < 1 || defaultDueDays > 365) {
+    if (currentDueDays < 1 || currentDueDays > 365) {
       toast({ title: "Invalid value", description: "Due days must be between 1 and 365.", variant: "destructive" });
       return;
     }
-    mockCompany.default_due_days = defaultDueDays;
-    setIsEditingDueDays(false);
-    toast({ title: "Settings saved", description: `Company default due days set to ${defaultDueDays}.` });
+    if (!company) return;
+    updateCompany.mutate({ id: company.id, default_due_days: currentDueDays }, {
+      onSuccess: () => {
+        setIsEditingDueDays(false);
+        toast({ title: "Settings saved", description: `Company default due days set to ${currentDueDays}.` });
+      },
+    });
   }
+
   function handleAddArea() {
     const trimmed = newArea.trim();
     if (!trimmed) return;
-    if (areas.some((a) => a.toLowerCase() === trimmed.toLowerCase())) {
+    if (areas.some((a) => a.name.toLowerCase() === trimmed.toLowerCase())) {
       toast({ title: "Duplicate area", description: "This area already exists.", variant: "destructive" });
       return;
     }
-    const updated = [...areas, trimmed];
-    setAreas(updated);
-    mockAreas.length = 0;
-    mockAreas.push(...updated);
-    setNewArea("");
-    toast({ title: "Area added", description: `"${trimmed}" has been added.` });
+    addArea.mutate(trimmed, {
+      onSuccess: () => {
+        setNewArea("");
+        toast({ title: "Area added", description: `"${trimmed}" has been added.` });
+      },
+    });
   }
 
-  function handleStartEdit(index: number) {
-    setEditingIndex(index);
-    setEditValue(areas[index]);
+  function handleStartEdit(id: string, name: string) {
+    setEditingId(id);
+    setEditValue(name);
   }
 
-  function handleSaveEdit(index: number) {
+  function handleSaveEdit(id: string) {
     const trimmed = editValue.trim();
     if (!trimmed) return;
-    if (areas.some((a, i) => i !== index && a.toLowerCase() === trimmed.toLowerCase())) {
+    if (areas.some((a) => a.id !== id && a.name.toLowerCase() === trimmed.toLowerCase())) {
       toast({ title: "Duplicate area", description: "This area already exists.", variant: "destructive" });
       return;
     }
-    const updated = [...areas];
-    updated[index] = trimmed;
-    setAreas(updated);
-    mockAreas.length = 0;
-    mockAreas.push(...updated);
-    setEditingIndex(null);
-    toast({ title: "Area updated", description: `Area renamed to "${trimmed}".` });
+    updateArea.mutate({ id, name: trimmed }, {
+      onSuccess: () => {
+        setEditingId(null);
+        toast({ title: "Area updated", description: `Area renamed to "${trimmed}".` });
+      },
+    });
   }
 
-  function handleDeleteArea(index: number) {
-    const name = areas[index];
-    const updated = areas.filter((_, i) => i !== index);
-    setAreas(updated);
-    mockAreas.length = 0;
-    mockAreas.push(...updated);
-    setEditingIndex(null);
-    toast({ title: "Area removed", description: `"${name}" has been removed.` });
+  function handleDeleteArea(id: string, name: string) {
+    deleteArea.mutate(id, {
+      onSuccess: () => {
+        setEditingId(null);
+        toast({ title: "Area removed", description: `"${name}" has been removed.` });
+      },
+    });
   }
 
   return (
@@ -76,7 +87,6 @@ export default function Settings() {
         <p className="text-sm text-muted-foreground">Manage company-wide configuration</p>
       </div>
 
-      {/* Default Due Days */}
       <div className="rounded-xl bg-card p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
           <SettingsIcon className="h-5 w-5 text-primary" />
@@ -91,17 +101,17 @@ export default function Settings() {
               type="number"
               min={1}
               max={365}
-              value={defaultDueDays}
+              value={currentDueDays}
               disabled={!isEditingDueDays}
               onChange={(e) => setDefaultDueDays(Number(e.target.value))}
             />
           </div>
           {isEditingDueDays ? (
             <div className="flex gap-2">
-              <Button onClick={handleSaveCompanySettings} className="gradient-primary text-primary-foreground gap-2">
+              <Button onClick={handleSaveCompanySettings} className="gradient-primary text-primary-foreground gap-2" disabled={updateCompany.isPending}>
                 <Save className="h-4 w-4" /> Save
               </Button>
-              <Button variant="outline" onClick={() => { setDefaultDueDays(mockCompany.default_due_days); setIsEditingDueDays(false); }}>
+              <Button variant="outline" onClick={() => { setDefaultDueDays(null); setIsEditingDueDays(false); }}>
                 Cancel
               </Button>
             </div>
@@ -111,7 +121,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Area Management */}
       <div className="rounded-xl bg-card p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="h-5 w-5 text-primary" />
@@ -121,7 +130,6 @@ export default function Settings() {
           Manage the predefined list of areas used to classify customers across the application.
         </p>
 
-        {/* Add new area */}
         <div className="flex gap-2 mb-4">
           <Input
             placeholder="Enter new area name"
@@ -130,38 +138,37 @@ export default function Settings() {
             onKeyDown={(e) => e.key === "Enter" && handleAddArea()}
             className="flex-1"
           />
-          <Button onClick={handleAddArea} className="gradient-primary text-primary-foreground gap-2" disabled={!newArea.trim()}>
+          <Button onClick={handleAddArea} className="gradient-primary text-primary-foreground gap-2" disabled={!newArea.trim() || addArea.isPending}>
             <Plus className="h-4 w-4" /> Add
           </Button>
         </div>
 
-        {/* Area list */}
         <ul className="divide-y divide-border rounded-lg border">
-          {areas.map((area, index) => (
-            <li key={index} className="flex items-center gap-2 px-3 py-2.5">
-              {editingIndex === index ? (
+          {areas.map((area) => (
+            <li key={area.id} className="flex items-center gap-2 px-3 py-2.5">
+              {editingId === area.id ? (
                 <>
                   <Input
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(index)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(area.id)}
                     className="flex-1 h-8"
                     autoFocus
                   />
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleSaveEdit(index)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleSaveEdit(area.id)}>
                     <Check className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingIndex(null)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingId(null)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </>
               ) : (
                 <>
-                  <span className="flex-1 text-sm">{area}</span>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleStartEdit(index)}>
+                  <span className="flex-1 text-sm">{area.name}</span>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleStartEdit(area.id, area.name)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => handleDeleteArea(index)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => handleDeleteArea(area.id, area.name)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </>

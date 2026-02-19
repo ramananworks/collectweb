@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Upload, Download, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useBulkImportCustomers } from "@/hooks/use-data";
 
 interface ParsedCustomer {
   name: string;
@@ -64,8 +65,8 @@ Priya Electronics,+91 98123 45678,22 Station Rd Mumbai,,1000000`;
 export default function BulkImportCustomersDialog() {
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
-  const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const bulkImport = useBulkImportCustomers();
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -84,16 +85,17 @@ export default function BulkImportCustomersDialog() {
 
   function handleImport() {
     if (!result || result.valid.length === 0) return;
-    setImporting(true);
-    // Mock import — in production this would call the backend
-    setTimeout(() => {
-      console.log("Bulk imported customers:", result.valid);
-      toast({ title: "Import complete", description: `${result.valid.length} customers imported successfully.` });
-      setImporting(false);
-      setResult(null);
-      setOpen(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }, 800);
+    bulkImport.mutate(result.valid, {
+      onSuccess: () => {
+        toast({ title: "Import complete", description: `${result.valid.length} customers imported successfully.` });
+        setResult(null);
+        setOpen(false);
+        if (fileRef.current) fileRef.current.value = "";
+      },
+      onError: (err) => {
+        toast({ title: "Import failed", description: err.message, variant: "destructive" });
+      },
+    });
   }
 
   function downloadSample() {
@@ -166,8 +168,8 @@ export default function BulkImportCustomersDialog() {
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={handleImport} disabled={!result || result.valid.length === 0 || importing} className="gradient-primary text-primary-foreground">
-              {importing ? "Importing..." : `Import ${result?.valid.length ?? 0} Customers`}
+            <Button onClick={handleImport} disabled={!result || result.valid.length === 0 || bulkImport.isPending} className="gradient-primary text-primary-foreground">
+              {bulkImport.isPending ? "Importing..." : `Import ${result?.valid.length ?? 0} Customers`}
             </Button>
           </div>
         </div>

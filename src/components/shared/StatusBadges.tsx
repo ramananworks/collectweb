@@ -1,5 +1,8 @@
-import { InvoiceStatus, PaymentMode, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge";
+
+type InvoiceStatus = "pending" | "partial" | "paid" | "overdue";
+type PaymentMode = "cash" | "upi" | "bank_transfer";
+type UserRole = "owner" | "manager" | "staff";
 
 const statusConfig: Record<InvoiceStatus, { label: string; className: string }> = {
   paid: { label: "Paid", className: "bg-success/10 text-success border-success/20" },
@@ -8,8 +11,9 @@ const statusConfig: Record<InvoiceStatus, { label: string; className: string }> 
   overdue: { label: "Overdue", className: "bg-destructive/10 text-destructive border-destructive/20" },
 };
 
-export function StatusBadge({ status }: { status: InvoiceStatus }) {
-  const config = statusConfig[status];
+export function StatusBadge({ status }: { status: string }) {
+  const config = statusConfig[status as InvoiceStatus];
+  if (!config) return <Badge variant="outline">{status}</Badge>;
   return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
 }
 
@@ -19,8 +23,8 @@ const modeLabels: Record<PaymentMode, string> = {
   bank_transfer: "Bank Transfer",
 };
 
-export function PaymentModeBadge({ mode }: { mode: PaymentMode }) {
-  return <Badge variant="secondary">{modeLabels[mode]}</Badge>;
+export function PaymentModeBadge({ mode }: { mode: string }) {
+  return <Badge variant="secondary">{modeLabels[mode as PaymentMode] || mode}</Badge>;
 }
 
 const roleConfig: Record<UserRole, { label: string; className: string }> = {
@@ -29,7 +33,8 @@ const roleConfig: Record<UserRole, { label: string; className: string }> = {
   staff: { label: "Staff", className: "bg-muted text-muted-foreground" },
 };
 
-export function RoleBadge({ role }: { role: UserRole }) {
-  const config = roleConfig[role];
+export function RoleBadge({ role }: { role: string }) {
+  const config = roleConfig[role as UserRole];
+  if (!config) return <Badge variant="outline">{role}</Badge>;
   return <Badge variant="outline" className={config.className}>{config.label}</Badge>;
 }

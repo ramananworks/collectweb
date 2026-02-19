@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Upload, Download, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { mockCustomers } from "@/lib/mock-data";
+import { useCustomers, useBulkImportInvoices } from "@/hooks/use-data";
 
 interface ParsedInvoice {
   customer_name: string;
+  customer_id: string;
   invoice_number: string;
   invoice_date: string;
   amount: number;
@@ -20,49 +21,6 @@ interface ImportResult {
   errors: { row: number; message: string }[];
 }
 
-function parseCSV(text: string): ImportResult {
-  const lines = text.trim().split("\n");
-  if (lines.length < 2) return { total: 0, valid: [], errors: [{ row: 0, message: "File must have a header row and at least one data row" }] };
-
-  const header = lines[0].toLowerCase().replace(/\r/g, "");
-  const expectedCols = ["customer_name", "invoice_number", "invoice_date", "amount", "due_date"];
-  const cols = header.split(",").map((h) => h.trim());
-
-  const missingCols = expectedCols.filter((c) => !cols.includes(c));
-  if (missingCols.length > 0) {
-    return { total: 0, valid: [], errors: [{ row: 0, message: `Missing columns: ${missingCols.join(", ")}` }] };
-  }
-
-  const colIndex = Object.fromEntries([...expectedCols, "description"].map((c) => [c, cols.indexOf(c)]));
-  const valid: ParsedInvoice[] = [];
-  const errors: { row: number; message: string }[] = [];
-  const customerNames = mockCustomers.map((c) => c.name.toLowerCase());
-
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].replace(/\r/g, "").trim();
-    if (!line) continue;
-    const values = line.split(",").map((v) => v.trim());
-
-    const customer_name = values[colIndex.customer_name] || "";
-    const invoice_number = values[colIndex.invoice_number] || "";
-    const invoice_date = values[colIndex.invoice_date] || "";
-    const amount = Number(values[colIndex.amount]) || 0;
-    const due_date = values[colIndex.due_date] || "";
-    const description = colIndex.description >= 0 ? (values[colIndex.description] || "") : "";
-
-    if (!customer_name) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer name is required` }); continue; }
-    if (!customerNames.includes(customer_name.toLowerCase())) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer "${customer_name}" not found` }); continue; }
-    if (!invoice_number) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice number is required` }); continue; }
-    if (!invoice_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice date is required` }); continue; }
-    if (amount < 1) { errors.push({ row: i + 1, message: `Row ${i + 1}: Amount must be greater than 0` }); continue; }
-    if (!due_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Due date is required` }); continue; }
-
-    valid.push({ customer_name, invoice_number, invoice_date, amount, due_date, description });
-  }
-
-  return { total: lines.length - 1, valid, errors };
-}
-
 const SAMPLE_CSV = `customer_name,invoice_number,invoice_date,amount,due_date,description
 Amit Patel,INV-2025-010,2025-02-15,75000,2025-03-15,Steel rods delivery
 Priya Electronics,INV-2025-011,2025-02-16,200000,2025-03-30,LED panels bulk order`;
@@ -70,8 +28,52 @@ Priya Electronics,INV-2025-011,2025-02-16,200000,2025-03-30,LED panels bulk orde
 export default function BulkImportInvoicesDialog() {
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
-  const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { data: customers = [] } = useCustomers();
+  const bulkImport = useBulkImportInvoices();
+
+  function parseCSV(text: string): ImportResult {
+    const lines = text.trim().split("\n");
+    if (lines.length < 2) return { total: 0, valid: [], errors: [{ row: 0, message: "File must have a header row and at least one data row" }] };
+
+    const header = lines[0].toLowerCase().replace(/\r/g, "");
+    const expectedCols = ["customer_name", "invoice_number", "invoice_date", "amount", "due_date"];
+    const cols = header.split(",").map((h) => h.trim());
+
+    const missingCols = expectedCols.filter((c) => !cols.includes(c));
+    if (missingCols.length > 0) {
+      return { total: 0, valid: [], errors: [{ row: 0, message: `Missing columns: ${missingCols.join(", ")}` }] };
+    }
+
+    const colIndex = Object.fromEntries([...expectedCols, "description"].map((c) => [c, cols.indexOf(c)]));
+    const valid: ParsedInvoice[] = [];
+    const errors: { row: number; message: string }[] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].replace(/\r/g, "").trim();
+      if (!line) continue;
+      const values = line.split(",").map((v) => v.trim());
+
+      const customer_name = values[colIndex.customer_name] || "";
+      const invoice_number = values[colIndex.invoice_number] || "";
+      const invoice_date = values[colIndex.invoice_date] || "";
+      const amount = Number(values[colIndex.amount]) || 0;
+      const due_date = values[colIndex.due_date] || "";
+      const description = colIndex.description >= 0 ? (values[colIndex.description] || "") : "";
+
+      if (!customer_name) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer name is required` }); continue; }
+      const cust = customers.find((c) => c.name.toLowerCase() === customer_name.toLowerCase());
+      if (!cust) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer "${customer_name}" not found` }); continue; }
+      if (!invoice_number) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice number is required` }); continue; }
+      if (!invoice_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice date is required` }); continue; }
+      if (amount < 1) { errors.push({ row: i + 1, message: `Row ${i + 1}: Amount must be greater than 0` }); continue; }
+      if (!due_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Due date is required` }); continue; }
+
+      valid.push({ customer_name: cust.name, customer_id: cust.id, invoice_number, invoice_date, amount, due_date, description });
+    }
+
+    return { total: lines.length - 1, valid, errors };
+  }
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -90,15 +92,17 @@ export default function BulkImportInvoicesDialog() {
 
   function handleImport() {
     if (!result || result.valid.length === 0) return;
-    setImporting(true);
-    setTimeout(() => {
-      console.log("Bulk imported invoices:", result.valid);
-      toast({ title: "Import complete", description: `${result.valid.length} invoices imported successfully.` });
-      setImporting(false);
-      setResult(null);
-      setOpen(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }, 800);
+    bulkImport.mutate(result.valid, {
+      onSuccess: () => {
+        toast({ title: "Import complete", description: `${result.valid.length} invoices imported successfully.` });
+        setResult(null);
+        setOpen(false);
+        if (fileRef.current) fileRef.current.value = "";
+      },
+      onError: (err) => {
+        toast({ title: "Import failed", description: err.message, variant: "destructive" });
+      },
+    });
   }
 
   function downloadSample() {
@@ -171,8 +175,8 @@ export default function BulkImportInvoicesDialog() {
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={handleImport} disabled={!result || result.valid.length === 0 || importing} className="gradient-primary text-primary-foreground">
-              {importing ? "Importing..." : `Import ${result?.valid.length ?? 0} Invoices`}
+            <Button onClick={handleImport} disabled={!result || result.valid.length === 0 || bulkImport.isPending} className="gradient-primary text-primary-foreground">
+              {bulkImport.isPending ? "Importing..." : `Import ${result?.valid.length ?? 0} Invoices`}
             </Button>
           </div>
         </div>

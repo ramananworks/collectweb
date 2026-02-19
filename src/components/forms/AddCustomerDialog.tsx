@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { mockAreas } from "@/lib/mock-data";
+import { useAreas, useAddCustomer } from "@/hooks/use-data";
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
@@ -27,16 +27,33 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 
 export default function AddCustomerDialog() {
   const [open, setOpen] = useState(false);
+  const { data: areas = [] } = useAreas();
+  const addCustomer = useAddCustomer();
+
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
     defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined },
   });
 
   function onSubmit(values: CustomerFormValues) {
-    console.log("New customer:", values);
-    toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
-    form.reset();
-    setOpen(false);
+    addCustomer.mutate({
+      name: values.name,
+      phone: values.phone,
+      address: values.address,
+      area: values.area,
+      gstin: values.gstin,
+      credit_limit: values.credit_limit,
+      default_due_days: values.default_due_days,
+    }, {
+      onSuccess: () => {
+        toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
+        form.reset();
+        setOpen(false);
+      },
+      onError: (err) => {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      },
+    });
   }
 
   return (
@@ -81,8 +98,8 @@ export default function AddCustomerDialog() {
                     <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {mockAreas.map((a) => (
-                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                    {areas.map((a) => (
+                      <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -113,7 +130,9 @@ export default function AddCustomerDialog() {
             )} />
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" className="gradient-primary text-primary-foreground">Add Customer</Button>
+              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={addCustomer.isPending}>
+                {addCustomer.isPending ? "Adding..." : "Add Customer"}
+              </Button>
             </div>
           </form>
         </Form>

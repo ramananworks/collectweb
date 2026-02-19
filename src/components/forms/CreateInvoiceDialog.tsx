@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Info } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { mockCustomers, mockCompany } from "@/lib/mock-data";
+import { useCustomers, useCompany, useCreateInvoice } from "@/hooks/use-data";
 import { resolveDueDate, DueDateSource } from "@/lib/due-date-resolver";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -39,6 +39,10 @@ const sourceBadgeStyles: Record<DueDateSource, string> = {
 
 export default function CreateInvoiceDialog() {
   const [open, setOpen] = useState(false);
+  const { data: customers = [] } = useCustomers();
+  const { data: company } = useCompany();
+  const createInvoice = useCreateInvoice();
+
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: { customer_id: "", invoice_number: "", invoice_date: "", amount: 0, due_date: "", description: "" },
@@ -48,24 +52,38 @@ export default function CreateInvoiceDialog() {
   const invoiceDate = form.watch("invoice_date");
   const manualDueDate = form.watch("due_date");
 
-  const customer = mockCustomers.find((c) => c.id === selectedCustomerId);
+  const customer = customers.find((c) => c.id === selectedCustomerId);
+  const companyData = company ?? { default_due_days: 30 };
 
-  // Resolve due date using priority system
   const resolved = invoiceDate
     ? resolveDueDate(
         { due_date: manualDueDate || "", invoice_date: invoiceDate },
         { default_due_days: customer?.default_due_days },
-        mockCompany
+        companyData
       )
     : null;
 
   function onSubmit(values: InvoiceFormValues) {
-    const cust = mockCustomers.find((c) => c.id === values.customer_id);
+    const cust = customers.find((c) => c.id === values.customer_id);
     const finalDueDate = resolved?.due_date || values.due_date || "";
-    console.log("New invoice:", { ...values, due_date: finalDueDate, due_date_source: resolved?.source, customer_name: cust?.name });
-    toast({ title: "Invoice created", description: `Invoice for ${cust?.name} has been created.` });
-    form.reset();
-    setOpen(false);
+    createInvoice.mutate({
+      customer_id: values.customer_id,
+      customer_name: cust?.name || "",
+      invoice_number: values.invoice_number,
+      invoice_date: values.invoice_date,
+      amount: values.amount,
+      due_date: finalDueDate,
+      description: values.description,
+    }, {
+      onSuccess: () => {
+        toast({ title: "Invoice created", description: `Invoice for ${cust?.name} has been created.` });
+        form.reset();
+        setOpen(false);
+      },
+      onError: (err) => {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      },
+    });
   }
 
   return (
@@ -89,7 +107,7 @@ export default function CreateInvoiceDialog() {
                     <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {mockCustomers.map((c) => (
+                    {customers.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                         {c.default_due_days ? ` (${c.default_due_days}d terms)` : ""}
@@ -122,7 +140,6 @@ export default function CreateInvoiceDialog() {
               </FormItem>
             )} />
 
-            {/* Due Date with resolution indicator */}
             <FormField control={form.control} name="due_date" render={({ field }) => (
               <FormItem>
                 <div className="flex items-center gap-2">
@@ -136,7 +153,7 @@ export default function CreateInvoiceDialog() {
                         <p className="font-semibold mb-1">Due Date Priority:</p>
                         <p>1. Invoice level (this field)</p>
                         <p>2. Customer default ({customer?.default_due_days ? `${customer.default_due_days} days` : "not set"})</p>
-                        <p>3. Company default ({mockCompany.default_due_days} days)</p>
+                        <p>3. Company default ({companyData.default_due_days} days)</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -165,7 +182,9 @@ export default function CreateInvoiceDialog() {
             )} />
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" className="gradient-primary text-primary-foreground">Create Invoice</Button>
+              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={createInvoice.isPending}>
+                {createInvoice.isPending ? "Creating..." : "Create Invoice"}
+              </Button>
             </div>
           </form>
         </Form>

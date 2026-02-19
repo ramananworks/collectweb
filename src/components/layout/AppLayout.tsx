@@ -13,9 +13,9 @@ import {
   X,
   Building2,
 } from "lucide-react";
-import { mockCompany } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCompany } from "@/hooks/use-data";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -32,7 +32,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, role, signOut } = useAuth();
+  const { data: company } = useCompany();
 
+  const companyName = company?.name || "My Company";
   const displayName = profile?.name || "User";
   const displayEmail = profile?.email || "";
   const displayRole = role || "staff";
@@ -65,7 +67,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-sidebar-accent-foreground truncate">
-              {mockCompany.name}
+              {companyName}
             </h1>
             <p className="text-xs text-sidebar-foreground">{displayRole}</p>
           </div>
@@ -129,7 +131,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex h-7 w-7 items-center justify-center rounded-md gradient-primary">
               <Building2 className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold">{mockCompany.name}</span>
+            <span className="text-sm font-semibold">{companyName}</span>
           </div>
         </header>
 

@@ -1,5 +1,4 @@
 import { addDays, format } from "date-fns";
-import { Company, Customer, Invoice } from "@/types";
 
 export type DueDateSource = "invoice" | "customer" | "company";
 
@@ -15,9 +14,9 @@ export interface ResolvedDueDate {
  * 3. Company-level default_due_days from invoice_date (lowest)
  */
 export function resolveDueDate(
-  invoice: Pick<Invoice, "due_date" | "invoice_date">,
-  customer: Pick<Customer, "default_due_days">,
-  company: Pick<Company, "default_due_days">
+  invoice: { due_date?: string; invoice_date: string },
+  customer: { default_due_days?: number | null },
+  company: { default_due_days: number }
 ): ResolvedDueDate {
   // 1. Invoice-level due date
   if (invoice.due_date) {
