@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/StatusBadges";
-import { mockInvoices, mockAreas, mockCustomers, formatCurrency, getCustomerArea } from "@/lib/mock-data";
+import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
@@ -14,8 +14,14 @@ export default function Invoices() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
   const [areaFilter, setAreaFilter] = useState("all");
+  const { data: invoices = [] } = useInvoices();
+  const { data: customers = [] } = useCustomers();
+  const { data: areas = [] } = useAreas();
 
-  const filtered = mockInvoices.filter((inv) => {
+  const areaNames = areas.map((a) => a.name);
+  const getCustomerArea = (customerId: string) => customers.find((c) => c.id === customerId)?.area || "Unknown";
+
+  const filtered = invoices.filter((inv) => {
     const matchesSearch = inv.customer_name.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
     const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
@@ -27,7 +33,7 @@ export default function Invoices() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Invoices & Loans</h1>
-          <p className="text-sm text-muted-foreground">{mockInvoices.length} total records</p>
+          <p className="text-sm text-muted-foreground">{invoices.length} total records</p>
         </div>
         <div className="flex gap-2">
           <BulkImportInvoicesDialog />
@@ -46,7 +52,7 @@ export default function Invoices() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Areas</SelectItem>
-            {mockAreas.map((a) => (
+            {areaNames.map((a) => (
               <SelectItem key={a} value={a}>{a}</SelectItem>
             ))}
           </SelectContent>

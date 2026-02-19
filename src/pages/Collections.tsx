@@ -2,25 +2,26 @@ import { useState } from "react";
 import { Search, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
-import { mockPayments, mockCustomers, formatCurrency } from "@/lib/mock-data";
+import { usePayments, useCustomers, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 
 export default function Collections() {
   const [search, setSearch] = useState("");
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
+  const { data: payments = [] } = usePayments();
+  const { data: customers = [] } = useCustomers();
 
-  // Group payments by customer
-  const customerCollections = mockCustomers
+  const customerCollections = customers
     .map((customer) => {
-      const collections = mockPayments.filter((p) => p.customer_name === customer.name);
+      const collections = payments.filter((p) => p.customer_name === customer.name);
       const totalCollected = collections.reduce((sum, p) => sum + p.amount, 0);
       return { ...customer, collections, totalCollected };
     })
     .filter((c) => c.collections.length > 0)
     .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
 
-  const totalCollections = mockPayments.length;
-  const totalAmount = mockPayments.reduce((sum, p) => sum + p.amount, 0);
+  const totalCollections = payments.length;
+  const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
 
   function toggleCustomer(customerId: string) {
     setExpandedCustomers((prev) => {
@@ -53,7 +54,6 @@ export default function Collections() {
           const isExpanded = expandedCustomers.has(customer.id);
           return (
             <div key={customer.id} className="rounded-xl bg-card stat-card-shadow overflow-hidden">
-              {/* Customer Header */}
               <button
                 onClick={() => toggleCustomer(customer.id)}
                 className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 transition-colors text-left"
@@ -74,7 +74,6 @@ export default function Collections() {
                 <span className="text-sm font-bold text-success">{formatCurrency(customer.totalCollected)}</span>
               </button>
 
-              {/* Expanded Collection Details */}
               {isExpanded && (
                 <div className="border-t border-border">
                   <div className="overflow-x-auto">

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { mockInvoices, mockCustomers, mockStaff, formatCurrency } from "@/lib/mock-data";
+import { useInvoices, useCustomers, useProfiles, useRecordPayment, formatCurrency } from "@/hooks/use-data";
 
 const collectionSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
@@ -26,6 +26,11 @@ type CollectionFormValues = z.infer<typeof collectionSchema>;
 
 export default function RecordPaymentDialog() {
   const [open, setOpen] = useState(false);
+  const { data: invoices = [] } = useInvoices();
+  const { data: customers = [] } = useCustomers();
+  const { data: profiles = [] } = useProfiles();
+  const recordPayment = useRecordPayment();
+
   const form = useForm<CollectionFormValues>({
     resolver: zodResolver(collectionSchema),
     defaultValues: { customer_id: "", invoice_id: "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: "", notes: "" },
@@ -33,22 +38,34 @@ export default function RecordPaymentDialog() {
 
   const selectedCustomerId = form.watch("customer_id");
 
-  // Customers who have unpaid invoices
-  const customersWithDues = mockCustomers.filter((c) =>
-    mockInvoices.some((inv) => inv.customer_id === c.id && inv.status !== "paid")
+  const customersWithDues = customers.filter((c) =>
+    invoices.some((inv) => inv.customer_id === c.id && inv.status !== "paid")
   );
 
-  // Invoices for selected customer
-  const customerInvoices = mockInvoices.filter(
+  const customerInvoices = invoices.filter(
     (inv) => inv.customer_id === selectedCustomerId && inv.status !== "paid"
   );
 
   function onSubmit(values: CollectionFormValues) {
-    const customer = mockCustomers.find((c) => c.id === values.customer_id);
-    console.log("New collection:", values);
-    toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${customer?.name}.` });
-    form.reset();
-    setOpen(false);
+    const customer = customers.find((c) => c.id === values.customer_id);
+    recordPayment.mutate({
+      invoice_id: values.invoice_id,
+      customer_name: customer?.name || "",
+      amount: values.amount,
+      date: values.date,
+      mode: values.mode,
+      collected_by: values.collected_by,
+      notes: values.notes,
+    }, {
+      onSuccess: () => {
+        toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${customer?.name}.` });
+        form.reset();
+        setOpen(false);
+      },
+      onError: (err) => {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      },
+    });
   }
 
   return (
@@ -64,7 +81,6 @@ export default function RecordPaymentDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Customer first */}
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
@@ -82,7 +98,6 @@ export default function RecordPaymentDialog() {
               </FormItem>
             )} />
 
-            {/* Invoice filtered by customer */}
             <FormField control={form.control} name="invoice_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Invoice</FormLabel>
@@ -142,8 +157,8 @@ export default function RecordPaymentDialog() {
                     <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {mockStaff.map((s) => (
-                      <SelectItem key={s.id} value={s.name}>{s.name} ({s.role})</SelectItem>
+                    {profiles.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -159,7 +174,9 @@ export default function RecordPaymentDialog() {
             )} />
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" className="gradient-primary text-primary-foreground">Record Collection</Button>
+              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={recordPayment.isPending}>
+                {recordPayment.isPending ? "Recording..." : "Record Collection"}
+              </Button>
             </div>
           </form>
         </Form>

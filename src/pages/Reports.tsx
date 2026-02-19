@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Download, MapPinned } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { StatusBadge } from "@/components/shared/StatusBadges";
-import { mockInvoices, mockCustomers, mockAreas, formatCurrency, ageingData, getCustomerArea } from "@/lib/mock-data";
+import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
+import { differenceInDays } from "date-fns";
 
 export default function Reports() {
   const [dateFrom, setDateFrom] = useState("");
@@ -13,8 +13,14 @@ export default function Reports() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
 
-  // Filter invoices
-  const filtered = mockInvoices.filter((inv) => {
+  const { data: invoices = [] } = useInvoices();
+  const { data: customers = [] } = useCustomers();
+  const { data: areas = [] } = useAreas();
+  const areaNames = areas.map((a) => a.name);
+
+  const getCustomerArea = (customerId: string) => customers.find((c) => c.id === customerId)?.area || "Unknown";
+
+  const filtered = invoices.filter((inv) => {
     const matchesCustomer = customerFilter === "all" || inv.customer_id === customerFilter;
     const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
     const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
@@ -27,10 +33,9 @@ export default function Reports() {
   const totalAmount = filtered.reduce((a, i) => a + i.amount, 0);
   const collectionRate = totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 0;
 
-  // Area-wise summary
-  const areaSummary = mockAreas
+  const areaSummary = areaNames
     .map((area) => {
-      const areaCustomerIds = mockCustomers.filter((c) => c.area === area).map((c) => c.id);
+      const areaCustomerIds = customers.filter((c) => c.area === area).map((c) => c.id);
       const areaInvoices = filtered.filter((inv) => areaCustomerIds.includes(inv.customer_id));
       const outstanding = areaInvoices.reduce((a, i) => a + (i.amount - i.paid_amount), 0);
       const overdue = areaInvoices.filter((i) => i.status === "overdue").reduce((a, i) => a + (i.amount - i.paid_amount), 0);
@@ -38,6 +43,27 @@ export default function Reports() {
       return { area, outstanding, overdue, invoiceCount: areaInvoices.length, customerCount };
     })
     .filter((a) => a.invoiceCount > 0);
+
+  const ageingData = useMemo(() => {
+    const now = new Date();
+    const brackets = [
+      { bracket: "0–30 days", amount: 0, count: 0 },
+      { bracket: "31–60 days", amount: 0, count: 0 },
+      { bracket: "61–90 days", amount: 0, count: 0 },
+      { bracket: "90+ days", amount: 0, count: 0 },
+    ];
+    filtered
+      .filter((i) => i.status !== "paid" && new Date(i.due_date) < now)
+      .forEach((i) => {
+        const days = differenceInDays(now, new Date(i.due_date));
+        const balance = i.amount - i.paid_amount;
+        if (days <= 30) { brackets[0].amount += balance; brackets[0].count++; }
+        else if (days <= 60) { brackets[1].amount += balance; brackets[1].count++; }
+        else if (days <= 90) { brackets[2].amount += balance; brackets[2].count++; }
+        else { brackets[3].amount += balance; brackets[3].count++; }
+      });
+    return brackets;
+  }, [filtered]);
 
   return (
     <div className="space-y-6">
@@ -51,7 +77,6 @@ export default function Reports() {
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="rounded-xl bg-card p-4 stat-card-shadow">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div>
@@ -68,7 +93,7 @@ export default function Reports() {
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Areas</SelectItem>
-                {mockAreas.map((a) => (
+                {areaNames.map((a) => (
                   <SelectItem key={a} value={a}>{a}</SelectItem>
                 ))}
               </SelectContent>
@@ -80,7 +105,7 @@ export default function Reports() {
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Customers</SelectItem>
-                {mockCustomers
+                {customers
                   .filter((c) => areaFilter === "all" || c.area === areaFilter)
                   .map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -104,7 +129,6 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-xl bg-card p-5 stat-card-shadow text-center">
           <p className="text-sm text-muted-foreground">Total Outstanding</p>
@@ -120,7 +144,6 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* Area-wise Summary */}
       <div className="rounded-xl bg-card stat-card-shadow overflow-hidden">
         <div className="px-5 py-4 border-b border-border flex items-center gap-2">
           <MapPinned className="h-4 w-4 text-primary" />
@@ -155,7 +178,6 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* Ageing Table */}
       <div className="rounded-xl bg-card stat-card-shadow overflow-hidden">
         <div className="px-5 py-4 border-b border-border">
           <h2 className="font-semibold">Ageing Summary</h2>

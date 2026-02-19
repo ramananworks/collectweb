@@ -2,15 +2,19 @@ import { useState } from "react";
 import { Search, Phone, MapPin, MapPinned } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockCustomers, mockAreas, formatCurrency } from "@/lib/mock-data";
+import { useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
+  const { data: customers = [] } = useCustomers();
+  const { data: areas = [] } = useAreas();
 
-  const filtered = mockCustomers.filter((c) => {
+  const areaNames = areas.map((a) => a.name);
+
+  const filtered = customers.filter((c) => {
     const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search);
@@ -18,15 +22,14 @@ export default function Customers() {
     return matchesSearch && matchesArea;
   });
 
-  // Group by area for display
-  const areas = [...new Set(filtered.map((c) => c.area))].sort();
+  const groupedAreas = [...new Set(filtered.map((c) => c.area))].sort();
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Customers</h1>
-          <p className="text-sm text-muted-foreground">{mockCustomers.length} parties registered</p>
+          <p className="text-sm text-muted-foreground">{customers.length} parties registered</p>
         </div>
         <div className="flex gap-2">
           <BulkImportCustomersDialog />
@@ -50,18 +53,18 @@ export default function Customers() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Areas</SelectItem>
-            {mockAreas.map((a) => (
+            {areaNames.map((a) => (
               <SelectItem key={a} value={a}>{a}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      {areas.map((area) => (
+      {groupedAreas.map((area) => (
         <div key={area} className="space-y-3">
           <div className="flex items-center gap-2">
             <MapPinned className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-primary">{area}</h2>
+            <h2 className="text-sm font-semibold text-primary">{area || "No Area"}</h2>
             <span className="text-xs text-muted-foreground">
               ({filtered.filter((c) => c.area === area).length} parties)
             </span>
@@ -94,8 +97,8 @@ export default function Customers() {
                     <span className="text-xs text-muted-foreground">
                       Credit Limit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
                     </span>
-                    <span className={`text-xs font-medium ${c.outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
-                      {((c.outstanding / c.credit_limit) * 100).toFixed(0)}% used
+                    <span className={`text-xs font-medium ${c.credit_limit > 0 && c.outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
+                      {c.credit_limit > 0 ? `${((c.outstanding / c.credit_limit) * 100).toFixed(0)}% used` : "—"}
                     </span>
                   </div>
                 </div>
