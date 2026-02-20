@@ -7,6 +7,7 @@ import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
+import BillCameraCapture from "@/components/forms/BillCameraCapture";
 
 const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue"];
 
@@ -14,7 +15,7 @@ export default function Invoices() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
   const [areaFilter, setAreaFilter] = useState("all");
-  const { data: invoices = [] } = useInvoices();
+  const { data: invoices = [], refetch } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
 
@@ -88,6 +89,7 @@ export default function Invoices() {
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Balance</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Due Date</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">Bill</th>
               </tr>
             </thead>
             <tbody>
@@ -102,6 +104,14 @@ export default function Invoices() {
                   <td className="px-4 py-3 hidden md:table-cell font-semibold">{formatCurrency(inv.amount - inv.paid_amount)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{inv.due_date}</td>
                   <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
+                  <td className="px-4 py-3">
+                    <BillCameraCapture
+                      invoiceId={inv.id}
+                      invoiceNumber={inv.invoice_number}
+                      existingImageUrl={(inv as unknown as { bill_image_url?: string }).bill_image_url}
+                      onImageSaved={() => refetch()}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
