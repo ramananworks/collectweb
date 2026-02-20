@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +10,7 @@ import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
 import BillCameraCapture from "@/components/forms/BillCameraCapture";
+import ScanInvoiceDialog, { ExtractedInvoiceData } from "@/components/forms/ScanInvoiceDialog";
 
 const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue"];
 
@@ -15,9 +18,16 @@ export default function Invoices() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [scanDefaults, setScanDefaults] = useState<ExtractedInvoiceData | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const { data: invoices = [], refetch } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
+
+  const handleDataExtracted = (data: ExtractedInvoiceData) => {
+    setScanDefaults(data);
+    setCreateOpen(true);
+  };
 
   const areaNames = areas.map((a) => a.name);
   const getCustomerArea = (customerId: string) => customers.find((c) => c.id === customerId)?.area || "Unknown";
@@ -38,7 +48,15 @@ export default function Invoices() {
         </div>
         <div className="flex gap-2">
           <BulkImportInvoicesDialog />
-          <CreateInvoiceDialog />
+          <ScanInvoiceDialog onDataExtracted={handleDataExtracted} />
+          <Button className="gradient-primary text-primary-foreground gap-2" onClick={() => { setScanDefaults(null); setCreateOpen(true); }}>
+            <Plus className="h-4 w-4" /> Create Invoice
+          </Button>
+          <CreateInvoiceDialog
+            open={createOpen}
+            onOpenChange={(o) => { setCreateOpen(o); if (!o) setScanDefaults(null); }}
+            defaultValues={scanDefaults ?? undefined}
+          />
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -37,16 +37,55 @@ const sourceBadgeStyles: Record<DueDateSource, string> = {
   company: "bg-muted text-muted-foreground",
 };
 
-export default function CreateInvoiceDialog() {
-  const [open, setOpen] = useState(false);
+interface CreateInvoiceDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  defaultValues?: {
+    invoice_number?: string | null;
+    invoice_date?: string | null;
+    due_date?: string | null;
+    amount?: number | null;
+    description?: string | null;
+  };
+}
+
+export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange, defaultValues }: CreateInvoiceDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
+
   const { data: customers = [] } = useCustomers();
   const { data: company } = useCompany();
   const createInvoice = useCreateInvoice();
 
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
-    defaultValues: { customer_id: "", invoice_number: "", invoice_date: "", amount: 0, due_date: "", description: "" },
+    defaultValues: {
+      customer_id: "",
+      invoice_number: defaultValues?.invoice_number || "",
+      invoice_date: defaultValues?.invoice_date || "",
+      amount: defaultValues?.amount || 0,
+      due_date: defaultValues?.due_date || "",
+      description: defaultValues?.description || "",
+    },
   });
+
+  // When scan data arrives, reset form with extracted values
+  useEffect(() => {
+    if (open && defaultValues) {
+      form.reset({
+        customer_id: "",
+        invoice_number: defaultValues.invoice_number || "",
+        invoice_date: defaultValues.invoice_date || "",
+        amount: defaultValues.amount || 0,
+        due_date: defaultValues.due_date || "",
+        description: defaultValues.description || "",
+      });
+    } else if (!open) {
+      form.reset({ customer_id: "", invoice_number: "", invoice_date: "", amount: 0, due_date: "", description: "" });
+    }
+  }, [open, defaultValues]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   const selectedCustomerId = form.watch("customer_id");
   const invoiceDate = form.watch("invoice_date");
