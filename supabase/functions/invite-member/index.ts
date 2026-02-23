@@ -27,6 +27,19 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Verify caller has owner/manager role
+    const { data: callerRole } = await callerClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", caller.id)
+      .single();
+
+    if (!callerRole || !["owner", "manager"].includes(callerRole.role)) {
+      return new Response(JSON.stringify({ error: "Insufficient permissions. Only owners and managers can invite members." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Get caller's company_id
     const { data: callerProfile } = await callerClient
@@ -54,8 +67,14 @@ Deno.serve(async (req) => {
     // Use admin client to create user
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Generate a random password for the invited user
-    const tempPassword = crypto.randomUUID() + "Aa1!";
+    // Generate a strong random password
+    function generateStrongPassword(length = 20): string {
+      const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+";
+      const array = new Uint8Array(length);
+      crypto.getRandomValues(array);
+      return Array.from(array, (byte) => charset[byte % charset.length]).join("");
+    }
+    const tempPassword = generateStrongPassword();
 
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
