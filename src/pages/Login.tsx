@@ -12,6 +12,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +24,24 @@ export default function Login() {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
       navigate("/dashboard");
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast({ title: "Email required", description: "Please enter your email address.", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/set-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Failed to send reset email", description: error.message, variant: "destructive" });
+    } else {
+      setResetSent(true);
     }
   };
 
@@ -50,40 +70,81 @@ export default function Login() {
             <span className="text-xl font-bold">CollectPro</span>
           </div>
 
-          <h1 className="text-2xl font-bold mb-1">Welcome back</h1>
-          <p className="text-sm text-muted-foreground mb-6">Sign in to your account to continue</p>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Email</label>
-              <Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Password</label>
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+          {forgotMode ? (
+            resetSent ? (
+              <div className="text-center">
+                <h1 className="text-2xl font-bold mb-2">Check your email</h1>
+                <p className="text-sm text-muted-foreground mb-6">
+                  We've sent a password reset link to <span className="font-medium text-foreground">{email}</span>. Click the link in the email to set a new password.
+                </p>
+                <Button variant="outline" className="w-full" onClick={() => { setForgotMode(false); setResetSent(false); }}>
+                  Back to Sign In
+                </Button>
               </div>
-            </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
-              {loading ? "Signing in…" : "Sign In"}
-            </Button>
-          </form>
+            ) : (
+              <>
+                <h1 className="text-2xl font-bold mb-1">Forgot password?</h1>
+                <p className="text-sm text-muted-foreground mb-6">Enter your email and we'll send you a reset link</p>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Email</label>
+                    <Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  </div>
+                  <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
+                    {loading ? "Sending…" : "Send Reset Link"}
+                  </Button>
+                </form>
+                <p className="mt-6 text-center text-sm text-muted-foreground">
+                  Remember your password?{" "}
+                  <button onClick={() => setForgotMode(false)} className="font-medium text-primary hover:underline">
+                    Sign in
+                  </button>
+                </p>
+              </>
+            )
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold mb-1">Welcome back</h1>
+              <p className="text-sm text-muted-foreground mb-6">Sign in to your account to continue</p>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/signup" className="font-medium text-primary hover:underline">
-              Sign up
-            </Link>
-          </p>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Email</label>
+                  <Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Password</label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => setForgotMode(true)} className="text-xs text-primary hover:underline">
+                    Forgot password?
+                  </button>
+                </div>
+                <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
+                  {loading ? "Signing in…" : "Sign In"}
+                </Button>
+              </form>
+
+              <p className="mt-6 text-center text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link to="/signup" className="font-medium text-primary hover:underline">
+                  Sign up
+                </Link>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
