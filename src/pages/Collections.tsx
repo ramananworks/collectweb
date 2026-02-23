@@ -38,25 +38,18 @@ export default function Collections() {
 
   return (
     <div
-      ref={containerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      ref={ptr.containerRef}
+      onTouchStart={ptr.handleTouchStart}
+      onTouchMove={ptr.handleTouchMove}
+      onTouchEnd={ptr.handleTouchEnd}
       className="space-y-6 relative"
     >
-      {/* Pull-to-refresh indicator */}
-      <div
-        className="flex items-center justify-center overflow-hidden transition-all duration-200"
-        style={{ height: pulling || refreshing ? `${pullDistance}px` : 0 }}
-      >
-        <RefreshCw
-          className={`h-5 w-5 text-primary transition-transform ${refreshing ? "animate-spin" : ""}`}
-          style={{ transform: `rotate(${pullDistance * 3}deg)` }}
-        />
-        <span className="ml-2 text-xs text-muted-foreground">
-          {refreshing ? "Refreshing..." : pullDistance >= THRESHOLD ? "Release to refresh" : "Pull to refresh"}
-        </span>
-      </div>
+      <PullToRefreshIndicator
+        pulling={ptr.pulling}
+        refreshing={ptr.refreshing}
+        pullDistance={ptr.pullDistance}
+        threshold={ptr.threshold}
+      />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Collections</h1>
