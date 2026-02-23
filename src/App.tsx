@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
+import SetPassword from "@/pages/SetPassword";
 import Dashboard from "@/pages/Dashboard";
 import Customers from "@/pages/Customers";
 import Invoices from "@/pages/Invoices";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/set-password" element={<SetPassword />} />
             <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
             <Route path="/customers" element={<ProtectedLayout><Customers /></ProtectedLayout>} />
             <Route path="/invoices" element={<ProtectedLayout><Invoices /></ProtectedLayout>} />
