@@ -241,8 +241,9 @@ export function useDeleteArea() {
 export function useUpdateCompany() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, default_due_days }: { id: string; default_due_days: number }) => {
-      const { error } = await supabase.from("companies").update({ default_due_days }).eq("id", id);
+    mutationFn: async (updates: { id: string; default_due_days?: number; address?: string; gstin?: string | null; phone?: string }) => {
+      const { id, ...rest } = updates;
+      const { error } = await supabase.from("companies").update(rest).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
