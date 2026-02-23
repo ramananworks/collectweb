@@ -45,26 +45,35 @@ export type Database = {
       }
       companies: {
         Row: {
+          address: string
           created_at: string
           default_due_days: number
+          gstin: string | null
           id: string
           name: string
+          phone: string
           plan: string
           status: string
         }
         Insert: {
+          address?: string
           created_at?: string
           default_due_days?: number
+          gstin?: string | null
           id?: string
           name: string
+          phone?: string
           plan?: string
           status?: string
         }
         Update: {
+          address?: string
           created_at?: string
           default_due_days?: number
+          gstin?: string | null
           id?: string
           name?: string
+          phone?: string
           plan?: string
           status?: string
         }

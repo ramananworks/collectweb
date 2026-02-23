@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Plus, Pencil, Trash2, Check, X, MapPin, Settings as SettingsIcon, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Pencil, Trash2, Check, X, MapPin, Settings as SettingsIcon, Save, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useCompany, useAreas, useAddArea, useUpdateArea, useDeleteArea, useUpdateCompany } from "@/hooks/use-data";
 import { toast } from "@/hooks/use-toast";
 
@@ -19,6 +20,20 @@ export default function Settings() {
   const [editValue, setEditValue] = useState("");
   const [defaultDueDays, setDefaultDueDays] = useState<number | null>(null);
   const [isEditingDueDays, setIsEditingDueDays] = useState(false);
+
+  // Company details state
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [companyAddress, setCompanyAddress] = useState("");
+  const [companyGstin, setCompanyGstin] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+
+  useEffect(() => {
+    if (company) {
+      setCompanyAddress((company as any).address ?? "");
+      setCompanyGstin((company as any).gstin ?? "");
+      setCompanyPhone((company as any).phone ?? "");
+    }
+  }, [company]);
 
   const currentDueDays = defaultDueDays ?? company?.default_due_days ?? 30;
 
@@ -87,6 +102,56 @@ export default function Settings() {
         <p className="text-sm text-muted-foreground">Manage company-wide configuration</p>
       </div>
 
+      {/* Company Details */}
+      <div className="rounded-xl bg-card p-5 stat-card-shadow max-w-xl">
+        <div className="flex items-center gap-2 mb-4">
+          <Building2 className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Company Details</h2>
+        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="company_phone">Mobile / Phone</Label>
+            <Input id="company_phone" placeholder="e.g. 9876543210" value={companyPhone} disabled={!isEditingDetails} onChange={(e) => setCompanyPhone(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="company_gstin">GSTIN</Label>
+            <Input id="company_gstin" placeholder="e.g. 22AAAAA0000A1Z5" value={companyGstin} disabled={!isEditingDetails} onChange={(e) => setCompanyGstin(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="company_address">Address</Label>
+            <Textarea id="company_address" placeholder="Company address" className="resize-none" rows={3} value={companyAddress} disabled={!isEditingDetails} onChange={(e) => setCompanyAddress(e.target.value)} />
+          </div>
+          {isEditingDetails ? (
+            <div className="flex gap-2">
+              <Button
+                className="gradient-primary text-primary-foreground gap-2"
+                disabled={updateCompany.isPending}
+                onClick={() => {
+                  if (!company) return;
+                  updateCompany.mutate({ id: company.id, address: companyAddress, gstin: companyGstin || null, phone: companyPhone }, {
+                    onSuccess: () => {
+                      setIsEditingDetails(false);
+                      toast({ title: "Details saved", description: "Company details updated successfully." });
+                    },
+                  });
+                }}
+              >
+                <Save className="h-4 w-4" /> Save
+              </Button>
+              <Button variant="outline" onClick={() => {
+                setCompanyAddress((company as any)?.address ?? "");
+                setCompanyGstin((company as any)?.gstin ?? "");
+                setCompanyPhone((company as any)?.phone ?? "");
+                setIsEditingDetails(false);
+              }}>Cancel</Button>
+            </div>
+          ) : (
+            <Button variant="outline" onClick={() => setIsEditingDetails(true)}>Edit</Button>
+          )}
+        </div>
+      </div>
+
+      {/* Default Due Days */}
       <div className="rounded-xl bg-card p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
           <SettingsIcon className="h-5 w-5 text-primary" />
