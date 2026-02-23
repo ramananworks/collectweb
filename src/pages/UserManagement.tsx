@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Plus, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/shared/StatusBadges";
 import { useProfiles } from "@/hooks/use-data";
+import { InviteMemberDialog } from "@/components/forms/InviteMemberDialog";
 
 export default function UserManagement() {
   const { data: profiles = [] } = useProfiles();
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -13,7 +16,7 @@ export default function UserManagement() {
           <h1 className="text-2xl font-bold">Team Management</h1>
           <p className="text-sm text-muted-foreground">{profiles.length} team member{profiles.length !== 1 ? "s" : ""}</p>
         </div>
-        <Button className="gradient-primary text-primary-foreground gap-2">
+        <Button className="gradient-primary text-primary-foreground gap-2" onClick={() => setInviteOpen(true)}>
           <Plus className="h-4 w-4" /> Invite Member
         </Button>
       </div>
@@ -44,6 +47,8 @@ export default function UserManagement() {
           </div>
         ))}
       </div>
+
+      <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </div>
   );
 }
