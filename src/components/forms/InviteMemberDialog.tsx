@@ -38,7 +38,7 @@ export function InviteMemberDialog({ open, onOpenChange }: Props) {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("invite-member", {
-        body: values,
+        body: { ...values, redirectUrl: `${window.location.origin}/set-password` },
       });
 
       if (error) throw error;
