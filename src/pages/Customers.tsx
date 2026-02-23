@@ -5,12 +5,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
+
+  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"]] });
 
   const areaNames = areas.map((a) => a.name);
 
@@ -25,7 +29,19 @@ export default function Customers() {
   const groupedAreas = [...new Set(filtered.map((c) => c.area))].sort();
 
   return (
-    <div className="space-y-6">
+    <div
+      ref={ptr.containerRef}
+      onTouchStart={ptr.handleTouchStart}
+      onTouchMove={ptr.handleTouchMove}
+      onTouchEnd={ptr.handleTouchEnd}
+      className="space-y-6 relative"
+    >
+      <PullToRefreshIndicator
+        pulling={ptr.pulling}
+        refreshing={ptr.refreshing}
+        pullDistance={ptr.pullDistance}
+        threshold={ptr.threshold}
+      />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Customers</h1>

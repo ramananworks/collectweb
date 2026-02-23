@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/StatusBadges";
@@ -11,6 +10,8 @@ import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
 import BillCameraCapture from "@/components/forms/BillCameraCapture";
 import ScanInvoiceDialog, { ExtractedInvoiceData } from "@/components/forms/ScanInvoiceDialog";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
 const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue"];
 
@@ -23,6 +24,8 @@ export default function Invoices() {
   const { data: invoices = [], refetch } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
+
+  const ptr = usePullToRefresh({ queryKeys: [["invoices"], ["customers"], ["areas"]] });
 
   const handleDataExtracted = (data: ExtractedInvoiceData) => {
     setScanDefaults(data);
@@ -40,7 +43,19 @@ export default function Invoices() {
   });
 
   return (
-    <div className="space-y-6">
+    <div
+      ref={ptr.containerRef}
+      onTouchStart={ptr.handleTouchStart}
+      onTouchMove={ptr.handleTouchMove}
+      onTouchEnd={ptr.handleTouchEnd}
+      className="space-y-6 relative"
+    >
+      <PullToRefreshIndicator
+        pulling={ptr.pulling}
+        refreshing={ptr.refreshing}
+        pullDistance={ptr.pullDistance}
+        threshold={ptr.threshold}
+      />
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>

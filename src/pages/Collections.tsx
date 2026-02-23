@@ -1,57 +1,19 @@
-import { useState, useRef, useCallback } from "react";
-import { Search, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Search, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
 import { usePayments, useCustomers, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
-import { useQueryClient } from "@tanstack/react-query";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
 export default function Collections() {
   const [search, setSearch] = useState("");
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
-  const queryClient = useQueryClient();
 
-  const [pulling, setPulling] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [pullDistance, setPullDistance] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const startY = useRef(0);
-  const isPulling = useRef(false);
-
-  const THRESHOLD = 80;
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const el = containerRef.current;
-    if (el && el.scrollTop === 0) {
-      startY.current = e.touches[0].clientY;
-      isPulling.current = true;
-    }
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling.current) return;
-    const diff = e.touches[0].clientY - startY.current;
-    if (diff > 0) {
-      setPulling(true);
-      setPullDistance(Math.min(diff * 0.5, 120));
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback(async () => {
-    if (!isPulling.current) return;
-    isPulling.current = false;
-    if (pullDistance >= THRESHOLD) {
-      setRefreshing(true);
-      setPullDistance(THRESHOLD);
-      await queryClient.invalidateQueries({ queryKey: ["payments"] });
-      await queryClient.invalidateQueries({ queryKey: ["customers"] });
-      setRefreshing(false);
-    }
-    setPulling(false);
-    setPullDistance(0);
-  }, [pullDistance, queryClient]);
+  const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"]] });
 
   const customerCollections = customers
     .map((customer) => {
