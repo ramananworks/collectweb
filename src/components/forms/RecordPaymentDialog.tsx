@@ -154,16 +154,7 @@ export default function RecordPaymentDialog() {
             <FormField control={form.control} name="collected_by" render={({ field }) => (
               <FormItem>
                 <FormLabel>Collected By</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {profiles.map((s) => (
-                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl><Input readOnly value={field.value} className="bg-muted cursor-not-allowed" /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
