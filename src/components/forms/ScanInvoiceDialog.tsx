@@ -150,7 +150,7 @@ export default function ScanInvoiceDialog({ onDataExtracted }: ScanInvoiceDialog
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+      <DialogContent className={cn("p-0 overflow-hidden", mode === "camera" ? "max-w-none w-screen h-screen rounded-none border-0" : "sm:max-w-lg")}>
         <DialogHeader className="px-5 pt-5 pb-0">
           <DialogTitle className="flex items-center gap-2">
             <Scan className="h-4 w-4 text-primary" />
@@ -199,27 +199,27 @@ export default function ScanInvoiceDialog({ onDataExtracted }: ScanInvoiceDialog
             </div>
           )}
 
-          {/* Camera viewfinder */}
+          {/* Camera viewfinder - full screen */}
           {mode === "camera" && (
-            <div className="space-y-3">
-              <div className="relative rounded-xl overflow-hidden bg-black aspect-[4/3]">
-                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute inset-4 border-2 border-white/50 rounded-lg" />
-                  <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
-                    Frame the entire bill
-                  </div>
+            <div className="fixed inset-0 flex flex-col bg-black">
+              <video ref={videoRef} autoPlay playsInline muted className="flex-1 w-full object-cover" />
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-8 border-2 border-white/40 rounded-lg" />
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                  Frame the entire bill
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <Button variant="outline" size="sm" onClick={flipCamera} className="gap-1.5">
-                  <RotateCcw className="h-3.5 w-3.5" /> Flip
+              <div className="absolute bottom-0 inset-x-0 p-4 pb-8 flex items-center justify-between gap-3 bg-gradient-to-t from-black/80 to-transparent">
+                <Button variant="ghost" size="sm" onClick={flipCamera} className="text-white gap-1.5">
+                  <RotateCcw className="h-4 w-4" /> Flip
                 </Button>
-                <Button onClick={capture} className="gradient-primary text-primary-foreground flex-1 gap-2">
-                  <Camera className="h-4 w-4" /> Capture
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="gap-1.5">
-                  <Upload className="h-3.5 w-3.5" /> File
+                <button
+                  onClick={capture}
+                  className="w-16 h-16 rounded-full border-4 border-white bg-white/20 active:bg-white/40 transition-colors"
+                  aria-label="Capture"
+                />
+                <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-white gap-1.5">
+                  <Upload className="h-4 w-4" /> File
                 </Button>
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
               </div>
