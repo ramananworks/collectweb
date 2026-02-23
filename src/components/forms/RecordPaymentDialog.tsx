@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useInvoices, useCustomers, useProfiles, useRecordPayment, formatCurrency } from "@/hooks/use-data";
+import { useAuth } from "@/contexts/AuthContext";
 
 const collectionSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
@@ -30,10 +31,11 @@ export default function RecordPaymentDialog() {
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
   const recordPayment = useRecordPayment();
+  const { profile: authProfile } = useAuth();
 
   const form = useForm<CollectionFormValues>({
     resolver: zodResolver(collectionSchema),
-    defaultValues: { customer_id: "", invoice_id: "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: "", notes: "" },
+    defaultValues: { customer_id: "", invoice_id: "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: authProfile?.name || "", notes: "" },
   });
 
   const selectedCustomerId = form.watch("customer_id");
