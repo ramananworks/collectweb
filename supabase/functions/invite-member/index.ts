@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, name, phone, role } = await req.json();
+    const { email, name, phone, role, redirectUrl } = await req.json();
 
     if (!email || !name || !role) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -64,31 +64,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Use admin client to create user
+    // Use admin client to invite user by email
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Generate a strong random password
-    function generateStrongPassword(length = 20): string {
-      const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+";
-      const array = new Uint8Array(length);
-      crypto.getRandomValues(array);
-      return Array.from(array, (byte) => charset[byte % charset.length]).join("");
-    }
-    const tempPassword = generateStrongPassword();
-
-    const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
-      email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
+    const { data: newUser, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      data: {
         name,
         company_id: callerProfile.company_id,
         role,
       },
+      redirectTo: redirectUrl || undefined,
     });
 
-    if (createError) {
-      return new Response(JSON.stringify({ error: createError.message }), {
+    if (inviteError) {
+      return new Response(JSON.stringify({ error: inviteError.message }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
