@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAreas, useAddCustomer } from "@/hooks/use-data";
+import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
@@ -21,6 +21,7 @@ const customerSchema = z.object({
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"),
   default_due_days: z.coerce.number().min(0).max(365).optional(),
+  assigned_to: z.string().optional(),
 });
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
@@ -28,11 +29,12 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 export default function AddCustomerDialog() {
   const [open, setOpen] = useState(false);
   const { data: areas = [] } = useAreas();
+  const { data: profiles = [] } = useProfiles();
   const addCustomer = useAddCustomer();
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined },
+    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined, assigned_to: undefined },
   });
 
   function onSubmit(values: CustomerFormValues) {
@@ -44,6 +46,7 @@ export default function AddCustomerDialog() {
       gstin: values.gstin,
       credit_limit: values.credit_limit,
       default_due_days: values.default_due_days,
+      assigned_to: values.assigned_to,
     }, {
       onSuccess: () => {
         toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
@@ -125,6 +128,23 @@ export default function AddCustomerDialog() {
                 <FormLabel>Default Due Days <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
                 <FormControl><Input type="number" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} /></FormControl>
                 <p className="text-xs text-muted-foreground">Overrides company default when creating invoices for this customer.</p>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="assigned_to" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Assigned To <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {profiles.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Assign a salesperson/collector responsible for this customer.</p>
                 <FormMessage />
               </FormItem>
             )} />

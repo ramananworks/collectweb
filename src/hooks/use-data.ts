@@ -118,12 +118,14 @@ export function useAddCustomer() {
       gstin?: string;
       credit_limit: number;
       default_due_days?: number;
+      assigned_to?: string;
     }) => {
       const { error } = await supabase.from("customers").insert({
         ...values,
         company_id: profile!.company_id!,
         gstin: values.gstin || null,
         default_due_days: values.default_due_days ?? null,
+        assigned_to: values.assigned_to || null,
         outstanding: 0,
       });
       if (error) throw error;

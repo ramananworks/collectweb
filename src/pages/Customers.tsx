@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Search, Phone, MapPin, MapPinned } from "lucide-react";
+import { Search, Phone, MapPin, MapPinned, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
+import { useCustomers, useAreas, useProfiles, formatCurrency } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
@@ -11,19 +11,28 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [userFilter, setUserFilter] = useState("all");
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
+  const { data: profiles = [] } = useProfiles();
 
-  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["profiles"]] });
 
   const areaNames = areas.map((a) => a.name);
+
+  const getProfileName = (userId: string | null) => {
+    if (!userId) return null;
+    const p = profiles.find((p) => p.id === userId);
+    return p ? (p.name || p.email) : null;
+  };
 
   const filtered = customers.filter((c) => {
     const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search);
     const matchesArea = areaFilter === "all" || c.area === areaFilter;
-    return matchesSearch && matchesArea;
+    const matchesUser = userFilter === "all" || c.assigned_to === userFilter;
+    return matchesSearch && matchesArea && matchesUser;
   });
 
   const groupedAreas = [...new Set(filtered.map((c) => c.area))].sort();
@@ -62,7 +71,18 @@ export default function Customers() {
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
           />
-        </div>
+        <Select value={userFilter} onValueChange={setUserFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by user" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Users</SelectItem>
+            {profiles.map((p) => (
+              <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
         <Select value={areaFilter} onValueChange={setAreaFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by area" />
@@ -108,7 +128,13 @@ export default function Customers() {
                   {c.gstin && (
                     <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
                   )}
-                  {!c.gstin && <div className="mb-3" />}
+                  {!c.gstin && <div className="mb-1" />}
+                  {c.assigned_to && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                      <User className="h-3 w-3 shrink-0" /> Assigned: <span className="font-medium text-foreground">{getProfileName(c.assigned_to)}</span>
+                    </div>
+                  )}
+                  {!c.assigned_to && !c.gstin && <div className="mb-2" />}
                   <div className="flex items-center justify-between pt-3 border-t border-border">
                     <span className="text-xs text-muted-foreground">
                       Credit Limit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
