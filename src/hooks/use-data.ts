@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
+import { mockCompany, mockCustomers, mockInvoices, mockPayments, mockAreas, mockProfiles } from "./mock-data";
+
+const DEV_MODE = true;
 
 export type Customer = Tables<"customers">;
 export type Invoice = Tables<"invoices">;
@@ -23,6 +26,7 @@ export function useCompany() {
   return useQuery({
     queryKey: ["company", profile?.company_id],
     queryFn: async () => {
+      if (DEV_MODE) return mockCompany;
       if (!profile?.company_id) return null;
       const { data, error } = await supabase
         .from("companies")
@@ -32,7 +36,7 @@ export function useCompany() {
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.company_id,
+    enabled: DEV_MODE || !!profile?.company_id,
   });
 }
 
@@ -40,6 +44,7 @@ export function useCustomers() {
   return useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
       const { data, error } = await supabase
         .from("customers")
         .select("*")
@@ -54,6 +59,7 @@ export function useInvoices() {
   return useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
+      if (DEV_MODE) return mockInvoices;
       const { data, error } = await supabase
         .from("invoices")
         .select("*")
@@ -68,6 +74,7 @@ export function usePayments() {
   return useQuery({
     queryKey: ["payments"],
     queryFn: async () => {
+      if (DEV_MODE) return mockPayments;
       const { data, error } = await supabase
         .from("payments")
         .select("*")
@@ -82,6 +89,7 @@ export function useAreas() {
   return useQuery({
     queryKey: ["areas"],
     queryFn: async () => {
+      if (DEV_MODE) return mockAreas;
       const { data, error } = await supabase
         .from("areas")
         .select("*")
@@ -96,6 +104,7 @@ export function useProfiles() {
   return useQuery({
     queryKey: ["profiles"],
     queryFn: async () => {
+      if (DEV_MODE) return mockProfiles;
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
