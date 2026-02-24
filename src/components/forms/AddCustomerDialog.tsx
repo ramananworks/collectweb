@@ -34,7 +34,7 @@ export default function AddCustomerDialog() {
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined },
+    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined, assigned_to: undefined },
   });
 
   function onSubmit(values: CustomerFormValues) {
