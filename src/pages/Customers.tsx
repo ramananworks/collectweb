@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Search, Phone, MapPin, MapPinned } from "lucide-react";
+import { Search, Phone, MapPin, MapPinned, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
+import { useCustomers, useAreas, useProfiles, formatCurrency } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
