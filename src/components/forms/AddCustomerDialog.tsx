@@ -29,6 +29,7 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 export default function AddCustomerDialog() {
   const [open, setOpen] = useState(false);
   const { data: areas = [] } = useAreas();
+  const { data: profiles = [] } = useProfiles();
   const addCustomer = useAddCustomer();
 
   const form = useForm<CustomerFormValues>({
