@@ -83,6 +83,7 @@ export type Database = {
         Row: {
           address: string
           area: string
+          assigned_to: string | null
           company_id: string
           created_at: string
           credit_limit: number
@@ -96,6 +97,7 @@ export type Database = {
         Insert: {
           address?: string
           area?: string
+          assigned_to?: string | null
           company_id: string
           created_at?: string
           credit_limit?: number
@@ -109,6 +111,7 @@ export type Database = {
         Update: {
           address?: string
           area?: string
+          assigned_to?: string | null
           company_id?: string
           created_at?: string
           credit_limit?: number
@@ -120,6 +123,13 @@ export type Database = {
           phone?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customers_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customers_company_id_fkey"
             columns: ["company_id"]
