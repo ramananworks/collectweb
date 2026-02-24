@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
+import { mockCompany, mockCustomers, mockInvoices, mockPayments, mockAreas, mockProfiles } from "./mock-data";
+
+const DEV_MODE = true;
 
 export type Customer = Tables<"customers">;
 export type Invoice = Tables<"invoices">;
