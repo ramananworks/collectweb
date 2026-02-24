@@ -74,6 +74,7 @@ export function usePayments() {
   return useQuery({
     queryKey: ["payments"],
     queryFn: async () => {
+      if (DEV_MODE) return mockPayments;
       const { data, error } = await supabase
         .from("payments")
         .select("*")
