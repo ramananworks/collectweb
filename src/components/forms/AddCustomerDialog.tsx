@@ -131,6 +131,23 @@ export default function AddCustomerDialog() {
                 <FormMessage />
               </FormItem>
             )} />
+            <FormField control={form.control} name="assigned_to" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Assigned To <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {profiles.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Assign a salesperson/collector responsible for this customer.</p>
+                <FormMessage />
+              </FormItem>
+            )} />
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" className="gradient-primary text-primary-foreground" disabled={addCustomer.isPending}>
