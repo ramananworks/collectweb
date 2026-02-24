@@ -128,7 +128,13 @@ export default function Customers() {
                   {c.gstin && (
                     <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
                   )}
-                  {!c.gstin && <div className="mb-3" />}
+                  {!c.gstin && <div className="mb-1" />}
+                  {c.assigned_to && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                      <User className="h-3 w-3 shrink-0" /> Assigned: <span className="font-medium text-foreground">{getProfileName(c.assigned_to)}</span>
+                    </div>
+                  )}
+                  {!c.assigned_to && !c.gstin && <div className="mb-2" />}
                   <div className="flex items-center justify-between pt-3 border-t border-border">
                     <span className="text-xs text-muted-foreground">
                       Credit Limit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
