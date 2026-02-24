@@ -124,7 +124,7 @@ export default function Invoices() {
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Balance</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Due Date</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Bill</th>
+                
               </tr>
             </thead>
             <tbody>
