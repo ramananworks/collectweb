@@ -44,6 +44,7 @@ export function useCustomers() {
   return useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
       const { data, error } = await supabase
         .from("customers")
         .select("*")
