@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Plus } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Plus, ChevronDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
 
@@ -28,6 +29,7 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 
 export default function AddCustomerDialog() {
   const [open, setOpen] = useState(false);
+  const [optionalOpen, setOptionalOpen] = useState(false);
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();
   const addCustomer = useAddCustomer();
@@ -51,6 +53,7 @@ export default function AddCustomerDialog() {
       onSuccess: () => {
         toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
         form.reset();
+        setOptionalOpen(false);
         setOpen(false);
       },
       onError: (err) => {
@@ -59,6 +62,12 @@ export default function AddCustomerDialog() {
     });
   }
 
+  const scrollInputIntoView = (e: React.FocusEvent<HTMLInputElement | HTMLButtonElement>) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -66,96 +75,111 @@ export default function AddCustomerDialog() {
           <Plus className="h-4 w-4" /> Add Customer
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[100dvh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-5 pt-5 pb-3 shrink-0">
           <DialogTitle>Add New Customer</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField control={form.control} name="name" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Customer Name</FormLabel>
-                <FormControl><Input placeholder="e.g. Amit Patel" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="phone" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl><Input placeholder="+91 98765 43210" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="address" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl><Input placeholder="15 MG Road, Pune" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="area" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Area</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {areas.map((a) => (
-                      <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="gstin" render={({ field }) => (
-              <FormItem>
-                <FormLabel>GSTIN <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
-                <FormControl><Input placeholder="27AABCP1234A1Z5" maxLength={15} {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="credit_limit" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Credit Limit (₹)</FormLabel>
-                <FormControl><Input type="number" placeholder="500000" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="default_due_days" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Default Due Days <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
-                <FormControl><Input type="number" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} /></FormControl>
-                <p className="text-xs text-muted-foreground">Overrides company default when creating invoices for this customer.</p>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="assigned_to" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Assigned To <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {profiles.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">Assign a salesperson/collector responsible for this customer.</p>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={addCustomer.isPending}>
-                {addCustomer.isPending ? "Adding..." : "Add Customer"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <div className="overflow-y-auto flex-1 px-5 pb-5" style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              {/* Essential fields */}
+              <FormField control={form.control} name="name" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Customer Name</FormLabel>
+                  <FormControl><Input placeholder="e.g. Amit Patel" {...field} onFocus={scrollInputIntoView} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="phone" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl><Input type="tel" inputMode="tel" placeholder="+91 98765 43210" {...field} onFocus={scrollInputIntoView} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="area" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Area</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {areas.map((a) => (
+                        <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+
+              {/* Collapsible optional fields */}
+              <Collapsible open={optionalOpen} onOpenChange={setOptionalOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button type="button" variant="ghost" className="w-full justify-between px-1 py-2 h-auto text-sm text-muted-foreground hover:text-foreground">
+                    Additional Details (Optional)
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${optionalOpen ? "rotate-180" : ""}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-3 pt-1">
+                  <FormField control={form.control} name="address" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl><Input placeholder="15 MG Road, Pune" {...field} onFocus={scrollInputIntoView} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="gstin" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>GSTIN</FormLabel>
+                      <FormControl><Input placeholder="27AABCP1234A1Z5" maxLength={15} {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} onFocus={scrollInputIntoView} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="credit_limit" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Credit Limit (₹)</FormLabel>
+                      <FormControl><Input type="number" inputMode="numeric" placeholder="500000" {...field} onFocus={scrollInputIntoView} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="default_due_days" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Default Due Days</FormLabel>
+                      <FormControl><Input type="number" inputMode="numeric" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} onFocus={scrollInputIntoView} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="assigned_to" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assigned To</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {profiles.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Submit area with safe bottom padding */}
+              <div className="flex justify-end gap-2 pt-3 pb-6">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button type="submit" className="gradient-primary text-primary-foreground" disabled={addCustomer.isPending}>
+                  {addCustomer.isPending ? "Adding..." : "Add Customer"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
