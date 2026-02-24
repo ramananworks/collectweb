@@ -139,14 +139,6 @@ export default function Invoices() {
                   <td className="px-4 py-3 hidden md:table-cell font-semibold">{formatCurrency(inv.amount - inv.paid_amount)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{inv.due_date}</td>
                   <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
-                  <td className="px-4 py-3">
-                    <BillCameraCapture
-                      invoiceId={inv.id}
-                      invoiceNumber={inv.invoice_number}
-                      existingImageUrl={(inv as unknown as { bill_image_url?: string }).bill_image_url}
-                      onImageSaved={() => refetch()}
-                    />
-                  </td>
                 </tr>
               ))}
             </tbody>
