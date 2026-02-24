@@ -46,6 +46,7 @@ export default function AddCustomerDialog() {
       gstin: values.gstin,
       credit_limit: values.credit_limit,
       default_due_days: values.default_due_days,
+      assigned_to: values.assigned_to,
     }, {
       onSuccess: () => {
         toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
