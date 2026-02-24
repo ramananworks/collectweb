@@ -89,6 +89,7 @@ export function useAreas() {
   return useQuery({
     queryKey: ["areas"],
     queryFn: async () => {
+      if (DEV_MODE) return mockAreas;
       const { data, error } = await supabase
         .from("areas")
         .select("*")
