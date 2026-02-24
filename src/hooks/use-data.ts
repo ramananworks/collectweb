@@ -26,6 +26,7 @@ export function useCompany() {
   return useQuery({
     queryKey: ["company", profile?.company_id],
     queryFn: async () => {
+      if (DEV_MODE) return mockCompany;
       if (!profile?.company_id) return null;
       const { data, error } = await supabase
         .from("companies")
@@ -35,7 +36,7 @@ export function useCompany() {
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.company_id,
+    enabled: DEV_MODE || !!profile?.company_id,
   });
 }
 
