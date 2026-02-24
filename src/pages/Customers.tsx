@@ -11,19 +11,28 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [userFilter, setUserFilter] = useState("all");
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
+  const { data: profiles = [] } = useProfiles();
 
-  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["profiles"]] });
 
   const areaNames = areas.map((a) => a.name);
+
+  const getProfileName = (userId: string | null) => {
+    if (!userId) return null;
+    const p = profiles.find((p) => p.id === userId);
+    return p ? (p.name || p.email) : null;
+  };
 
   const filtered = customers.filter((c) => {
     const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search);
     const matchesArea = areaFilter === "all" || c.area === areaFilter;
-    return matchesSearch && matchesArea;
+    const matchesUser = userFilter === "all" || c.assigned_to === userFilter;
+    return matchesSearch && matchesArea && matchesUser;
   });
 
   const groupedAreas = [...new Set(filtered.map((c) => c.area))].sort();
