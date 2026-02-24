@@ -71,7 +71,18 @@ export default function Customers() {
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
           />
-        </div>
+        <Select value={userFilter} onValueChange={setUserFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by user" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Users</SelectItem>
+            {profiles.map((p) => (
+              <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
         <Select value={areaFilter} onValueChange={setAreaFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by area" />
