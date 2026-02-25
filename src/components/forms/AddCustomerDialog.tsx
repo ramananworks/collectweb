@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
 
 const supportsContactPicker = "contacts" in navigator && "ContactsManager" in window;
+const supportsAndroidBridge = typeof window !== "undefined" && !!(window as any).Android?.pickContact;
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
@@ -72,31 +73,46 @@ export default function AddCustomerDialog() {
 
   const pickFromContacts = async () => {
     try {
-      const nav = navigator as any;
-      if (!nav.contacts?.select) {
-        toast({ title: "Not supported", description: "Contact picker is not available in this browser. Try opening the app in Chrome.", variant: "destructive" });
-        return;
-      }
-      const props = ["name", "tel", "address"];
-      const opts = { multiple: false };
-      const contacts = await nav.contacts.select(props, opts);
-      if (contacts && contacts.length > 0) {
-        const contact = contacts[0];
-        if (contact.name?.[0]) form.setValue("name", contact.name[0]);
-        if (contact.tel?.[0]) {
-          const phone = contact.tel[0].replace(/[\s\-()]/g, "");
-          form.setValue("phone", phone);
-        }
-        if (contact.address?.[0]) {
-          const addr = contact.address[0];
-          const parts = [addr.streetAddress, addr.locality, addr.region, addr.postalCode].filter(Boolean);
-          if (parts.length > 0) {
-            form.setValue("address", parts.join(", "));
+      const android = (window as any).Android;
+
+      // Path 1: Android WebView bridge
+      if (android?.pickContact) {
+        const result = android.pickContact();
+        if (result) {
+          const contact = typeof result === "string" ? JSON.parse(result) : result;
+          if (contact.name) form.setValue("name", contact.name);
+          if (contact.phone) form.setValue("phone", contact.phone.replace(/[\s\-()]/g, ""));
+          if (contact.address) {
+            form.setValue("address", contact.address);
             setOptionalOpen(true);
           }
+          toast({ title: "Contact imported", description: `${contact.name || "Contact"} details filled in.` });
+          return;
         }
-        toast({ title: "Contact imported", description: `${contact.name?.[0] || "Contact"} details filled in.` });
       }
+
+      // Path 2: Web Contact Picker API (Chrome on Android)
+      const nav = navigator as any;
+      if (nav.contacts?.select) {
+        const contacts = await nav.contacts.select(["name", "tel", "address"], { multiple: false });
+        if (contacts?.length > 0) {
+          const c = contacts[0];
+          if (c.name?.[0]) form.setValue("name", c.name[0]);
+          if (c.tel?.[0]) form.setValue("phone", c.tel[0].replace(/[\s\-()]/g, ""));
+          if (c.address?.[0]) {
+            const addr = c.address[0];
+            const parts = [addr.streetAddress, addr.locality, addr.region, addr.postalCode].filter(Boolean);
+            if (parts.length > 0) {
+              form.setValue("address", parts.join(", "));
+              setOptionalOpen(true);
+            }
+          }
+          toast({ title: "Contact imported", description: `${c.name?.[0] || "Contact"} details filled in.` });
+          return;
+        }
+      }
+
+      toast({ title: "Not supported", description: "Contact picker is not available in this browser.", variant: "destructive" });
     } catch (err: any) {
       console.error("Contact picker error:", err);
       toast({ title: "Could not access contacts", description: err?.message || "Please allow contact access and try again.", variant: "destructive" });
@@ -114,7 +130,7 @@ export default function AddCustomerDialog() {
         <DialogHeader className="px-5 pt-5 pb-3 shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle>Add New Customer</DialogTitle>
-            {supportsContactPicker && (
+            {(supportsContactPicker || supportsAndroidBridge) && (
               <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={pickFromContacts}>
                 <Contact className="h-3.5 w-3.5" /> From Contacts
               </Button>
