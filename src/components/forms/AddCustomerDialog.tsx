@@ -73,6 +73,10 @@ export default function AddCustomerDialog() {
   const pickFromContacts = async () => {
     try {
       const nav = navigator as any;
+      if (!nav.contacts?.select) {
+        toast({ title: "Not supported", description: "Contact picker is not available in this browser. Try opening the app in Chrome.", variant: "destructive" });
+        return;
+      }
       const props = ["name", "tel", "address"];
       const opts = { multiple: false };
       const contacts = await nav.contacts.select(props, opts);
@@ -94,9 +98,8 @@ export default function AddCustomerDialog() {
         toast({ title: "Contact imported", description: `${contact.name?.[0] || "Contact"} details filled in.` });
       }
     } catch (err: any) {
-      if (err.name !== "TypeError") {
-        toast({ title: "Could not access contacts", description: "Please allow contact access and try again.", variant: "destructive" });
-      }
+      console.error("Contact picker error:", err);
+      toast({ title: "Could not access contacts", description: err?.message || "Please allow contact access and try again.", variant: "destructive" });
     }
   };
 
