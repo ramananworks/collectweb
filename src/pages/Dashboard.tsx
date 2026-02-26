@@ -3,11 +3,14 @@ import { IndianRupee, TrendingUp, AlertTriangle, Users } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StatCard from "@/components/dashboard/StatCard";
+import DrillDownSheet from "@/components/dashboard/DrillDownSheet";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { useCustomers, useInvoices, usePayments, useAreas, formatCurrency } from "@/hooks/use-data";
 import { differenceInDays } from "date-fns";
 
 const barColors = ["hsl(160, 84%, 39%)", "hsl(38, 92%, 50%)", "hsl(25, 85%, 55%)", "hsl(0, 72%, 51%)"];
+
+type DrillDownType = "outstanding" | "todayCollection" | "overdue" | null;
 
 export default function Dashboard() {
   const [areaFilter, setAreaFilter] = useState("all");
