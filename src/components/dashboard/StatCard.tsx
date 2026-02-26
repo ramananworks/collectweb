@@ -25,9 +25,14 @@ const iconVariantStyles = {
   destructive: "bg-destructive/10 text-destructive",
 };
 
-export default function StatCard({ title, value, icon: Icon, isCurrency = true, trend, variant = "default" }: StatCardProps) {
+export default function StatCard({ title, value, icon: Icon, isCurrency = true, trend, variant = "default", onClick }: StatCardProps) {
   return (
-    <div className={`rounded-xl p-5 stat-card-shadow hover:stat-card-shadow-hover transition-shadow animate-fade-in ${variantStyles[variant]}`}>
+    <div
+      className={`rounded-xl p-5 stat-card-shadow hover:stat-card-shadow-hover transition-shadow animate-fade-in ${variantStyles[variant]} ${onClick ? "cursor-pointer hover:ring-2 hover:ring-primary/30" : ""}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{title}</p>
