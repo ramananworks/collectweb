@@ -152,7 +152,7 @@ export default function Settings() {
       </div>
 
       {/* Default Due Days */}
-      <div className="rounded-xl bg-card p-5 stat-card-shadow max-w-xl">
+      <div className="rounded-xl bg-card p-4 sm:p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
           <SettingsIcon className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold">Default Due Days</h2>
