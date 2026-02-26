@@ -56,24 +56,22 @@ export default function Invoices() {
         pullDistance={ptr.pullDistance}
         threshold={ptr.threshold}
       />
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Invoices & Loans</h1>
-            <p className="text-sm text-muted-foreground">{invoices.length} total records</p>
-          </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Invoices & Loans</h1>
+          <p className="text-sm text-muted-foreground">{invoices.length} total records</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <BulkImportInvoicesDialog />
+          <ScanInvoiceDialog onDataExtracted={handleDataExtracted} />
           <Button className="gradient-primary text-primary-foreground gap-2" onClick={() => { setScanDefaults(null); setCreateOpen(true); }}>
-            <Plus className="h-4 w-4" /> Create Invoice
+            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create</span> Invoice
           </Button>
           <CreateInvoiceDialog
             open={createOpen}
             onOpenChange={(o) => { setCreateOpen(o); if (!o) setScanDefaults(null); }}
             defaultValues={scanDefaults ?? undefined}
           />
-        </div>
-        <div className="flex gap-2">
-          <BulkImportInvoicesDialog />
-          <ScanInvoiceDialog onDataExtracted={handleDataExtracted} />
         </div>
       </div>
 
