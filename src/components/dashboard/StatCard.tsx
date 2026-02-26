@@ -8,6 +8,7 @@ interface StatCardProps {
   isCurrency?: boolean;
   trend?: string;
   variant?: "default" | "success" | "warning" | "destructive";
+  onClick?: () => void;
 }
 
 const variantStyles = {
