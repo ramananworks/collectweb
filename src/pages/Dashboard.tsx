@@ -65,6 +65,30 @@ export default function Dashboard() {
 
   const getCustomerArea = (customerId: string) => customers.find((c) => c.id === customerId)?.area || "Unknown";
 
+  const drillInvoices = useMemo(() => {
+    if (drillDown === "outstanding") {
+      return filteredInvoices.filter((i) => i.amount - i.paid_amount > 0).map((i) => ({
+        ...i, area: getCustomerArea(i.customer_id),
+      }));
+    }
+    if (drillDown === "overdue") {
+      return filteredInvoices.filter((i) => i.status === "overdue").map((i) => ({
+        ...i, area: getCustomerArea(i.customer_id),
+      }));
+    }
+    return [];
+  }, [drillDown, filteredInvoices, customers]);
+
+  const drillPayments = useMemo(() => {
+    if (drillDown === "todayCollection") {
+      return filteredPayments.filter((p) => p.date === today).map((p) => {
+        const inv = invoices.find((i) => i.id === p.invoice_id);
+        return { ...p, area: inv ? getCustomerArea(inv.customer_id) : undefined };
+      });
+    }
+    return [];
+  }, [drillDown, filteredPayments, today, invoices, customers]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
