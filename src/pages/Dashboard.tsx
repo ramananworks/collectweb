@@ -3,14 +3,18 @@ import { IndianRupee, TrendingUp, AlertTriangle, Users } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StatCard from "@/components/dashboard/StatCard";
+import DrillDownSheet from "@/components/dashboard/DrillDownSheet";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { useCustomers, useInvoices, usePayments, useAreas, formatCurrency } from "@/hooks/use-data";
 import { differenceInDays } from "date-fns";
 
 const barColors = ["hsl(160, 84%, 39%)", "hsl(38, 92%, 50%)", "hsl(25, 85%, 55%)", "hsl(0, 72%, 51%)"];
 
+type DrillDownType = "outstanding" | "todayCollection" | "overdue" | null;
+
 export default function Dashboard() {
   const [areaFilter, setAreaFilter] = useState("all");
+  const [drillDown, setDrillDown] = useState<DrillDownType>(null);
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
   const { data: payments = [] } = usePayments();
@@ -61,6 +65,30 @@ export default function Dashboard() {
 
   const getCustomerArea = (customerId: string) => customers.find((c) => c.id === customerId)?.area || "Unknown";
 
+  const drillInvoices = useMemo(() => {
+    if (drillDown === "outstanding") {
+      return filteredInvoices.filter((i) => i.amount - i.paid_amount > 0).map((i) => ({
+        ...i, area: getCustomerArea(i.customer_id),
+      }));
+    }
+    if (drillDown === "overdue") {
+      return filteredInvoices.filter((i) => i.status === "overdue").map((i) => ({
+        ...i, area: getCustomerArea(i.customer_id),
+      }));
+    }
+    return [];
+  }, [drillDown, filteredInvoices, customers]);
+
+  const drillPayments = useMemo(() => {
+    if (drillDown === "todayCollection") {
+      return filteredPayments.filter((p) => p.date === today).map((p) => {
+        const inv = invoices.find((i) => i.id === p.invoice_id);
+        return { ...p, area: inv ? getCustomerArea(inv.customer_id) : undefined };
+      });
+    }
+    return [];
+  }, [drillDown, filteredPayments, today, invoices, customers]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -82,9 +110,9 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Total Outstanding" value={totalOutstanding} icon={IndianRupee} variant="default" />
-        <StatCard title="Today's Collection" value={todayCollection} icon={TrendingUp} variant="success" />
-        <StatCard title="Overdue Amount" value={overdueAmount} icon={AlertTriangle} variant="destructive" />
+        <StatCard title="Total Outstanding" value={totalOutstanding} icon={IndianRupee} variant="default" onClick={() => setDrillDown("outstanding")} />
+        <StatCard title="Today's Collection" value={todayCollection} icon={TrendingUp} variant="success" onClick={() => setDrillDown("todayCollection")} />
+        <StatCard title="Overdue Amount" value={overdueAmount} icon={AlertTriangle} variant="destructive" onClick={() => setDrillDown("overdue")} />
         <StatCard title="Active Customers" value={customerCount} icon={Users} isCurrency={false} variant="default" />
       </div>
 
@@ -153,6 +181,13 @@ export default function Dashboard() {
           {recentPayments.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No collections yet</p>}
         </div>
       </div>
+
+      <DrillDownSheet
+        type={drillDown}
+        onClose={() => setDrillDown(null)}
+        invoices={drillInvoices}
+        payments={drillPayments}
+      />
     </div>
   );
 }
