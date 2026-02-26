@@ -78,7 +78,7 @@ export default function Reports() {
       </div>
 
       <div className="rounded-xl bg-card p-4 stat-card-shadow">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">From Date</label>
             <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
@@ -129,7 +129,7 @@ export default function Reports() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl bg-card p-5 stat-card-shadow text-center">
           <p className="text-sm text-muted-foreground">Total Outstanding</p>
           <p className="text-xl font-bold mt-1">{formatCurrency(totalOutstanding)}</p>
