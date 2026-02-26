@@ -181,6 +181,13 @@ export default function Dashboard() {
           {recentPayments.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No collections yet</p>}
         </div>
       </div>
+
+      <DrillDownSheet
+        type={drillDown}
+        onClose={() => setDrillDown(null)}
+        invoices={drillInvoices}
+        payments={drillPayments}
+      />
     </div>
   );
 }
