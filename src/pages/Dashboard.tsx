@@ -14,6 +14,7 @@ type DrillDownType = "outstanding" | "todayCollection" | "overdue" | null;
 
 export default function Dashboard() {
   const [areaFilter, setAreaFilter] = useState("all");
+  const [drillDown, setDrillDown] = useState<DrillDownType>(null);
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
   const { data: payments = [] } = usePayments();
