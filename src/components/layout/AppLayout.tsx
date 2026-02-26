@@ -11,23 +11,23 @@ import {
   LogOut,
   Menu,
   X,
-  Building2 } from
-"lucide-react";
+  Building2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompany } from "@/hooks/use-data";
 
 const navItems = [
-{ to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-{ to: "/customers", icon: Users, label: "Customers" },
-{ to: "/invoices", icon: FileText, label: "Invoices" },
-{ to: "/collections", icon: CreditCard, label: "Collections" },
-{ to: "/reports", icon: BarChart3, label: "Reports" },
-{ to: "/users", icon: UserCog, label: "Team" },
-{ to: "/settings", icon: Settings, label: "Company Settings" }];
+  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/customers", icon: Users, label: "Customers" },
+  { to: "/invoices", icon: FileText, label: "Invoices" },
+  { to: "/collections", icon: CreditCard, label: "Collections" },
+  { to: "/reports", icon: BarChart3, label: "Reports" },
+  { to: "/users", icon: UserCog, label: "Team" },
+  { to: "/settings", icon: Settings, label: "Company Settings" },
+];
 
-
-export default function AppLayout({ children }: {children: React.ReactNode;}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -47,19 +47,19 @@ export default function AppLayout({ children }: {children: React.ReactNode;}) {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Mobile overlay */}
-      {sidebarOpen &&
-      <div
-        className="fixed inset-0 z-30 bg-foreground/40 lg:hidden"
-        onClick={() => setSidebarOpen(false)} />
-
-      }
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-foreground/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
       <aside
         className={`gradient-sidebar fixed inset-y-0 left-0 z-40 flex w-64 flex-col transition-transform duration-300 lg:static lg:translate-x-0 ${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"}`
-        }>
-
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
@@ -73,8 +73,8 @@ export default function AppLayout({ children }: {children: React.ReactNode;}) {
           </div>
           <button
             className="ml-auto lg:hidden text-sidebar-foreground"
-            onClick={() => setSidebarOpen(false)}>
-
+            onClick={() => setSidebarOpen(false)}
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -89,15 +89,15 @@ export default function AppLayout({ children }: {children: React.ReactNode;}) {
                 to={item.to}
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
-                isActive ?
-                "gradient-primary text-primary-foreground shadow-md" :
-                "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`
-                }>
-
+                  isActive
+                    ? "gradient-primary text-primary-foreground shadow-md"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                }`}
+              >
                 <item.icon className="h-4.5 w-4.5 shrink-0" />
                 {item.label}
-              </NavLink>);
-
+              </NavLink>
+            );
           })}
         </nav>
 
@@ -121,7 +121,7 @@ export default function AppLayout({ children }: {children: React.ReactNode;}) {
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex-col overflow-hidden flex items-center justify-start">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile header */}
         <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 lg:hidden">
           <button onClick={() => setSidebarOpen(true)}>
@@ -137,6 +137,6 @@ export default function AppLayout({ children }: {children: React.ReactNode;}) {
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
       </div>
-    </div>);
-
+    </div>
+  );
 }
