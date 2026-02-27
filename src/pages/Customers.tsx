@@ -2,16 +2,18 @@ import { useState } from "react";
 import { Search, Phone, MapPin, MapPinned, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCustomers, useAreas, useProfiles, formatCurrency } from "@/hooks/use-data";
+import { useCustomers, useAreas, useProfiles, formatCurrency, type Customer } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
+import CustomerLedgerSheet from "@/components/customers/CustomerLedgerSheet";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
   const [userFilter, setUserFilter] = useState("all");
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();
@@ -111,7 +113,7 @@ export default function Customers() {
             {filtered
               .filter((c) => c.area === area)
               .map((c) => (
-                <div key={c.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in cursor-pointer">
+                <div key={c.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in cursor-pointer" onClick={() => setSelectedCustomer(c)}>
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold">{c.name}</h3>
@@ -153,6 +155,7 @@ export default function Customers() {
       {filtered.length === 0 && (
         <div className="p-8 text-center text-muted-foreground">No customers found</div>
       )}
+      <CustomerLedgerSheet customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
     </div>
   );
 }
