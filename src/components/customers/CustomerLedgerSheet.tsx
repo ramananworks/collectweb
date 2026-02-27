@@ -1,5 +1,10 @@
-import { useMemo } from "react";
-import { format, parseISO } from "date-fns";
+import { useMemo, useState } from "react";
+import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { CalendarIcon, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,8 +28,10 @@ type LedgerEntry = {
 export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedgerSheetProps) {
   const { data: invoices = [] } = useInvoices();
   const { data: payments = [] } = usePayments();
+  const [fromDate, setFromDate] = useState<Date | undefined>();
+  const [toDate, setToDate] = useState<Date | undefined>();
 
-  const ledgerEntries = useMemo<LedgerEntry[]>(() => {
+  const allEntries = useMemo<LedgerEntry[]>(() => {
     if (!customer) return [];
 
     const customerInvoices = invoices.filter((i) => i.customer_id === customer.id);
@@ -72,6 +79,16 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     });
   }, [customer, invoices, payments]);
 
+  const ledgerEntries = useMemo(() => {
+    if (!fromDate && !toDate) return allEntries;
+    return allEntries.filter((e) => {
+      const d = parseISO(e.date);
+      const after = fromDate ? d >= startOfDay(fromDate) : true;
+      const before = toDate ? d <= endOfDay(toDate) : true;
+      return after && before;
+    });
+  }, [allEntries, fromDate, toDate]);
+
   const totalDebit = ledgerEntries.reduce((s, e) => s + e.debit, 0);
   const totalCredit = ledgerEntries.reduce((s, e) => s + e.credit, 0);
   const closingBalance = totalDebit - totalCredit;
@@ -99,6 +116,35 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
                 {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
               </Badge>
             </div>
+          </div>
+          <div className="flex gap-2 pt-2 items-center flex-wrap">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !fromDate && "text-muted-foreground")}>
+                  <CalendarIcon className="h-3 w-3" />
+                  {fromDate ? format(fromDate, "dd MMM yy") : "From"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !toDate && "text-muted-foreground")}>
+                  <CalendarIcon className="h-3 w-3" />
+                  {toDate ? format(toDate, "dd MMM yy") : "To"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+            {(fromDate || toDate) && (
+              <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => { setFromDate(undefined); setToDate(undefined); }}>
+                <X className="h-3 w-3 mr-1" /> Clear
+              </Button>
+            )}
           </div>
         </SheetHeader>
 
