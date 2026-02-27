@@ -79,6 +79,16 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     });
   }, [customer, invoices, payments]);
 
+  const ledgerEntries = useMemo(() => {
+    if (!fromDate && !toDate) return allEntries;
+    return allEntries.filter((e) => {
+      const d = parseISO(e.date);
+      const after = fromDate ? d >= startOfDay(fromDate) : true;
+      const before = toDate ? d <= endOfDay(toDate) : true;
+      return after && before;
+    });
+  }, [allEntries, fromDate, toDate]);
+
   const totalDebit = ledgerEntries.reduce((s, e) => s + e.debit, 0);
   const totalCredit = ledgerEntries.reduce((s, e) => s + e.credit, 0);
   const closingBalance = totalDebit - totalCredit;
