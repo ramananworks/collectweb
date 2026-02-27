@@ -155,6 +155,7 @@ export default function Customers() {
       {filtered.length === 0 && (
         <div className="p-8 text-center text-muted-foreground">No customers found</div>
       )}
+      <CustomerLedgerSheet customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
     </div>
   );
 }
