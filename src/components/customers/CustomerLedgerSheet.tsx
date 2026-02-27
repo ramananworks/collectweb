@@ -94,6 +94,41 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const totalCredit = ledgerEntries.reduce((s, e) => s + e.credit, 0);
   const closingBalance = totalDebit - totalCredit;
 
+  const fmtAmount = (n: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
+
+  function exportCSV() {
+    if (!customer || ledgerEntries.length === 0) return;
+    const header = "Date,Particulars,Debit,Credit,Balance\n";
+    const rows = ledgerEntries.map((e) =>
+      `${format(parseISO(e.date), "dd-MM-yyyy")},"${e.particular}",${e.debit || ""},${e.credit || ""},${e.balance > 0 ? fmtAmount(e.balance) + " Dr" : e.balance < 0 ? fmtAmount(Math.abs(e.balance)) + " Cr" : "0"}`
+    ).join("\n");
+    const footer = `\nClosing Balance,,${fmtAmount(totalDebit)},${fmtAmount(totalCredit)},${closingBalance > 0 ? fmtAmount(closingBalance) + " Dr" : closingBalance < 0 ? fmtAmount(Math.abs(closingBalance)) + " Cr" : "0"}`;
+    const blob = new Blob([header + rows + footer], { type: "text/csv" });
+    downloadBlob(blob, `${customer.name}_Ledger.csv`);
+  }
+
+  function exportPDF() {
+    if (!customer || ledgerEntries.length === 0) return;
+    const w = window.open("", "_blank");
+    if (!w) return;
+    const tableRows = ledgerEntries.map((e) =>
+      `<tr><td>${format(parseISO(e.date), "dd MMM yy")}</td><td>${e.particular}</td><td style="text-align:right">${e.debit > 0 ? fmtAmount(e.debit) : "–"}</td><td style="text-align:right">${e.credit > 0 ? fmtAmount(e.credit) : "–"}</td><td style="text-align:right">${fmtAmount(Math.abs(e.balance))} ${e.balance > 0 ? "Dr" : e.balance < 0 ? "Cr" : ""}</td></tr>`
+    ).join("");
+    const footerRow = `<tr style="font-weight:bold;border-top:2px solid #333"><td colspan="2">Closing Balance</td><td style="text-align:right">${fmtAmount(totalDebit)}</td><td style="text-align:right">${fmtAmount(totalCredit)}</td><td style="text-align:right">${fmtAmount(Math.abs(closingBalance))} ${closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}</td></tr>`;
+    w.document.write(`<!DOCTYPE html><html><head><title>${customer.name} – Ledger</title><style>body{font-family:system-ui,sans-serif;padding:24px;font-size:12px}h2{margin:0 0 4px}p{margin:0 0 16px;color:#666}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f5f5f5}</style></head><body><h2>${customer.name} – Ledger</h2><p>${customer.phone} · ${customer.area || "No Area"}</p><table><thead><tr><th>Date</th><th>Particulars</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th><th style="text-align:right">Balance</th></tr></thead><tbody>${tableRows}</tbody><tfoot>${footerRow}</tfoot></table></body></html>`);
+    w.document.close();
+    w.print();
+  }
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <Sheet open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
