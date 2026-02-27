@@ -50,12 +50,12 @@ function groupBy<T>(items: T[], key: (item: T) => string): Record<string, T[]> {
 }
 
 export default function DrillDownSheet({ type, onClose, invoices, payments }: DrillDownSheetProps) {
-  if (!type) return null;
-
   const isPayments = type === "todayCollection";
 
   const groupedInvoices = useMemo(() => groupBy(invoices, (i) => i.area || "Unknown"), [invoices]);
   const groupedPayments = useMemo(() => groupBy(payments, (p) => p.area || "Unknown"), [payments]);
+
+  if (!type) return null;
 
   const invoiceAreaKeys = Object.keys(groupedInvoices).sort();
   const paymentAreaKeys = Object.keys(groupedPayments).sort();
