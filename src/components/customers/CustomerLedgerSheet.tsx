@@ -117,6 +117,35 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               </Badge>
             </div>
           </div>
+          <div className="flex gap-2 pt-2 items-center flex-wrap">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !fromDate && "text-muted-foreground")}>
+                  <CalendarIcon className="h-3 w-3" />
+                  {fromDate ? format(fromDate, "dd MMM yy") : "From"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !toDate && "text-muted-foreground")}>
+                  <CalendarIcon className="h-3 w-3" />
+                  {toDate ? format(toDate, "dd MMM yy") : "To"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+            {(fromDate || toDate) && (
+              <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => { setFromDate(undefined); setToDate(undefined); }}>
+                <X className="h-3 w-3 mr-1" /> Clear
+              </Button>
+            )}
+          </div>
         </SheetHeader>
 
         <ScrollArea className="flex-1">
