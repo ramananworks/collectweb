@@ -113,7 +113,7 @@ export default function Customers() {
             {filtered
               .filter((c) => c.area === area)
               .map((c) => (
-                <div key={c.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in cursor-pointer">
+                <div key={c.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in cursor-pointer" onClick={() => setSelectedCustomer(c)}>
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold">{c.name}</h3>
