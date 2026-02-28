@@ -52,6 +52,14 @@ function groupBy<T>(items: T[], key: (item: T) => string): Record<string, T[]> {
 }
 
 export default function DrillDownSheet({ type, onClose, invoices, payments }: DrillDownSheetProps) {
+  const isPayments = type === "todayCollection";
+
+  const groupedInvoices = useMemo(() => groupBy(invoices, (i) => i.area || "Unknown"), [invoices]);
+  const groupedPayments = useMemo(() => groupBy(payments, (p) => p.area || "Unknown"), [payments]);
+
+  const invoiceAreaKeys = useMemo(() => Object.keys(groupedInvoices).sort(), [groupedInvoices]);
+  const paymentAreaKeys = useMemo(() => Object.keys(groupedPayments).sort(), [groupedPayments]);
+
   const totalOutstanding = useMemo(() => invoices.reduce((a, i) => a + (i.amount - i.paid_amount), 0), [invoices]);
   const totalOverdue = useMemo(() => invoices.filter((i) => i.status === "overdue").reduce((a, i) => a + (i.amount - i.paid_amount), 0), [invoices]);
   const pendingCount = useMemo(() => invoices.filter((i) => i.status !== "paid").length, [invoices]);
@@ -62,7 +70,6 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
     if (totalOverdue > 0) lines.push(`Overdue Amount: ${formatCurrency(totalOverdue)}`);
     lines.push(`Pending Invoices: ${pendingCount}`);
 
-    // Area breakdown
     if (invoiceAreaKeys.length > 0) {
       lines.push("", "Area Breakdown:");
       invoiceAreaKeys.forEach((area) => {
@@ -86,9 +93,6 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
   };
 
   if (!type) return null;
-
-  const invoiceAreaKeys = Object.keys(groupedInvoices).sort();
-  const paymentAreaKeys = Object.keys(groupedPayments).sort();
 
   return (
     <Sheet open={!!type} onOpenChange={(o) => !o && onClose()}>
