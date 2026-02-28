@@ -163,13 +163,19 @@ export function useCreateInvoice() {
       due_date: string;
       description?: string;
     }) => {
-      const { error } = await supabase.from("invoices").insert({
+      const row = {
         ...values,
         company_id: profile!.company_id!,
         description: values.description || null,
         paid_amount: 0,
         status: "pending",
-      });
+      };
+      if (!navigator.onLine) {
+        enqueueMutation({ table: "invoices", type: "insert", payload: row });
+        toast.info("Invoice saved offline — will sync when back online");
+        return;
+      }
+      const { error } = await supabase.from("invoices").insert(row);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
