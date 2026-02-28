@@ -49,16 +49,18 @@ export async function replayQueue(): Promise<{ succeeded: number; failed: number
   for (const mutation of queue) {
     try {
       let error: any = null;
+      // Use `as any` to bypass strict table-name typing for dynamic replay
+      const table = (supabase as any).from(mutation.table);
 
       if (mutation.type === "insert") {
-        const res = await supabase.from(mutation.table).insert(mutation.payload);
+        const res = await table.insert(mutation.payload);
         error = res.error;
       } else if (mutation.type === "update") {
         const { id, ...rest } = mutation.payload;
-        const res = await supabase.from(mutation.table).update(rest).eq("id", id);
+        const res = await table.update(rest).eq("id", id);
         error = res.error;
       } else if (mutation.type === "delete") {
-        const res = await supabase.from(mutation.table).delete().eq("id", mutation.payload.id);
+        const res = await table.delete().eq("id", mutation.payload.id);
         error = res.error;
       }
 
@@ -68,6 +70,7 @@ export async function replayQueue(): Promise<{ succeeded: number; failed: number
         failed++;
       } else {
         succeeded++;
+      }
       }
     } catch (err) {
       console.error("Replay exception for mutation:", mutation.id, err);
