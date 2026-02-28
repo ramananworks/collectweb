@@ -17,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompany } from "@/hooks/use-data";
 import { useNetworkStatus } from "@/hooks/use-network-status";
-import { WifiOff } from "lucide-react";
+import { useSyncStatus } from "@/hooks/use-sync-status";
+import { WifiOff, Wifi, Clock } from "lucide-react";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
