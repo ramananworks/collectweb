@@ -31,6 +31,7 @@ type LedgerEntry = {
 export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedgerSheetProps) {
   const { data: invoices = [] } = useInvoices();
   const { data: payments = [] } = usePayments();
+  const { data: company } = useCompany();
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
   const [shareOpen, setShareOpen] = useState(false);
