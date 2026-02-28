@@ -110,6 +110,8 @@ export default function Settings() {
         </div>
       )}
 
+      {/* Company Details - Owner only */}
+      {canManageSettings && (<>
       {/* Company Details */}
       <div className="rounded-xl bg-card p-4 sm:p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
