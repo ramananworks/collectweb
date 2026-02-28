@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
-import { IndianRupee, TrendingUp, AlertTriangle, Users, UserPlus, FileText, Wallet } from "lucide-react";
+import { IndianRupee, TrendingUp, AlertTriangle, Users, UserPlus, FileText, Wallet, Share2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import StatCard from "@/components/dashboard/StatCard";
 import DrillDownSheet from "@/components/dashboard/DrillDownSheet";
@@ -98,17 +99,64 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Overview of your collections and outstanding</p>
         </div>
-        <Select value={areaFilter} onValueChange={setAreaFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by area" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Areas</SelectItem>
-            {areaNames.map((a) => (
-              <SelectItem key={a} value={a}>{a}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Share2 className="h-4 w-4" />
+                Share
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-64 p-3 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Share Summary</p>
+              {[
+                { label: "Total Outstanding", value: formatCurrency(totalOutstanding) },
+                { label: "Today's Collection", value: formatCurrency(todayCollection) },
+                { label: "Overdue Amount", value: formatCurrency(overdueAmount) },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm hover:bg-accent transition-colors text-left"
+                  onClick={() => {
+                    const text = `${item.label}: ${item.value}`;
+                    if (navigator.share) {
+                      navigator.share({ text });
+                    } else {
+                      navigator.clipboard.writeText(text);
+                    }
+                  }}
+                >
+                  <span className="font-medium">{item.label}</span>
+                  <span className="text-muted-foreground">{item.value}</span>
+                </button>
+              ))}
+              <button
+                className="flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mt-1"
+                onClick={() => {
+                  const text = `Total Outstanding: ${formatCurrency(totalOutstanding)}\nToday's Collection: ${formatCurrency(todayCollection)}\nOverdue Amount: ${formatCurrency(overdueAmount)}`;
+                  if (navigator.share) {
+                    navigator.share({ text });
+                  } else {
+                    navigator.clipboard.writeText(text);
+                  }
+                }}
+              >
+                Share All
+              </button>
+            </PopoverContent>
+          </Popover>
+          <Select value={areaFilter} onValueChange={setAreaFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by area" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Areas</SelectItem>
+              {areaNames.map((a) => (
+                <SelectItem key={a} value={a}>{a}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <DashboardQuickActions />
