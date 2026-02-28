@@ -71,7 +71,6 @@ export async function replayQueue(): Promise<{ succeeded: number; failed: number
       } else {
         succeeded++;
       }
-      }
     } catch (err) {
       console.error("Replay exception for mutation:", mutation.id, err);
       remaining.push(mutation);
