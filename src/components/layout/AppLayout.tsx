@@ -16,6 +16,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompany } from "@/hooks/use-data";
+import { useNetworkStatus } from "@/hooks/use-network-status";
+import { WifiOff } from "lucide-react";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -33,6 +35,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { profile, role, signOut } = useAuth();
   const { data: company } = useCompany();
+  const isOnline = useNetworkStatus();
 
   const companyName = company?.name || "My Company";
   const displayName = profile?.name || "User";
@@ -134,6 +137,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <span className="text-sm font-semibold">{companyName}</span>
           </div>
         </header>
+
+        {!isOnline && (
+          <div className="flex items-center justify-center gap-2 bg-destructive px-3 py-1.5 text-destructive-foreground text-xs font-medium">
+            <WifiOff className="h-3.5 w-3.5" />
+            Offline — changes will sync when back online
+          </div>
+        )}
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
       </div>
