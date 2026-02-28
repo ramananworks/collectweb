@@ -30,8 +30,15 @@ const customerSchema = z.object({
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
 
-export default function AddCustomerDialog() {
-  const [open, setOpen] = useState(false);
+interface AddCustomerDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }: AddCustomerDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [optionalOpen, setOptionalOpen] = useState(false);
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();

@@ -25,8 +25,15 @@ const collectionSchema = z.object({
 
 type CollectionFormValues = z.infer<typeof collectionSchema>;
 
-export default function RecordPaymentDialog() {
-  const [open, setOpen] = useState(false);
+interface RecordPaymentDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange }: RecordPaymentDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const { data: invoices = [] } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
