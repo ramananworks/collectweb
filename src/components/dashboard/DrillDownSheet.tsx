@@ -114,7 +114,7 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="flex flex-row items-center justify-between pr-8">
           <SheetTitle className="text-lg">{titles[type]}</SheetTitle>
-          {!isPayments && invoices.length > 0 && (
+          {((isPayments && payments.length > 0) || (!isPayments && invoices.length > 0)) && (
             <button
               onClick={handleShare}
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 active:scale-95 transition-all duration-200"
