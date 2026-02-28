@@ -90,9 +90,11 @@ export type Database = {
           default_due_days: number | null
           gstin: string | null
           id: string
+          local_id: string | null
           name: string
           outstanding: number
           phone: string
+          synced: boolean
         }
         Insert: {
           address?: string
@@ -104,9 +106,11 @@ export type Database = {
           default_due_days?: number | null
           gstin?: string | null
           id?: string
+          local_id?: string | null
           name: string
           outstanding?: number
           phone?: string
+          synced?: boolean
         }
         Update: {
           address?: string
@@ -118,9 +122,11 @@ export type Database = {
           default_due_days?: number | null
           gstin?: string | null
           id?: string
+          local_id?: string | null
           name?: string
           outstanding?: number
           phone?: string
+          synced?: boolean
         }
         Relationships: [
           {
@@ -152,8 +158,10 @@ export type Database = {
           id: string
           invoice_date: string
           invoice_number: string
+          local_id: string | null
           paid_amount: number
           status: string
+          synced: boolean
         }
         Insert: {
           amount?: number
@@ -167,8 +175,10 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_number: string
+          local_id?: string | null
           paid_amount?: number
           status?: string
+          synced?: boolean
         }
         Update: {
           amount?: number
@@ -182,8 +192,10 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_number?: string
+          local_id?: string | null
           paid_amount?: number
           status?: string
+          synced?: boolean
         }
         Relationships: [
           {
@@ -212,8 +224,10 @@ export type Database = {
           date: string
           id: string
           invoice_id: string
+          local_id: string | null
           mode: string
           notes: string | null
+          synced: boolean
         }
         Insert: {
           amount?: number
@@ -224,8 +238,10 @@ export type Database = {
           date?: string
           id?: string
           invoice_id: string
+          local_id?: string | null
           mode?: string
           notes?: string | null
+          synced?: boolean
         }
         Update: {
           amount?: number
@@ -236,8 +252,10 @@ export type Database = {
           date?: string
           id?: string
           invoice_id?: string
+          local_id?: string | null
           mode?: string
           notes?: string | null
+          synced?: boolean
         }
         Relationships: [
           {
