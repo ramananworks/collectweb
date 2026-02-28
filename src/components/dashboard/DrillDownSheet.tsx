@@ -56,6 +56,11 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
   const [shareOpen, setShareOpen] = useState(false);
   const isPayments = type === "todayCollection";
 
+  // Reset share modal when drawer type changes
+  React.useEffect(() => {
+    setShareOpen(false);
+  }, [type]);
+
   const groupedInvoices = useMemo(() => groupBy(invoices, (i) => i.area || "Unknown"), [invoices]);
   const groupedPayments = useMemo(() => groupBy(payments, (p) => p.area || "Unknown"), [payments]);
 
