@@ -37,6 +37,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { profile, role, signOut } = useAuth();
   const { data: company } = useCompany();
   const isOnline = useNetworkStatus();
+  const pendingCount = useSyncStatus();
 
   const companyName = company?.name || "My Company";
   const displayName = profile?.name || "User";
