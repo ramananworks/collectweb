@@ -35,6 +35,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { profile, role, signOut } = useAuth();
   const { data: company } = useCompany();
+  const isOnline = useNetworkStatus();
 
   const companyName = company?.name || "My Company";
   const displayName = profile?.name || "User";
