@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCompany, useAreas, useAddArea, useUpdateArea, useDeleteArea, useUpdateCompany } from "@/hooks/use-data";
 import { toast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function Settings() {
   const { data: company } = useCompany();
@@ -14,6 +15,7 @@ export default function Settings() {
   const updateArea = useUpdateArea();
   const deleteArea = useDeleteArea();
   const updateCompany = useUpdateCompany();
+  const { canManageSettings, canManageCustomers } = usePermissions();
 
   const [newArea, setNewArea] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -102,6 +104,14 @@ export default function Settings() {
         <p className="text-sm text-muted-foreground">Manage company-wide configuration</p>
       </div>
 
+      {!canManageSettings && !canManageCustomers && (
+        <div className="rounded-xl bg-muted p-8 text-center text-muted-foreground">
+          You don't have permission to manage settings. Contact your owner or manager.
+        </div>
+      )}
+
+      {/* Company Details - Owner only */}
+      {canManageSettings && (<>
       {/* Company Details */}
       <div className="rounded-xl bg-card p-4 sm:p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
@@ -185,7 +195,10 @@ export default function Settings() {
           )}
         </div>
       </div>
+      </>)}
 
+      {/* Area List - Owner & Manager */}
+      {canManageCustomers && (
       <div className="rounded-xl bg-card p-4 sm:p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="h-5 w-5 text-primary" />
@@ -245,6 +258,7 @@ export default function Settings() {
           )}
         </ul>
       </div>
+      )}
     </div>
   );
 }

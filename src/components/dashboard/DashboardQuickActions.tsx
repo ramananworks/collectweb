@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { UserPlus, Receipt, IndianRupee } from "lucide-react";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type ActionKey = "customer" | "invoice" | "payment";
 
-const actions: { key: ActionKey; label: string; icon: typeof UserPlus; color: string; iconBg: string }[] = [
+const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; color: string; iconBg: string }[] = [
   { key: "customer", label: "Add Customer", icon: UserPlus, color: "text-blue-600", iconBg: "bg-blue-100" },
   { key: "invoice", label: "Create Invoice", icon: Receipt, color: "text-indigo-600", iconBg: "bg-indigo-100" },
   { key: "payment", label: "Record Payment", icon: IndianRupee, color: "text-emerald-600", iconBg: "bg-emerald-100" },
@@ -14,6 +15,14 @@ const actions: { key: ActionKey; label: string; icon: typeof UserPlus; color: st
 
 export default function DashboardQuickActions() {
   const [openDialog, setOpenDialog] = useState<ActionKey | null>(null);
+  const { canManageCustomers, canManageInvoices, canRecordPayments } = usePermissions();
+
+  const actions = useMemo(() => allActions.filter((a) => {
+    if (a.key === "customer") return canManageCustomers;
+    if (a.key === "invoice") return canManageInvoices;
+    if (a.key === "payment") return canRecordPayments;
+    return true;
+  }), [canManageCustomers, canManageInvoices, canRecordPayments]);
 
   return (
     <div className="rounded-2xl bg-card p-5 shadow-sm">

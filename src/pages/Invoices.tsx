@@ -8,10 +8,10 @@ import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
-
 import ScanInvoiceDialog, { ExtractedInvoiceData } from "@/components/forms/ScanInvoiceDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue"];
 
@@ -24,6 +24,7 @@ export default function Invoices() {
   const { data: invoices = [], refetch } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
+  const { canManageInvoices, canBulkImport } = usePermissions();
 
   const ptr = usePullToRefresh({ queryKeys: [["invoices"], ["customers"], ["areas"]] });
 
@@ -61,18 +62,20 @@ export default function Invoices() {
           <h1 className="text-2xl font-bold">Invoices & Loans</h1>
           <p className="text-sm text-muted-foreground">{invoices.length} total records</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <BulkImportInvoicesDialog />
-          <ScanInvoiceDialog onDataExtracted={handleDataExtracted} />
-          <Button className="gradient-primary text-primary-foreground gap-2" onClick={() => { setScanDefaults(null); setCreateOpen(true); }}>
-            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create</span> Invoice
-          </Button>
-          <CreateInvoiceDialog
-            open={createOpen}
-            onOpenChange={(o) => { setCreateOpen(o); if (!o) setScanDefaults(null); }}
-            defaultValues={scanDefaults ?? undefined}
-          />
-        </div>
+        {canManageInvoices && (
+          <div className="flex flex-wrap gap-2">
+            {canBulkImport && <BulkImportInvoicesDialog />}
+            <ScanInvoiceDialog onDataExtracted={handleDataExtracted} />
+            <Button className="gradient-primary text-primary-foreground gap-2" onClick={() => { setScanDefaults(null); setCreateOpen(true); }}>
+              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create</span> Invoice
+            </Button>
+            <CreateInvoiceDialog
+              open={createOpen}
+              onOpenChange={(o) => { setCreateOpen(o); if (!o) setScanDefaults(null); }}
+              defaultValues={scanDefaults ?? undefined}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

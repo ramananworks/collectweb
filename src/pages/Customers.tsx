@@ -8,6 +8,7 @@ import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDia
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import CustomerLedgerSheet from "@/components/customers/CustomerLedgerSheet";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
@@ -17,6 +18,7 @@ export default function Customers() {
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();
+  const { canManageCustomers, canBulkImport } = usePermissions();
 
   const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["profiles"]] });
 
@@ -58,10 +60,12 @@ export default function Customers() {
           <h1 className="text-2xl font-bold">Customers</h1>
           <p className="text-sm text-muted-foreground">{customers.length} parties registered</p>
         </div>
-        <div className="flex gap-2">
-          <BulkImportCustomersDialog />
-          <AddCustomerDialog />
-        </div>
+        {canManageCustomers && (
+          <div className="flex gap-2">
+            {canBulkImport && <BulkImportCustomersDialog />}
+            <AddCustomerDialog />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
