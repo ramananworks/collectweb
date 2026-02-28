@@ -261,5 +261,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
         </ScrollArea>
       </SheetContent>
     </Sheet>
+    <ShareOptionsModal open={shareOpen} onClose={() => setShareOpen(false)} data={shareData} />
+  </>
   );
 }
