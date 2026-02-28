@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
-import { CalendarIcon, X, Download } from "lucide-react";
+import { CalendarIcon, X, Download, Share2 } from "lucide-react";
+import ShareOptionsModal from "@/components/shared/ShareOptionsModal";
+import type { ShareSummaryData } from "@/lib/share-utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -31,6 +33,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const { data: payments = [] } = usePayments();
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
+  const [shareOpen, setShareOpen] = useState(false);
 
   const allEntries = useMemo<LedgerEntry[]>(() => {
     if (!customer) return [];
@@ -94,6 +97,16 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const totalCredit = ledgerEntries.reduce((s, e) => s + e.credit, 0);
   const closingBalance = totalDebit - totalCredit;
 
+  const shareData: ShareSummaryData = {
+    title: `${customer?.name ?? ""} – Ledger Summary`,
+    lines: [
+      { label: "Total Debit", value: formatCurrency(totalDebit) },
+      { label: "Total Credit", value: formatCurrency(totalCredit) },
+      { label: "Closing Balance", value: `${formatCurrency(Math.abs(closingBalance))} ${closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}` },
+      { label: "Transactions", value: String(ledgerEntries.length) },
+    ],
+  };
+
   const fmtAmount = (n: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
 
   function exportCSV() {
@@ -130,6 +143,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   }
 
   return (
+    <>
     <Sheet open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
         <SheetHeader className="p-5 pb-3 border-b border-border">
@@ -181,7 +195,10 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
                 <X className="h-3 w-3 mr-1" /> Clear
               </Button>
             )}
-            <div className="ml-auto">
+            <div className="ml-auto flex gap-1.5">
+              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShareOpen(true)}>
+                <Share2 className="h-3 w-3" /> Share
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
@@ -245,5 +262,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
         </ScrollArea>
       </SheetContent>
     </Sheet>
+    <ShareOptionsModal open={shareOpen} onClose={() => setShareOpen(false)} data={shareData} />
+  </>
   );
 }
