@@ -26,9 +26,35 @@ const options = [
 export default function ShareOptionsModal({ open, onClose, data }: ShareOptionsModalProps) {
   if (!open) return null;
 
-  const handleAction = (key: string) => {
+  const handleAction = async (key: string) => {
     const text = generateShareText(data);
 
+    if (key === "pdf") {
+      const blob = generateSummaryPDF(data);
+      const date = new Date().toISOString().split("T")[0];
+      downloadPDF(blob, `collection-summary-${date}.pdf`);
+      toast({ title: "PDF Downloaded", description: "Summary saved successfully" });
+      onClose();
+      return;
+    }
+
+    // Try native Web Share API first
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: data.title,
+          text,
+          url: "https://money-mate-co.lovable.app",
+        });
+        onClose();
+        return;
+      } catch (e) {
+        // User cancelled or API failed — fall through to direct links
+        if ((e as DOMException)?.name === "AbortError") { onClose(); return; }
+      }
+    }
+
+    // Fallback to direct links
     switch (key) {
       case "whatsapp":
         shareViaWhatsApp(text);
@@ -39,13 +65,6 @@ export default function ShareOptionsModal({ open, onClose, data }: ShareOptionsM
       case "sms":
         shareViaSMS(text);
         break;
-      case "pdf": {
-        const blob = generateSummaryPDF(data);
-        const date = new Date().toISOString().split("T")[0];
-        downloadPDF(blob, `collection-summary-${date}.pdf`);
-        toast({ title: "PDF Downloaded", description: "Summary saved successfully" });
-        break;
-      }
     }
     onClose();
   };
