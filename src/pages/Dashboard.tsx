@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import StatCard from "@/components/dashboard/StatCard";
 import DrillDownSheet from "@/components/dashboard/DrillDownSheet";
+import DashboardQuickActions from "@/components/dashboard/DashboardQuickActions";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
