@@ -24,6 +24,7 @@ export default function Invoices() {
   const { data: invoices = [], refetch } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
+  const { canManageInvoices, canBulkImport } = usePermissions();
 
   const ptr = usePullToRefresh({ queryKeys: [["invoices"], ["customers"], ["areas"]] });
 
