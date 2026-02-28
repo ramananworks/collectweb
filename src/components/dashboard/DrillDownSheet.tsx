@@ -65,20 +65,35 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
   const pendingCount = useMemo(() => invoices.filter((i) => i.status !== "paid").length, [invoices]);
 
   const handleShare = async () => {
-    const lines = ["Collection Summary", "------------------"];
-    lines.push(`Total Outstanding: ${formatCurrency(totalOutstanding)}`);
-    if (totalOverdue > 0) lines.push(`Overdue Amount: ${formatCurrency(totalOverdue)}`);
-    lines.push(`Pending Invoices: ${pendingCount}`);
+    let text = "";
 
-    if (invoiceAreaKeys.length > 0) {
-      lines.push("", "Area Breakdown:");
-      invoiceAreaKeys.forEach((area) => {
-        const subtotal = groupedInvoices[area].reduce((a, i) => a + (i.amount - i.paid_amount), 0);
-        lines.push(`  ${area}: ${formatCurrency(subtotal)}`);
-      });
+    if (isPayments) {
+      const total = payments.reduce((a, p) => a + p.amount, 0);
+      const lines = ["Today's Collection Summary", "------------------"];
+      lines.push(`Total Collected: ${formatCurrency(total)}`);
+      lines.push(`Payments: ${payments.length}`);
+      if (paymentAreaKeys.length > 0) {
+        lines.push("", "Area Breakdown:");
+        paymentAreaKeys.forEach((area) => {
+          const subtotal = groupedPayments[area].reduce((a, p) => a + p.amount, 0);
+          lines.push(`  ${area}: ${formatCurrency(subtotal)}`);
+        });
+      }
+      text = lines.join("\n");
+    } else {
+      const lines = [type === "overdue" ? "Overdue Summary" : "Collection Summary", "------------------"];
+      lines.push(`Total Outstanding: ${formatCurrency(totalOutstanding)}`);
+      if (totalOverdue > 0) lines.push(`Overdue Amount: ${formatCurrency(totalOverdue)}`);
+      lines.push(`Pending Invoices: ${pendingCount}`);
+      if (invoiceAreaKeys.length > 0) {
+        lines.push("", "Area Breakdown:");
+        invoiceAreaKeys.forEach((area) => {
+          const subtotal = groupedInvoices[area].reduce((a, i) => a + (i.amount - i.paid_amount), 0);
+          lines.push(`  ${area}: ${formatCurrency(subtotal)}`);
+        });
+      }
+      text = lines.join("\n");
     }
-
-    const text = lines.join("\n");
 
     try {
       if (navigator.share) {
@@ -99,7 +114,7 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="flex flex-row items-center justify-between pr-8">
           <SheetTitle className="text-lg">{titles[type]}</SheetTitle>
-          {!isPayments && invoices.length > 0 && (
+          {((isPayments && payments.length > 0) || (!isPayments && invoices.length > 0)) && (
             <button
               onClick={handleShare}
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 active:scale-95 transition-all duration-200"
