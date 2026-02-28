@@ -23,7 +23,7 @@ export default function DashboardQuickActions() {
             <div className={`w-10 h-10 rounded-full ${a.iconBg} flex items-center justify-center`}>
               <a.icon className={`h-5 w-5 ${a.color}`} strokeWidth={1.8} />
             </div>
-            <span className={`text-sm font-medium ${a.color} text-center leading-tight`}>{a.label}</span>
+            <span className="text-sm font-medium text-foreground text-center leading-tight">{a.label}</span>
           </button>
         ))}
       </div>
