@@ -8,6 +8,7 @@ import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDia
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import CustomerLedgerSheet from "@/components/customers/CustomerLedgerSheet";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
