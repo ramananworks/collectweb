@@ -130,14 +130,20 @@ export function useAddCustomer() {
       default_due_days?: number;
       assigned_to?: string;
     }) => {
-      const { error } = await supabase.from("customers").insert({
+      const row = {
         ...values,
         company_id: profile!.company_id!,
         gstin: values.gstin || null,
         default_due_days: values.default_due_days ?? null,
         assigned_to: values.assigned_to || null,
         outstanding: 0,
-      });
+      };
+      if (!navigator.onLine) {
+        enqueueMutation({ table: "customers", type: "insert", payload: row });
+        toast.info("Customer saved offline — will sync when back online");
+        return;
+      }
+      const { error } = await supabase.from("customers").insert(row);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["customers"] }),
