@@ -17,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompany } from "@/hooks/use-data";
 import { useNetworkStatus } from "@/hooks/use-network-status";
-import { WifiOff } from "lucide-react";
+import { useSyncStatus } from "@/hooks/use-sync-status";
+import { WifiOff, Wifi, Clock } from "lucide-react";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -36,6 +37,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { profile, role, signOut } = useAuth();
   const { data: company } = useCompany();
   const isOnline = useNetworkStatus();
+  const pendingCount = useSyncStatus();
 
   const companyName = company?.name || "My Company";
   const displayName = profile?.name || "User";
@@ -104,6 +106,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
+        {/* Sync Status */}
+        <div className="px-4 py-2 border-t border-sidebar-border">
+          <div className="flex items-center gap-2 rounded-lg px-3 py-2 bg-sidebar-accent/50 text-xs font-medium">
+            {!isOnline ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                <span className="text-destructive">Offline</span>
+              </>
+            ) : pendingCount > 0 ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-warning animate-pulse" />
+                <span className="text-warning">{pendingCount} Pending</span>
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-success" />
+                <span className="text-success">Online</span>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* User */}
         <div className="border-t border-sidebar-border px-4 py-4">
           <div className="flex items-center gap-3">
@@ -135,6 +159,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Building2 className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-sm font-semibold">{companyName}</span>
+          </div>
+          <div className="ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
+            {!isOnline ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                <span className="text-destructive">Offline</span>
+              </>
+            ) : pendingCount > 0 ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-warning animate-pulse" />
+                <span className="text-warning">{pendingCount}</span>
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-success" />
+              </>
+            )}
           </div>
         </header>
 
