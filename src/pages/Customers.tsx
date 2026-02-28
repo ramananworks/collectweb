@@ -60,10 +60,12 @@ export default function Customers() {
           <h1 className="text-2xl font-bold">Customers</h1>
           <p className="text-sm text-muted-foreground">{customers.length} parties registered</p>
         </div>
-        <div className="flex gap-2">
-          <BulkImportCustomersDialog />
-          <AddCustomerDialog />
-        </div>
+        {canManageCustomers && (
+          <div className="flex gap-2">
+            {canBulkImport && <BulkImportCustomersDialog />}
+            <AddCustomerDialog />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">

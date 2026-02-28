@@ -258,6 +258,7 @@ export default function Settings() {
           )}
         </ul>
       </div>
+      )}
     </div>
   );
 }
