@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Share2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -55,6 +55,11 @@ function groupBy<T>(items: T[], key: (item: T) => string): Record<string, T[]> {
 export default function DrillDownSheet({ type, onClose, invoices, payments }: DrillDownSheetProps) {
   const [shareOpen, setShareOpen] = useState(false);
   const isPayments = type === "todayCollection";
+
+  // Reset share modal when drawer type changes
+  useEffect(() => {
+    setShareOpen(false);
+  }, [type]);
 
   const groupedInvoices = useMemo(() => groupBy(invoices, (i) => i.area || "Unknown"), [invoices]);
   const groupedPayments = useMemo(() => groupBy(payments, (p) => p.area || "Unknown"), [payments]);
