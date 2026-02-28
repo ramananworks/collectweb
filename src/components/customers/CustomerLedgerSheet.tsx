@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useInvoices, usePayments, formatCurrency, type Customer } from "@/hooks/use-data";
+import { useInvoices, usePayments, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
 
 interface CustomerLedgerSheetProps {
   customer: Customer | null;
@@ -31,6 +31,7 @@ type LedgerEntry = {
 export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedgerSheetProps) {
   const { data: invoices = [] } = useInvoices();
   const { data: payments = [] } = usePayments();
+  const { data: company } = useCompany();
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
   const [shareOpen, setShareOpen] = useState(false);
@@ -99,6 +100,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
 
   const shareData: ShareSummaryData = {
     title: `${customer?.name ?? ""} – Ledger Summary`,
+    companyName: company?.name,
     lines: [
       { label: "Total Debit", value: formatCurrency(totalDebit) },
       { label: "Total Credit", value: formatCurrency(totalCredit) },
