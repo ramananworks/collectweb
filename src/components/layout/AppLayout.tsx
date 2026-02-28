@@ -160,6 +160,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <span className="text-sm font-semibold">{companyName}</span>
           </div>
+          <div className="ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
+            {!isOnline ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                <span className="text-destructive">Offline</span>
+              </>
+            ) : pendingCount > 0 ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-warning animate-pulse" />
+                <span className="text-warning">{pendingCount}</span>
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-success" />
+              </>
+            )}
+          </div>
         </header>
 
         {!isOnline && (
