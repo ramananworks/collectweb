@@ -15,6 +15,7 @@ export default function Settings() {
   const updateArea = useUpdateArea();
   const deleteArea = useDeleteArea();
   const updateCompany = useUpdateCompany();
+  const { canManageSettings, canManageCustomers } = usePermissions();
 
   const [newArea, setNewArea] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
