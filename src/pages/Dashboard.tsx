@@ -1,10 +1,14 @@
 import { useState, useMemo } from "react";
-import { IndianRupee, TrendingUp, AlertTriangle, Users } from "lucide-react";
+import { IndianRupee, TrendingUp, AlertTriangle, Users, UserPlus, FileText, Wallet } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import StatCard from "@/components/dashboard/StatCard";
 import DrillDownSheet from "@/components/dashboard/DrillDownSheet";
 import { StatusBadge } from "@/components/shared/StatusBadges";
+import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
+import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
+import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { useCustomers, useInvoices, usePayments, useAreas, formatCurrency } from "@/hooks/use-data";
 import { differenceInDays } from "date-fns";
 
@@ -107,6 +111,12 @@ export default function Dashboard() {
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <AddCustomerDialog />
+        <CreateInvoiceDialog />
+        <RecordPaymentDialog />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
