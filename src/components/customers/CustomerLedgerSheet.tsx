@@ -100,6 +100,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
 
   const shareData: ShareSummaryData = {
     title: `${customer?.name ?? ""} – Ledger Summary`,
+    companyName: company?.name,
     lines: [
       { label: "Total Debit", value: formatCurrency(totalDebit) },
       { label: "Total Credit", value: formatCurrency(totalCredit) },
