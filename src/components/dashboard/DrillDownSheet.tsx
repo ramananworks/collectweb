@@ -65,20 +65,35 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
   const pendingCount = useMemo(() => invoices.filter((i) => i.status !== "paid").length, [invoices]);
 
   const handleShare = async () => {
-    const lines = ["Collection Summary", "------------------"];
-    lines.push(`Total Outstanding: ${formatCurrency(totalOutstanding)}`);
-    if (totalOverdue > 0) lines.push(`Overdue Amount: ${formatCurrency(totalOverdue)}`);
-    lines.push(`Pending Invoices: ${pendingCount}`);
+    let text = "";
 
-    if (invoiceAreaKeys.length > 0) {
-      lines.push("", "Area Breakdown:");
-      invoiceAreaKeys.forEach((area) => {
-        const subtotal = groupedInvoices[area].reduce((a, i) => a + (i.amount - i.paid_amount), 0);
-        lines.push(`  ${area}: ${formatCurrency(subtotal)}`);
-      });
+    if (isPayments) {
+      const total = payments.reduce((a, p) => a + p.amount, 0);
+      const lines = ["Today's Collection Summary", "------------------"];
+      lines.push(`Total Collected: ${formatCurrency(total)}`);
+      lines.push(`Payments: ${payments.length}`);
+      if (paymentAreaKeys.length > 0) {
+        lines.push("", "Area Breakdown:");
+        paymentAreaKeys.forEach((area) => {
+          const subtotal = groupedPayments[area].reduce((a, p) => a + p.amount, 0);
+          lines.push(`  ${area}: ${formatCurrency(subtotal)}`);
+        });
+      }
+      text = lines.join("\n");
+    } else {
+      const lines = [type === "overdue" ? "Overdue Summary" : "Collection Summary", "------------------"];
+      lines.push(`Total Outstanding: ${formatCurrency(totalOutstanding)}`);
+      if (totalOverdue > 0) lines.push(`Overdue Amount: ${formatCurrency(totalOverdue)}`);
+      lines.push(`Pending Invoices: ${pendingCount}`);
+      if (invoiceAreaKeys.length > 0) {
+        lines.push("", "Area Breakdown:");
+        invoiceAreaKeys.forEach((area) => {
+          const subtotal = groupedInvoices[area].reduce((a, i) => a + (i.amount - i.paid_amount), 0);
+          lines.push(`  ${area}: ${formatCurrency(subtotal)}`);
+        });
+      }
+      text = lines.join("\n");
     }
-
-    const text = lines.join("\n");
 
     try {
       if (navigator.share) {
