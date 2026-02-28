@@ -1,8 +1,10 @@
 import { useMemo } from "react";
+import { Share2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { formatCurrency } from "@/hooks/use-data";
+import { toast } from "@/hooks/use-toast";
 
 type DrillDownType = "outstanding" | "todayCollection" | "overdue" | null;
 
@@ -55,16 +57,57 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
   const groupedInvoices = useMemo(() => groupBy(invoices, (i) => i.area || "Unknown"), [invoices]);
   const groupedPayments = useMemo(() => groupBy(payments, (p) => p.area || "Unknown"), [payments]);
 
-  if (!type) return null;
+  const invoiceAreaKeys = useMemo(() => Object.keys(groupedInvoices).sort(), [groupedInvoices]);
+  const paymentAreaKeys = useMemo(() => Object.keys(groupedPayments).sort(), [groupedPayments]);
 
-  const invoiceAreaKeys = Object.keys(groupedInvoices).sort();
-  const paymentAreaKeys = Object.keys(groupedPayments).sort();
+  const totalOutstanding = useMemo(() => invoices.reduce((a, i) => a + (i.amount - i.paid_amount), 0), [invoices]);
+  const totalOverdue = useMemo(() => invoices.filter((i) => i.status === "overdue").reduce((a, i) => a + (i.amount - i.paid_amount), 0), [invoices]);
+  const pendingCount = useMemo(() => invoices.filter((i) => i.status !== "paid").length, [invoices]);
+
+  const handleShare = async () => {
+    const lines = ["Collection Summary", "------------------"];
+    lines.push(`Total Outstanding: ${formatCurrency(totalOutstanding)}`);
+    if (totalOverdue > 0) lines.push(`Overdue Amount: ${formatCurrency(totalOverdue)}`);
+    lines.push(`Pending Invoices: ${pendingCount}`);
+
+    if (invoiceAreaKeys.length > 0) {
+      lines.push("", "Area Breakdown:");
+      invoiceAreaKeys.forEach((area) => {
+        const subtotal = groupedInvoices[area].reduce((a, i) => a + (i.amount - i.paid_amount), 0);
+        lines.push(`  ${area}: ${formatCurrency(subtotal)}`);
+      });
+    }
+
+    const text = lines.join("\n");
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        toast({ title: "Copied to clipboard", description: "Summary copied successfully" });
+      }
+    } catch {
+      // User cancelled share or error
+    }
+  };
+
+  if (!type) return null;
 
   return (
     <Sheet open={!!type} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
+        <SheetHeader className="flex flex-row items-center justify-between pr-8">
           <SheetTitle className="text-lg">{titles[type]}</SheetTitle>
+          {!isPayments && invoices.length > 0 && (
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 active:scale-95 transition-all duration-200"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </button>
+          )}
         </SheetHeader>
 
         {isPayments ? (
