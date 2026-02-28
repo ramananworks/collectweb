@@ -33,6 +33,17 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const { data: payments = [] } = usePayments();
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const shareData: ShareSummaryData | null = customer ? {
+    title: `${customer.name} – Ledger Summary`,
+    lines: [
+      { label: "Total Debit", value: formatCurrency(totalDebit) },
+      { label: "Total Credit", value: formatCurrency(totalCredit) },
+      { label: "Closing Balance", value: `${formatCurrency(Math.abs(closingBalance))} ${closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}` },
+      { label: "Transactions", value: String(ledgerEntries.length) },
+    ],
+  } : null;
 
   const allEntries = useMemo<LedgerEntry[]>(() => {
     if (!customer) return [];
