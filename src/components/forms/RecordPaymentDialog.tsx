@@ -25,8 +25,15 @@ const collectionSchema = z.object({
 
 type CollectionFormValues = z.infer<typeof collectionSchema>;
 
-export default function RecordPaymentDialog() {
-  const [open, setOpen] = useState(false);
+interface RecordPaymentDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange }: RecordPaymentDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const { data: invoices = [] } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
@@ -72,11 +79,13 @@ export default function RecordPaymentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> Record Collection
-        </Button>
-      </DialogTrigger>
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          <Button className="gradient-primary text-primary-foreground gap-2">
+            <Plus className="h-4 w-4" /> Record Collection
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Record Collection</DialogTitle>

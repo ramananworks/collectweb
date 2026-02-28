@@ -30,8 +30,15 @@ const customerSchema = z.object({
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
 
-export default function AddCustomerDialog() {
-  const [open, setOpen] = useState(false);
+interface AddCustomerDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }: AddCustomerDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [optionalOpen, setOptionalOpen] = useState(false);
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();
@@ -121,11 +128,13 @@ export default function AddCustomerDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> Add Customer
-        </Button>
-      </DialogTrigger>
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          <Button className="gradient-primary text-primary-foreground gap-2">
+            <Plus className="h-4 w-4" /> Add Customer
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md max-h-[100dvh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-5 pt-5 pb-3 shrink-0">
           <div className="flex items-center justify-between">

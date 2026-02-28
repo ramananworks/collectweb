@@ -1,14 +1,19 @@
+import { useState } from "react";
 import { UserPlus, Receipt, IndianRupee } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
+import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
+import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 
-const actions = [
-  { label: "Add Customer", icon: UserPlus, path: "/customers", color: "text-blue-600", iconBg: "bg-blue-100" },
-  { label: "Create Invoice", icon: Receipt, path: "/invoices", color: "text-indigo-600", iconBg: "bg-indigo-100" },
-  { label: "Record Payment", icon: IndianRupee, path: "/collections", color: "text-emerald-600", iconBg: "bg-emerald-100" },
+type ActionKey = "customer" | "invoice" | "payment";
+
+const actions: { key: ActionKey; label: string; icon: typeof UserPlus; color: string; iconBg: string }[] = [
+  { key: "customer", label: "Add Customer", icon: UserPlus, color: "text-blue-600", iconBg: "bg-blue-100" },
+  { key: "invoice", label: "Create Invoice", icon: Receipt, color: "text-indigo-600", iconBg: "bg-indigo-100" },
+  { key: "payment", label: "Record Payment", icon: IndianRupee, color: "text-emerald-600", iconBg: "bg-emerald-100" },
 ];
 
 export default function DashboardQuickActions() {
-  const navigate = useNavigate();
+  const [openDialog, setOpenDialog] = useState<ActionKey | null>(null);
 
   return (
     <div className="rounded-2xl bg-card p-5 shadow-sm">
@@ -16,8 +21,8 @@ export default function DashboardQuickActions() {
       <div className="grid grid-cols-3 gap-3 overflow-x-auto">
         {actions.map((a) => (
           <button
-            key={a.label}
-            onClick={() => navigate(a.path)}
+            key={a.key}
+            onClick={() => setOpenDialog(a.key)}
             className="flex flex-col items-center justify-center gap-2 rounded-2xl p-4 bg-card shadow-sm transition-all duration-200 active:scale-95 hover:shadow-md cursor-pointer min-w-0 border border-border/50"
           >
             <div className={`w-10 h-10 rounded-full ${a.iconBg} flex items-center justify-center`}>
@@ -27,6 +32,10 @@ export default function DashboardQuickActions() {
           </button>
         ))}
       </div>
+
+      <AddCustomerDialog open={openDialog === "customer"} onOpenChange={(v) => !v && setOpenDialog(null)} />
+      <CreateInvoiceDialog open={openDialog === "invoice"} onOpenChange={(v) => !v && setOpenDialog(null)} />
+      <RecordPaymentDialog open={openDialog === "payment"} onOpenChange={(v) => !v && setOpenDialog(null)} />
     </div>
   );
 }
