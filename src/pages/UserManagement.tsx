@@ -47,9 +47,9 @@ function useUserRoles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_roles")
-        .select("user_id, role");
+        .select("user_id, role, company_id");
       if (error) throw error;
-      return data as { user_id: string; role: AppRole }[];
+      return data as { user_id: string; role: AppRole; company_id: string }[];
     },
   });
 }
