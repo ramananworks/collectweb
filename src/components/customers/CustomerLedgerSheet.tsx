@@ -144,6 +144,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
 
   return (
     <>
+    <Sheet open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
         <SheetHeader className="p-5 pb-3 border-b border-border">
           <SheetTitle className="text-lg">{customer?.name} – Ledger</SheetTitle>
