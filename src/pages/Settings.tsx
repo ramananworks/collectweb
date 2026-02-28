@@ -104,6 +104,12 @@ export default function Settings() {
         <p className="text-sm text-muted-foreground">Manage company-wide configuration</p>
       </div>
 
+      {!canManageSettings && !canManageCustomers && (
+        <div className="rounded-xl bg-muted p-8 text-center text-muted-foreground">
+          You don't have permission to manage settings. Contact your owner or manager.
+        </div>
+      )}
+
       {/* Company Details */}
       <div className="rounded-xl bg-card p-4 sm:p-5 stat-card-shadow max-w-xl">
         <div className="flex items-center gap-2 mb-4">
