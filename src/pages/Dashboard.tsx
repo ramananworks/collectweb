@@ -113,6 +113,12 @@ export default function Dashboard() {
         </Select>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <AddCustomerDialog />
+        <CreateInvoiceDialog />
+        <RecordPaymentDialog />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Total Outstanding" value={totalOutstanding} icon={IndianRupee} variant="default" onClick={() => setDrillDown("outstanding")} />
         <StatCard title="Today's Collection" value={todayCollection} icon={TrendingUp} variant="success" onClick={() => setDrillDown("todayCollection")} />
