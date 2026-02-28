@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useInvoices, usePayments, formatCurrency, type Customer } from "@/hooks/use-data";
+import { useInvoices, usePayments, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
 
 interface CustomerLedgerSheetProps {
   customer: Customer | null;
