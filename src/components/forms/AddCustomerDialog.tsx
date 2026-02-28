@@ -128,11 +128,13 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> Add Customer
-        </Button>
-      </DialogTrigger>
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          <Button className="gradient-primary text-primary-foreground gap-2">
+            <Plus className="h-4 w-4" /> Add Customer
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md max-h-[100dvh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-5 pt-5 pb-3 shrink-0">
           <div className="flex items-center justify-between">
