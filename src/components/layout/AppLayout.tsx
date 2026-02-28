@@ -106,6 +106,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
+        {/* Sync Status */}
+        <div className="px-4 py-2 border-t border-sidebar-border">
+          <div className="flex items-center gap-2 rounded-lg px-3 py-2 bg-sidebar-accent/50 text-xs font-medium">
+            {!isOnline ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                <span className="text-destructive">Offline</span>
+              </>
+            ) : pendingCount > 0 ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-warning animate-pulse" />
+                <span className="text-warning">{pendingCount} Pending</span>
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-success" />
+                <span className="text-success">Online</span>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* User */}
         <div className="border-t border-sidebar-border px-4 py-4">
           <div className="flex items-center gap-3">
