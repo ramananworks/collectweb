@@ -97,6 +97,16 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const totalCredit = ledgerEntries.reduce((s, e) => s + e.credit, 0);
   const closingBalance = totalDebit - totalCredit;
 
+  const shareData: ShareSummaryData = {
+    title: `${customer?.name ?? ""} – Ledger Summary`,
+    lines: [
+      { label: "Total Debit", value: formatCurrency(totalDebit) },
+      { label: "Total Credit", value: formatCurrency(totalCredit) },
+      { label: "Closing Balance", value: `${formatCurrency(Math.abs(closingBalance))} ${closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}` },
+      { label: "Transactions", value: String(ledgerEntries.length) },
+    ],
+  };
+
   const fmtAmount = (n: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
 
   function exportCSV() {
