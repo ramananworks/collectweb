@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { mockCompany, mockCustomers, mockInvoices, mockPayments, mockAreas, mockProfiles } from "./mock-data";
-
+import { enqueueMutation } from "@/lib/offline-queue";
+import { toast } from "sonner";
 const DEV_MODE = true;
 
 export type Customer = Tables<"customers">;
@@ -129,14 +130,20 @@ export function useAddCustomer() {
       default_due_days?: number;
       assigned_to?: string;
     }) => {
-      const { error } = await supabase.from("customers").insert({
+      const row = {
         ...values,
         company_id: profile!.company_id!,
         gstin: values.gstin || null,
         default_due_days: values.default_due_days ?? null,
         assigned_to: values.assigned_to || null,
         outstanding: 0,
-      });
+      };
+      if (!navigator.onLine) {
+        enqueueMutation({ table: "customers", type: "insert", payload: row });
+        toast.info("Customer saved offline — will sync when back online");
+        return;
+      }
+      const { error } = await supabase.from("customers").insert(row);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["customers"] }),
@@ -156,13 +163,19 @@ export function useCreateInvoice() {
       due_date: string;
       description?: string;
     }) => {
-      const { error } = await supabase.from("invoices").insert({
+      const row = {
         ...values,
         company_id: profile!.company_id!,
         description: values.description || null,
         paid_amount: 0,
         status: "pending",
-      });
+      };
+      if (!navigator.onLine) {
+        enqueueMutation({ table: "invoices", type: "insert", payload: row });
+        toast.info("Invoice saved offline — will sync when back online");
+        return;
+      }
+      const { error } = await supabase.from("invoices").insert(row);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
@@ -182,12 +195,18 @@ export function useRecordPayment() {
       collected_by: string;
       notes?: string;
     }) => {
-      // Insert payment
-      const { error } = await supabase.from("payments").insert({
+      const row = {
         ...values,
         company_id: profile!.company_id!,
         notes: values.notes || null,
-      });
+      };
+      if (!navigator.onLine) {
+        enqueueMutation({ table: "payments", type: "insert", payload: row });
+        toast.info("Payment saved offline — will sync when back online");
+        return;
+      }
+      // Insert payment
+      const { error } = await supabase.from("payments").insert(row);
       if (error) throw error;
       // Update invoice paid_amount and status
       const { data: inv } = await supabase
