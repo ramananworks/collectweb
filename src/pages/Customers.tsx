@@ -18,6 +18,7 @@ export default function Customers() {
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();
+  const { canManageCustomers, canBulkImport } = usePermissions();
 
   const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["profiles"]] });
 
