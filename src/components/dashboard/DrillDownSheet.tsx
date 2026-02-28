@@ -57,7 +57,7 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
   const isPayments = type === "todayCollection";
 
   // Reset share modal when drawer type changes
-  React.useEffect(() => {
+  useEffect(() => {
     setShareOpen(false);
   }, [type]);
 
