@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { mockCompany, mockCustomers, mockInvoices, mockPayments, mockAreas, mockProfiles } from "./mock-data";
-
+import { enqueueMutation } from "@/lib/offline-queue";
+import { toast } from "sonner";
 const DEV_MODE = true;
 
 export type Customer = Tables<"customers">;
