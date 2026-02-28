@@ -1,8 +1,10 @@
 import { useMemo } from "react";
+import { Share2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { formatCurrency } from "@/hooks/use-data";
+import { toast } from "@/hooks/use-toast";
 
 type DrillDownType = "outstanding" | "todayCollection" | "overdue" | null;
 
