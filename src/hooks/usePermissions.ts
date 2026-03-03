@@ -40,7 +40,7 @@ export function usePermissions(): Permissions {
     canManageInvoices: isOwner || isManager,
     canRecordPayments: isOwner || isManager || isStaff, // all roles
     canManageSettings: isOwner,
-    canManageTeam: isOwner || isManager,
+    canManageTeam: isOwner,
     canBulkImport: isOwner || isManager,
   };
 }
