@@ -98,7 +98,6 @@ export function useProfiles() {
   return useQuery({
     queryKey: ["profiles"],
     queryFn: async () => {
-      if (DEV_MODE) return mockProfiles;
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
