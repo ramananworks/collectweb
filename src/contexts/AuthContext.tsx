@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const initializedRef = useRef(false);
 
   const fetchProfileAndRole = async (userId: string) => {
     const [profileRes, roleRes] = await Promise.all([
@@ -48,17 +49,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // First, restore session from storage
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfileAndRole(session.user.id).then(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+      initializedRef.current = true;
+    });
+
+    // Then listen for auth state changes (sign in, sign out, token refresh, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // Skip if this is the initial event and we already handled it via getSession
+        if (!initializedRef.current) return;
+
         setSession(session);
         setUser(session?.user ?? null);
+
         if (session?.user) {
-          await fetchProfileAndRole(session.user.id);
+          // Use setTimeout to avoid potential deadlocks with Supabase auth internals
+          setTimeout(async () => {
+            await fetchProfileAndRole(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
           setRole(null);
         }
-        setLoading(false);
 
         // Redirect invited users to set-password page
         if (event === "PASSWORD_RECOVERY") {
@@ -66,15 +86,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfileAndRole(session.user.id);
-      }
-      setLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, []);
