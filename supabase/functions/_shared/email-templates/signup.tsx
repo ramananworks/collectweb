@@ -4,7 +4,6 @@ import * as React from 'npm:react@18.3.1'
 
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
@@ -19,6 +18,7 @@ interface SignupEmailProps {
   siteUrl: string
   recipient: string
   confirmationUrl: string
+  token?: string
 }
 
 export const SignupEmail = ({
@@ -26,27 +26,32 @@ export const SignupEmail = ({
   siteUrl,
   recipient,
   confirmationUrl,
+  token,
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Welcome to CollectPro — verify your email to get started</Preview>
+    <Preview>Your CollectPro verification code</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Welcome to CollectPro 👋</Heading>
         <Text style={text}>
-          Thanks for signing up! You're one step away from managing your
-          collections and credit like a pro.
-        </Text>
-        <Text style={text}>
-          Please verify your email (
+          Thanks for signing up! Enter the code below in the app to verify your
+          email (
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
           </Link>
-          ) to activate your account:
+          ) and activate your account:
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Verify Email
-        </Button>
+        {token ? (
+          <Text style={otpCode}>{token}</Text>
+        ) : (
+          <Text style={text}>
+            <Link href={confirmationUrl} style={link}>
+              Click here to verify
+            </Link>
+          </Text>
+        )}
+        <Text style={text}>This code expires in 10 minutes.</Text>
         <Text style={footer}>
           If you didn't create an account, you can safely ignore this email.
         </Text>
@@ -72,12 +77,15 @@ const text = {
   margin: '0 0 25px',
 }
 const link = { color: 'inherit', textDecoration: 'underline' }
-const button = {
-  backgroundColor: 'hsl(160, 84%, 39%)',
-  color: '#ffffff',
-  fontSize: '14px',
+const otpCode = {
+  fontSize: '32px',
+  fontWeight: 'bold' as const,
+  letterSpacing: '8px',
+  textAlign: 'center' as const,
+  color: 'hsl(160, 84%, 39%)',
+  padding: '16px 0',
+  margin: '0 0 25px',
+  backgroundColor: '#f4f4f5',
   borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
