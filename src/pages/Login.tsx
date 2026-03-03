@@ -159,6 +159,15 @@ export default function Login() {
                 </Button>
               </form>
 
+              {emailNotConfirmed && (
+                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-center">
+                  <p className="text-sm text-amber-800 mb-2">Your email is not verified yet. Didn't get the email or link expired?</p>
+                  <Button variant="outline" size="sm" onClick={handleResendVerification} disabled={resending}>
+                    {resending ? "Sending…" : "Resend Verification Email"}
+                  </Button>
+                </div>
+              )}
+
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <Link to="/signup" className="font-medium text-primary hover:underline">
