@@ -1,5 +1,9 @@
 project_id = "fsntgyhqgywbbkeytpxz"
 
+[auth]
+  [auth.email]
+    otp_length = 6
+
 [functions]
   [functions.auth-email-hook]
     verify_jwt = false
