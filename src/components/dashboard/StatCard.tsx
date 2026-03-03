@@ -1,5 +1,5 @@
 import { LucideIcon } from "lucide-react";
-import { formatCurrency } from "@/lib/mock-data";
+import { formatCurrency } from "@/hooks/use-data";
 
 interface StatCardProps {
   title: string;
