@@ -14,16 +14,38 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setEmailNotConfirmed(false);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setEmailNotConfirmed(true);
+      }
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
       navigate("/dashboard");
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      toast({ title: "Email required", description: "Please enter your email address.", variant: "destructive" });
+      return;
+    }
+    setResending(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    setResending(false);
+    if (error) {
+      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Verification email sent", description: "Please check your inbox and click the link to verify." });
+      setEmailNotConfirmed(false);
     }
   };
 
@@ -136,6 +158,15 @@ export default function Login() {
                   {loading ? "Signing in…" : "Sign In"}
                 </Button>
               </form>
+
+              {emailNotConfirmed && (
+                <div className="mt-4 rounded-lg border border-border bg-muted p-4 text-center">
+                  <p className="text-sm text-muted-foreground mb-2">Your email is not verified yet. Didn't get the email or link expired?</p>
+                  <Button variant="outline" size="sm" onClick={handleResendVerification} disabled={resending}>
+                    {resending ? "Sending…" : "Resend Verification Email"}
+                  </Button>
+                </div>
+              )}
 
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 Don't have an account?{" "}
