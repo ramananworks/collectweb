@@ -34,8 +34,8 @@ Deno.serve(async (req) => {
       .eq("user_id", caller.id)
       .single();
 
-    if (!callerRole || !["owner", "manager"].includes(callerRole.role)) {
-      return new Response(JSON.stringify({ error: "Insufficient permissions. Only owners and managers can invite members." }), {
+    if (!callerRole || callerRole.role !== "owner") {
+      return new Response(JSON.stringify({ error: "Insufficient permissions. Only owners can invite members." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
