@@ -46,7 +46,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/login");
+    window.location.href = "/login";
   };
 
   return (
