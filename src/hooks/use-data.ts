@@ -56,7 +56,6 @@ export function useInvoices() {
   return useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
-      if (DEV_MODE) return mockInvoices;
       const { data, error } = await supabase
         .from("invoices")
         .select("*")
