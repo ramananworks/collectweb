@@ -34,7 +34,7 @@ export function useCompany() {
       if (error) throw error;
       return data;
     },
-    enabled: DEV_MODE || !!profile?.company_id,
+    enabled: !!profile?.company_id,
   });
 }
 
