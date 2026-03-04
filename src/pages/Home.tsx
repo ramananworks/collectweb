@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import {
   Building2,
   FileText,
@@ -15,6 +16,19 @@ import {
   MapPin,
   Clock,
 } from "lucide-react";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.1, ease: [0, 0, 0.2, 1] as const },
+  }),
+};
+
+const stagger = {
+  visible: { transition: { staggerChildren: 0.08 } },
+};
 
 const features = [
   {
@@ -68,7 +82,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+      <motion.nav
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl"
+      >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
@@ -87,7 +106,7 @@ export default function Home() {
             </Button>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero */}
       <section className="relative overflow-hidden px-6 pb-20 pt-20 md:pt-32">
@@ -96,27 +115,32 @@ export default function Home() {
           <div className="absolute -bottom-20 right-0 h-[400px] w-[400px] rounded-full bg-accent/40 blur-3xl" />
         </div>
 
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={stagger}
+          className="mx-auto max-w-4xl text-center"
+        >
+          <motion.div variants={fadeUp} custom={0} className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground">
             <Smartphone className="h-3.5 w-3.5" />
             Distributor Collection App — Mobile & Desktop
-          </div>
+          </motion.div>
 
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
+          <motion.h1 variants={fadeUp} custom={1} className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
             The Smartest Way to{" "}
             <span className="bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent">
               Collect Payments
             </span>{" "}
             from Your Customers
-          </h1>
+          </motion.h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+          <motion.p variants={fadeUp} custom={2} className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
             CollectWeb is a powerful <strong>credit collection software</strong> built for distributors and wholesalers.
             Track invoices, manage credit limits, record payments, and monitor your team — all from one{" "}
             <strong>distributor payment tracking</strong> platform.
-          </p>
+          </motion.p>
 
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <motion.div variants={fadeUp} custom={3} className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button size="lg" asChild className="rounded-full px-8 text-base">
               <Link to="/signup">
                 Start Free <ArrowRight className="ml-2 h-4 w-4" />
@@ -125,84 +149,114 @@ export default function Home() {
             <Button size="lg" variant="outline" asChild className="rounded-full px-8 text-base">
               <a href="#features">See Features</a>
             </Button>
-          </div>
+          </motion.div>
 
-          <p className="mt-4 text-sm text-muted-foreground">No credit card required · Free forever for small teams</p>
-        </div>
+          <motion.p variants={fadeUp} custom={4} className="mt-4 text-sm text-muted-foreground">No credit card required · Free forever for small teams</motion.p>
+        </motion.div>
       </section>
 
       {/* Trust strip */}
-      <section className="border-y border-border/50 bg-card/50 px-6 py-10">
+      <motion.section
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.5 }}
+        variants={stagger}
+        className="border-y border-border/50 bg-card/50 px-6 py-10"
+      >
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm font-medium text-muted-foreground">
-          <span className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-primary" /> Bank-Grade Security
-          </span>
-          <span className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary" /> Works Offline
-          </span>
-          <span className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-primary" /> Real-time Sync
-          </span>
-          <span className="flex items-center gap-2">
-            <Smartphone className="h-4 w-4 text-primary" /> Mobile Friendly
-          </span>
+          {[
+            { icon: Shield, label: "Bank-Grade Security" },
+            { icon: Clock, label: "Works Offline" },
+            { icon: Bell, label: "Real-time Sync" },
+            { icon: Smartphone, label: "Mobile Friendly" },
+          ].map((item) => (
+            <motion.span key={item.label} variants={fadeUp} className="flex items-center gap-2">
+              <item.icon className="h-4 w-4 text-primary" /> {item.label}
+            </motion.span>
+          ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* Features */}
       <section id="features" className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-6xl">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={stagger}
+            className="mx-auto mb-16 max-w-2xl text-center"
+          >
+            <motion.h2 variants={fadeUp} className="text-3xl font-bold tracking-tight md:text-4xl">
               Everything You Need for <span className="text-primary">Invoice Collection</span>
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-lg text-muted-foreground">
               A complete <strong>invoice collection system</strong> designed for distributors who want to get paid
               faster and manage credit smarter.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={stagger}
+            className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
             {features.map((f) => (
-              <div
+              <motion.div
                 key={f.title}
-                className="group rounded-2xl border border-border/60 bg-card p-7 transition-all hover:border-primary/30 hover:shadow-lg"
+                variants={fadeUp}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="group rounded-2xl border border-border/60 bg-card p-7 transition-shadow hover:border-primary/30 hover:shadow-lg"
               >
                 <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   <f.icon className="h-5 w-5" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">{f.title}</h3>
                 <p className="text-sm leading-relaxed text-muted-foreground">{f.description}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Benefits */}
       <section className="bg-card/50 px-6 py-20 md:py-28">
-        <div className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-2">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={stagger}
+          className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-2"
+        >
           <div>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Why Distributors Choose CollectWeb</h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <motion.h2 variants={fadeUp} className="text-3xl font-bold tracking-tight md:text-4xl">Why Distributors Choose CollectWeb</motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-lg text-muted-foreground">
               Purpose-built <strong>distributor collection app</strong> that fits the way you already work — no learning
               curve, instant results.
-            </p>
+            </motion.p>
           </div>
           <ul className="space-y-4">
-            {benefits.map((b) => (
-              <li key={b} className="flex items-start gap-3">
+            {benefits.map((b, i) => (
+              <motion.li key={b} variants={fadeUp} custom={i} className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <span className="text-base">{b}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       </section>
 
       {/* CTA */}
       <section className="px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-3xl rounded-3xl bg-primary px-8 py-16 text-center text-primary-foreground md:px-16">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          variants={fadeUp}
+          className="mx-auto max-w-3xl rounded-3xl bg-primary px-8 py-16 text-center text-primary-foreground md:px-16"
+        >
           <h2 className="text-3xl font-bold md:text-4xl">Start Collecting Faster Today</h2>
           <p className="mx-auto mt-4 max-w-xl text-primary-foreground/80">
             Join hundreds of distributors who use CollectWeb to reduce overdue payments and streamline their{" "}
@@ -223,11 +277,17 @@ export default function Home() {
               <Link to="/login">Sign In</Link>
             </Button>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 px-6 py-10">
+      <motion.footer
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="border-t border-border/50 px-6 py-10"
+      >
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
@@ -235,7 +295,7 @@ export default function Home() {
           </div>
           <p>© {new Date().getFullYear()} CollectWeb. All rights reserved.</p>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }
