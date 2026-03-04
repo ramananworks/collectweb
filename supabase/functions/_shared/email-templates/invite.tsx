@@ -34,7 +34,7 @@ export const InviteEmail = ({
         <Text style={text}>
           Your team has invited you to join{' '}
           <Link href={siteUrl} style={link}>
-            <strong>CollectPro</strong>
+            <strong>CollectWeb</strong>
           </Link>
           . Click below to accept and set up your account.
         </Text>

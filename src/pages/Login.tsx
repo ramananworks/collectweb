@@ -89,7 +89,7 @@ export default function Login() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
               <Building2 className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CollectPro</span>
+            <span className="text-xl font-bold">CollectWeb</span>
           </div>
 
           {forgotMode ? (
