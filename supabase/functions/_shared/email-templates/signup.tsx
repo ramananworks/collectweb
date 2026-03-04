@@ -30,7 +30,7 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your CollectPro verification code</Preview>
+    <Preview>Your CollectWeb verification code</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Welcome to CollectPro 👋</Heading>
