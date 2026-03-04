@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import logoImg from "@/assets/logo.jpeg";
 import {
   Building2,
   FileText,
