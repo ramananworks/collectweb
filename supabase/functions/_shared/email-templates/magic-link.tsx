@@ -24,7 +24,7 @@ export const MagicLinkEmail = ({
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your CollectPro login link</Preview>
+    <Preview>Your CollectWeb login link</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Your login link</Heading>
