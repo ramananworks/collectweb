@@ -107,13 +107,12 @@ export default function Home() {
             <span className="bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent">
               Collect Payments
             </span>{" "}
-            from Distributors
+            from Your Customers
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-            CollectWeb is a powerful <strong>credit collection software</strong> built for
-            distributors and wholesalers. Track invoices, manage credit limits, record
-            payments, and monitor your team — all from one{" "}
+            CollectWeb is a powerful <strong>credit collection software</strong> built for distributors and wholesalers.
+            Track invoices, manage credit limits, record payments, and monitor your team — all from one{" "}
             <strong>distributor payment tracking</strong> platform.
           </p>
 
@@ -128,9 +127,7 @@ export default function Home() {
             </Button>
           </div>
 
-          <p className="mt-4 text-sm text-muted-foreground">
-            No credit card required · Free forever for small teams
-          </p>
+          <p className="mt-4 text-sm text-muted-foreground">No credit card required · Free forever for small teams</p>
         </div>
       </section>
 
@@ -157,12 +154,11 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Everything You Need for{" "}
-              <span className="text-primary">Invoice Collection</span>
+              Everything You Need for <span className="text-primary">Invoice Collection</span>
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              A complete <strong>invoice collection system</strong> designed for distributors
-              who want to get paid faster and manage credit smarter.
+              A complete <strong>invoice collection system</strong> designed for distributors who want to get paid
+              faster and manage credit smarter.
             </p>
           </div>
 
@@ -176,9 +172,7 @@ export default function Home() {
                   <f.icon className="h-5 w-5" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">{f.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {f.description}
-                </p>
+                <p className="text-sm leading-relaxed text-muted-foreground">{f.description}</p>
               </div>
             ))}
           </div>
@@ -189,12 +183,10 @@ export default function Home() {
       <section className="bg-card/50 px-6 py-20 md:py-28">
         <div className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-2">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Why Distributors Choose CollectWeb
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Why Distributors Choose CollectWeb</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Purpose-built <strong>distributor collection app</strong> that fits the way you
-              already work — no learning curve, instant results.
+              Purpose-built <strong>distributor collection app</strong> that fits the way you already work — no learning
+              curve, instant results.
             </p>
           </div>
           <ul className="space-y-4">
@@ -211,20 +203,13 @@ export default function Home() {
       {/* CTA */}
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-3xl rounded-3xl bg-primary px-8 py-16 text-center text-primary-foreground md:px-16">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Start Collecting Faster Today
-          </h2>
+          <h2 className="text-3xl font-bold md:text-4xl">Start Collecting Faster Today</h2>
           <p className="mx-auto mt-4 max-w-xl text-primary-foreground/80">
-            Join hundreds of distributors who use CollectWeb to reduce overdue payments and
-            streamline their <strong>distributor payment tracking</strong>.
+            Join hundreds of distributors who use CollectWeb to reduce overdue payments and streamline their{" "}
+            <strong>distributor payment tracking</strong>.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button
-              size="lg"
-              variant="secondary"
-              asChild
-              className="rounded-full px-8 text-base"
-            >
+            <Button size="lg" variant="secondary" asChild className="rounded-full px-8 text-base">
               <Link to="/signup">
                 Create Free Account <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
