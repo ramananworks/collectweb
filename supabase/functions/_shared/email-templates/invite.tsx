@@ -27,14 +27,14 @@ export const InviteEmail = ({
 }: InviteEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>You've been invited to join CollectPro</Preview>
+    <Preview>You've been invited to join CollectWeb</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>You've been invited! 🎉</Heading>
         <Text style={text}>
           Your team has invited you to join{' '}
           <Link href={siteUrl} style={link}>
-            <strong>CollectPro</strong>
+            <strong>CollectWeb</strong>
           </Link>
           . Click below to accept and set up your account.
         </Text>

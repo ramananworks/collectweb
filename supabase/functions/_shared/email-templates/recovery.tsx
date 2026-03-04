@@ -24,12 +24,12 @@ export const RecoveryEmail = ({
 }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Reset your CollectPro password</Preview>
+    <Preview>Reset your CollectWeb password</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
-          We received a request to reset your CollectPro password. Click the
+          We received a request to reset your CollectWeb password. Click the
           button below to choose a new one.
         </Text>
         <Button style={button} href={confirmationUrl}>

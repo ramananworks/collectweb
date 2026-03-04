@@ -30,10 +30,10 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your CollectPro verification code</Preview>
+    <Preview>Your CollectWeb verification code</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Welcome to CollectPro 👋</Heading>
+        <Heading style={h1}>Welcome to CollectWeb 👋</Heading>
         <Text style={text}>
           Thanks for signing up! Enter the code below in the app to verify your
           email (

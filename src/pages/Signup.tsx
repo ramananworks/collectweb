@@ -81,7 +81,7 @@ export default function Signup() {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-foreground/20">
             <Building2 className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h2 className="text-3xl font-bold text-primary-foreground mb-3">CollectPro</h2>
+          <h2 className="text-3xl font-bold text-primary-foreground mb-3">CollectWeb</h2>
           <p className="text-primary-foreground/80 text-lg">
             Start managing your collections and credit in minutes.
           </p>
@@ -95,7 +95,7 @@ export default function Signup() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
               <Building2 className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CollectPro</span>
+            <span className="text-xl font-bold">CollectWeb</span>
           </div>
 
           {otpStep ? (
