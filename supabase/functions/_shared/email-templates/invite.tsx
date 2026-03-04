@@ -27,7 +27,7 @@ export const InviteEmail = ({
 }: InviteEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>You've been invited to join CollectPro</Preview>
+    <Preview>You've been invited to join CollectWeb</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>You've been invited! 🎉</Heading>
