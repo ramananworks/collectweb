@@ -14,6 +14,7 @@ import {
   Building2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import logoImg from "@/assets/logo.jpeg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompany } from "@/hooks/use-data";
 import { useNetworkStatus } from "@/hooks/use-network-status";
@@ -67,9 +68,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src={logoImg} alt="CollectWeb" className="h-9 w-9 rounded-lg object-cover" />
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-sidebar-accent-foreground truncate">
               {companyName}
@@ -155,9 +154,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5 text-foreground" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md gradient-primary">
-              <Building2 className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-md object-cover" />
             <span className="text-sm font-semibold">{companyName}</span>
           </div>
           <div className="ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">

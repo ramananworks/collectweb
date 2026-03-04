@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import logoImg from "@/assets/logo.jpeg";
 import {
   Building2,
   FileText,
@@ -90,9 +91,7 @@ export default function Home() {
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="CollectWeb logo" className="h-9 w-9 rounded-lg object-cover" />
             <span className="text-xl font-bold tracking-tight">CollectWeb</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -290,7 +289,7 @@ export default function Home() {
       >
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
+            <img src={logoImg} alt="CollectWeb" className="h-5 w-5 rounded object-cover" />
             <span className="font-medium">CollectWeb</span> · Distributor Collection App
           </div>
           <p>© {new Date().getFullYear()} CollectWeb. All rights reserved.</p>
