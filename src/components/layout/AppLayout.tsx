@@ -154,9 +154,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5 text-foreground" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md gradient-primary">
-              <Building2 className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-md object-cover" />
             <span className="text-sm font-semibold">{companyName}</span>
           </div>
           <div className="ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">

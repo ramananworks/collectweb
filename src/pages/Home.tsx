@@ -289,7 +289,7 @@ export default function Home() {
       >
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
+            <img src={logoImg} alt="CollectWeb" className="h-5 w-5 rounded object-cover" />
             <span className="font-medium">CollectWeb</span> · Distributor Collection App
           </div>
           <p>© {new Date().getFullYear()} CollectWeb. All rights reserved.</p>
