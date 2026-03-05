@@ -89,18 +89,20 @@ export default function Home() {
         transition={{ duration: 0.4 }}
         className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl"
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoImg} alt="CollectWeb logo" className="h-9 w-9 rounded-lg object-cover" />
-            <span className="text-xl font-bold tracking-tight">CollectWeb</span>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <Link to="/" className="flex items-center gap-2 min-w-0">
+            <img src={logoImg} alt="CollectWeb logo" className="h-8 w-8 flex-shrink-0 rounded-lg object-cover sm:h-9 sm:w-9" />
+            <span className="text-lg font-bold tracking-tight sm:text-xl">CollectWeb</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" asChild>
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+            <Button variant="ghost" size="sm" asChild className="px-2 sm:px-4">
               <Link to="/login">Sign In</Link>
             </Button>
-            <Button asChild className="rounded-full px-6">
+            <Button asChild size="sm" className="rounded-full px-3 sm:px-6">
               <Link to="/signup">
-                Get Started <ArrowRight className="ml-1.5 h-4 w-4" />
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Start</span>
+                <ArrowRight className="ml-1 h-3.5 w-3.5 sm:ml-1.5 sm:h-4 sm:w-4" />
               </Link>
             </Button>
           </div>
