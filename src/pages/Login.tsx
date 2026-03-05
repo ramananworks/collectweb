@@ -73,8 +73,8 @@ export default function Login() {
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 gradient-primary items-center justify-center p-12">
         <div className="max-w-md text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-foreground/20">
-            <img src={logoImg} alt="CollectWeb" className="h-10 w-10 rounded-lg object-cover" />
+          <div className="mx-auto mb-6">
+            <img src={logoImg} alt="CollectWeb" className="h-20 w-20 rounded-2xl object-cover" />
           </div>
           <h2 className="text-3xl font-bold text-primary-foreground mb-3">CollectWeb</h2>
           <p className="text-primary-foreground/80 text-lg">
@@ -87,8 +87,8 @@ export default function Login() {
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-              <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-md object-cover" />
+            <div className="flex h-12 w-12 items-center justify-center">
+              <img src={logoImg} alt="CollectWeb" className="h-12 w-12 rounded-xl object-cover" />
             </div>
             <span className="text-xl font-bold">CollectWeb</span>
           </div>
