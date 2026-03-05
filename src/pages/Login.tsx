@@ -73,7 +73,7 @@ export default function Login() {
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 gradient-primary items-center justify-center p-12">
         <div className="max-w-md text-center">
-          <div className="mx-auto mb-6">
+          <div className="mx-auto mb-6 flex justify-center">
             <img src={logoImg} alt="CollectWeb" className="h-20 w-20 rounded-2xl object-cover" />
           </div>
           <h2 className="text-3xl font-bold text-primary-foreground mb-3">CollectWeb</h2>
