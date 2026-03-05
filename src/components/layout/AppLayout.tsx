@@ -14,7 +14,7 @@ import {
   Building2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import logoImg from "@/assets/logo.svg";
+import logoImg from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompany } from "@/hooks/use-data";
 import { useNetworkStatus } from "@/hooks/use-network-status";
