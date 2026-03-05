@@ -87,8 +87,8 @@ export default function Login() {
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-              <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-md object-cover" />
+            <div className="flex h-12 w-12 items-center justify-center">
+              <img src={logoImg} alt="CollectWeb" className="h-12 w-12 rounded-xl object-cover" />
             </div>
             <span className="text-xl font-bold">CollectWeb</span>
           </div>
