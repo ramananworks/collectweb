@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Building2, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
+import logoImg from "@/assets/logo.png";
 import { toast } from "@/hooks/use-toast";
 
 export default function Signup() {
@@ -79,7 +80,7 @@ export default function Signup() {
       <div className="hidden lg:flex lg:w-1/2 gradient-primary items-center justify-center p-12">
         <div className="max-w-md text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-foreground/20">
-            <Building2 className="h-8 w-8 text-primary-foreground" />
+            <img src={logoImg} alt="CollectWeb" className="h-10 w-10 rounded-lg object-cover" />
           </div>
           <h2 className="text-3xl font-bold text-primary-foreground mb-3">CollectWeb</h2>
           <p className="text-primary-foreground/80 text-lg">
@@ -93,7 +94,7 @@ export default function Signup() {
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
+              <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-md object-cover" />
             </div>
             <span className="text-xl font-bold">CollectWeb</span>
           </div>
