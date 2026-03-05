@@ -94,7 +94,7 @@ export default function Signup() {
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
+              <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-md object-cover" />
             </div>
             <span className="text-xl font-bold">CollectWeb</span>
           </div>
