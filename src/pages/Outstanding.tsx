@@ -15,7 +15,7 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
-import { downloadPDF, shareViaWhatsApp } from "@/lib/share-utils";
+import { downloadPDF } from "@/lib/share-utils";
 import jsPDF from "jspdf";
 
 export default function Outstanding() {
