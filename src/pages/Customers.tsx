@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Search, Phone, MapPin, MapPinned, User } from "lucide-react";
+import { Search, Phone, MapPin, MapPinned, User, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCustomers, useAreas, useProfiles, formatCurrency, type Customer } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
+import EditCustomerDialog from "@/components/forms/EditCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
@@ -15,6 +17,7 @@ export default function Customers() {
   const [areaFilter, setAreaFilter] = useState("all");
   const [userFilter, setUserFilter] = useState("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();
@@ -125,9 +128,21 @@ export default function Customers() {
                         <Phone className="h-3 w-3" /> {c.phone}
                       </div>
                     </div>
-                    <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
-                      <p className="text-xs text-muted-foreground">Outstanding</p>
-                      <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
+                    <div className="flex items-start gap-2">
+                      {canManageCustomers && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => { e.stopPropagation(); setEditingCustomer(c); }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
+                        <p className="text-xs text-muted-foreground">Outstanding</p>
+                        <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
@@ -160,6 +175,7 @@ export default function Customers() {
         <div className="p-8 text-center text-muted-foreground">No customers found</div>
       )}
       <CustomerLedgerSheet customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
+      <EditCustomerDialog customer={editingCustomer} open={!!editingCustomer} onOpenChange={(o) => { if (!o) setEditingCustomer(null); }} />
     </div>
   );
 }
