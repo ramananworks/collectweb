@@ -213,6 +213,7 @@ export type Database = {
           delivery_location: Json | null
           description: string | null
           due_date: string
+          due_date_source: string
           id: string
           invoice_date: string
           invoice_number: string
@@ -234,6 +235,7 @@ export type Database = {
           delivery_location?: Json | null
           description?: string | null
           due_date: string
+          due_date_source?: string
           id?: string
           invoice_date?: string
           invoice_number: string
@@ -255,6 +257,7 @@ export type Database = {
           delivery_location?: Json | null
           description?: string | null
           due_date?: string
+          due_date_source?: string
           id?: string
           invoice_date?: string
           invoice_number?: string

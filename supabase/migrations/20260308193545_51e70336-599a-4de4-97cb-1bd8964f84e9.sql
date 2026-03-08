@@ -1,0 +1,1 @@
+ALTER TABLE public.invoices ADD COLUMN due_date_source text NOT NULL DEFAULT 'company';
