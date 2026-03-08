@@ -182,6 +182,7 @@ export default function UserManagement() {
           const isSelf = member.id === user?.id;
           const memberIsOwner = memberRoles.includes("owner");
           const canEdit = canManage && !isSelf && !(memberIsOwner && !isOwner);
+          const isPending = pendingInvites[member.id] === true;
 
           return (
             <div key={member.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in">
