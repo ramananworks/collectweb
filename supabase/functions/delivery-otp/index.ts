@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
         .from("invoices")
         .select("id, customer_id, company_id, customer_name")
         .eq("id", invoiceId)
-        .eq("company_id", callerRole.company_id)
+        .eq("company_id", callerCompanyId)
         .single();
 
       if (!invoice) {
