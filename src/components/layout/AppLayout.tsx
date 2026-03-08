@@ -94,7 +94,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const companyName = company?.name || "My Company";
   const displayName = profile?.name || "User";
   const displayEmail = profile?.email || "";
-  const displayRole = role || "staff";
+  const { role: permRole } = usePermissions();
+  const roleLabels: Record<string, string> = {
+    owner: "Owner",
+    manager: "Manager",
+    collection_staff: "Collection Staff",
+    delivery_staff: "Delivery Staff",
+  };
+  const displayRole = roleLabels[role || ""] || role || "Staff";
+
+  const navItems = allNavItems.filter(
+    (item) => item.roles === null || (role && item.roles.includes(role))
+  );
 
   const handleSignOut = async () => {
     await signOut();

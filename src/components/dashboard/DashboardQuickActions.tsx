@@ -15,14 +15,14 @@ const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; color:
 
 export default function DashboardQuickActions() {
   const [openDialog, setOpenDialog] = useState<ActionKey | null>(null);
-  const { canManageCustomers, canManageInvoices, canRecordPayments } = usePermissions();
+  const { canManageCustomers, canCreateInvoices, canRecordPayments } = usePermissions();
 
   const actions = useMemo(() => allActions.filter((a) => {
     if (a.key === "customer") return canManageCustomers;
-    if (a.key === "invoice") return canManageInvoices;
+    if (a.key === "invoice") return canCreateInvoices;
     if (a.key === "payment") return canRecordPayments;
     return true;
-  }), [canManageCustomers, canManageInvoices, canRecordPayments]);
+  }), [canManageCustomers, canCreateInvoices, canRecordPayments]);
 
   return (
     <div className="rounded-2xl bg-card p-5 shadow-sm">

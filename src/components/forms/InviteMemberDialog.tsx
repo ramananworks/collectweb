@@ -94,7 +94,8 @@ export function InviteMemberDialog({ open, onOpenChange }: Props) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="collection_staff">Collection Staff</SelectItem>
+                    <SelectItem value="delivery_staff">Delivery Staff</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
