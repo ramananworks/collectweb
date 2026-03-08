@@ -61,7 +61,28 @@ Deno.serve(async (req) => {
     const { action, userId, role, roles } = await req.json();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Verify target user belongs to same company
+    // For check_invite_status, handle array of userIds with bulk company check
+    if (action === "check_invite_status") {
+      const userIds: string[] = Array.isArray(userId) ? userId : [userId];
+      // Verify all users belong to caller's company
+      const { data: targetProfiles } = await adminClient
+        .from("profiles")
+        .select("id, company_id")
+        .in("id", userIds)
+        .eq("company_id", callerProfile.company_id);
+
+      const validIds = (targetProfiles || []).map((p: any) => p.id);
+      const pending: Record<string, boolean> = {};
+      for (const uid of validIds) {
+        const { data: authUser } = await adminClient.auth.admin.getUserById(uid);
+        pending[uid] = !!(authUser?.user && !authUser.user.last_sign_in_at);
+      }
+      return new Response(JSON.stringify({ pending }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Verify target user belongs to same company (single user actions)
     const { data: targetProfile } = await adminClient
       .from("profiles")
       .select("company_id")
