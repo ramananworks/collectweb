@@ -76,13 +76,13 @@ export default function Collections() {
         <RecordPaymentDialog />
       </div>
 
-      <div className="flex gap-2">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[160px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={modeFilter} onValueChange={setModeFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Mode" />
           </SelectTrigger>
           <SelectContent>
@@ -92,6 +92,38 @@ export default function Collections() {
             <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Date range filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal text-xs", !dateFrom && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+              {dateFrom ? format(dateFrom, "dd MMM yyyy") : "From date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+        <span className="text-xs text-muted-foreground">to</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal text-xs", !dateTo && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+              {dateTo ? format(dateTo, "dd MMM yyyy") : "To date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateTo} onSelect={setDateTo} disabled={(d) => dateFrom ? d < dateFrom : false} initialFocus className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+        {(dateFrom || dateTo) && (
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
 
       <div className="space-y-3">
