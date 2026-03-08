@@ -10,6 +10,7 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
 export default function Collections() {
   const [search, setSearch] = useState("");
+  const [modeFilter, setModeFilter] = useState("all");
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
