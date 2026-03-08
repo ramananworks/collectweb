@@ -206,7 +206,7 @@ export default function Outstanding() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
-            <Download className="h-4 w-4" /> PDF
+            {isMobile ? <><Share2 className="h-4 w-4" /> Share</> : <><Download className="h-4 w-4" /> PDF</>}
           </Button>
         </div>
       </div>
