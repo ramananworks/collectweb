@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Search, IndianRupee, ChevronDown, ChevronRight } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { Search, IndianRupee, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCustomers, useInvoices, useAreas, formatCurrency } from "@/hooks/use-data";
+import { useCustomers, useInvoices, useAreas, useCompany, formatCurrency } from "@/hooks/use-data";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
+import { downloadPDF } from "@/lib/share-utils";
+import jsPDF from "jspdf";
 
 export default function Outstanding() {
   const [search, setSearch] = useState("");
