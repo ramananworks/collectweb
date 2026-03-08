@@ -70,7 +70,7 @@ export default function UserManagement() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const getRoleForUser = (userId: string): AppRole => {
-    return roles.find((r) => r.user_id === userId)?.role || "staff";
+    return roles.find((r) => r.user_id === userId)?.role as AppRole || "collection_staff";
   };
 
   const handleEditRole = async () => {
