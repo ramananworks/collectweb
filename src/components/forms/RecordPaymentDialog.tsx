@@ -47,6 +47,16 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     defaultValues: { customer_id: prefillCustomerId || "", invoice_id: prefillInvoiceId || "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: authProfile?.name || "", notes: "" },
   });
 
+  useEffect(() => {
+    if (open && prefillCustomerId) {
+      form.setValue("customer_id", prefillCustomerId);
+      form.setValue("invoice_id", prefillInvoiceId || "");
+    }
+    if (!open) {
+      form.reset();
+    }
+  }, [open, prefillCustomerId, prefillInvoiceId]);
+
   const selectedCustomerId = form.watch("customer_id");
 
   const customersWithDues = customers.filter((c) =>
