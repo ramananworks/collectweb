@@ -163,11 +163,12 @@ export default function Customers() {
                     <span className="text-xs text-muted-foreground">
                       Credit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
                     </span>
-                    {c.default_due_days != null && (
-                      <span className="text-xs text-muted-foreground">
-                        Terms: <span className="font-medium text-foreground">{c.default_due_days} days</span>
+                    <span className="text-xs text-muted-foreground">
+                      Terms: <span className="font-medium text-foreground">
+                        {c.default_due_days != null ? c.default_due_days : (company?.default_due_days ?? 30)} days
                       </span>
-                    )}
+                      {c.default_due_days == null && <span className="text-muted-foreground/60 ml-0.5">(co.)</span>}
+                    </span>
                     <span className={`text-xs font-medium ${c.credit_limit > 0 && c.outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
                       {c.credit_limit > 0 ? `${((c.outstanding / c.credit_limit) * 100).toFixed(0)}% used` : "—"}
                     </span>
