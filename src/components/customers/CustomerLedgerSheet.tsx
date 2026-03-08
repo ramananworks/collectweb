@@ -97,29 +97,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const totalCredit = ledgerEntries.reduce((s, e) => s + e.credit, 0);
   const closingBalance = totalDebit - totalCredit;
 
-  const shareData: ShareSummaryData = {
-    title: `${customer?.name ?? ""} – Ledger Summary`,
-    companyName: company?.name,
-    lines: [
-      { label: "Total Debit", value: formatCurrency(totalDebit) },
-      { label: "Total Credit", value: formatCurrency(totalCredit) },
-      { label: "Closing Balance", value: `${formatCurrency(Math.abs(closingBalance))} ${closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}` },
-      { label: "Transactions", value: String(ledgerEntries.length) },
-    ],
-  };
-
-  const fmtAmount = (n: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
-
-  function exportCSV() {
-    if (!customer || ledgerEntries.length === 0) return;
-    const header = "Date,Particulars,Debit,Credit,Balance\n";
-    const rows = ledgerEntries.map((e) =>
-      `${format(parseISO(e.date), "dd-MM-yyyy")},"${e.particular}",${e.debit || ""},${e.credit || ""},${e.balance > 0 ? fmtAmount(e.balance) + " Dr" : e.balance < 0 ? fmtAmount(Math.abs(e.balance)) + " Cr" : "0"}`
-    ).join("\n");
-    const footer = `\nClosing Balance,,${fmtAmount(totalDebit)},${fmtAmount(totalCredit)},${closingBalance > 0 ? fmtAmount(closingBalance) + " Dr" : closingBalance < 0 ? fmtAmount(Math.abs(closingBalance)) + " Cr" : "0"}`;
-    const blob = new Blob([header + rows + footer], { type: "text/csv" });
-    downloadBlob(blob, `${customer.name}_Ledger.csv`);
-  }
+  
 
   const generateLedgerPDFBlob = useCallback((): Blob | null => {
     if (!customer || ledgerEntries.length === 0) return null;
