@@ -82,11 +82,10 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
   };
 
   const pickFromContacts = async () => {
+    // Path 1: Try Android WebView bridge first
     try {
       const android = (window as any).Android;
-
-      // Path 1: Android WebView bridge
-      if (android?.pickContact) {
+      if (android && typeof android.pickContact === "function") {
         const result = android.pickContact();
         if (result) {
           const contact = typeof result === "string" ? JSON.parse(result) : result;
@@ -100,8 +99,12 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
           return;
         }
       }
+    } catch (e) {
+      console.warn("Android bridge pickContact failed, trying Web API:", e);
+    }
 
-      // Path 2: Web Contact Picker API (Chrome on Android)
+    // Path 2: Web Contact Picker API (Chrome on Android)
+    try {
       const nav = navigator as any;
       if (nav.contacts?.select) {
         const contacts = await nav.contacts.select(["name", "tel", "address"], { multiple: false });
@@ -121,12 +124,11 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
           return;
         }
       }
-
-      toast({ title: "Not supported", description: "Contact picker is not available in this browser.", variant: "destructive" });
-    } catch (err: any) {
-      console.error("Contact picker error:", err);
-      toast({ title: "Could not access contacts", description: err?.message || "Please allow contact access and try again.", variant: "destructive" });
+    } catch (e) {
+      console.warn("Web Contact Picker failed:", e);
     }
+
+    toast({ title: "Not supported", description: "Contact picker is not available on this device.", variant: "destructive" });
   };
 
   return (
