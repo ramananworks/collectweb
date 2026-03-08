@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
-import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { useMemo, useState, useCallback } from "react";
+import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { CalendarIcon, X, Download, Share2 } from "lucide-react";
 import ShareOptionsModal from "@/components/shared/ShareOptionsModal";
 import type { ShareSummaryData } from "@/lib/share-utils";
+import { downloadPDF } from "@/lib/share-utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -13,6 +14,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useInvoices, usePayments, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
+import { useIsMobile } from "@/hooks/use-mobile";
+import jsPDF from "jspdf";
 
 interface CustomerLedgerSheetProps {
   customer: Customer | null;
@@ -35,7 +38,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
   const [shareOpen, setShareOpen] = useState(false);
-
+  const isMobile = useIsMobile();
   const allEntries = useMemo<LedgerEntry[]>(() => {
     if (!customer) return [];
 
@@ -122,6 +125,96 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     downloadBlob(blob, `${customer.name}_Ledger.csv`);
   }
 
+  const generateLedgerPDFBlob = useCallback((): Blob | null => {
+    if (!customer || ledgerEntries.length === 0) return null;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pw = doc.internal.pageSize.getWidth();
+    const ph = doc.internal.pageSize.getHeight();
+    let y = 20;
+
+    const checkPage = (needed: number) => {
+      if (y + needed > ph - 20) { doc.addPage(); y = 20; }
+    };
+
+    if (company?.name) {
+      doc.setFontSize(16); doc.setFont("helvetica", "bold");
+      doc.text(company.name, pw / 2, y, { align: "center" }); y += 10;
+    }
+
+    doc.setFontSize(13); doc.setFont("helvetica", "bold");
+    doc.text(`${customer.name} – Ledger`, pw / 2, y, { align: "center" }); y += 7;
+    doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(120, 120, 120);
+    doc.text(`${customer.phone} · ${customer.area || "No Area"}`, pw / 2, y, { align: "center" }); y += 5;
+    doc.text(`Generated on ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, pw / 2, y, { align: "center" }); y += 8;
+
+    doc.setDrawColor(200, 200, 200); doc.line(15, y, pw - 15, y); y += 8;
+
+    // Summary
+    doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont("helvetica", "normal");
+    doc.text("Total Debit:", 20, y); doc.setFont("helvetica", "bold"); doc.text(formatCurrency(totalDebit), 70, y); y += 6;
+    doc.setFont("helvetica", "normal"); doc.text("Total Credit:", 20, y); doc.setFont("helvetica", "bold"); doc.text(formatCurrency(totalCredit), 70, y); y += 6;
+    doc.setFont("helvetica", "normal"); doc.text("Closing Balance:", 20, y); doc.setFont("helvetica", "bold");
+    doc.text(`${formatCurrency(Math.abs(closingBalance))} ${closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}`, 70, y); y += 10;
+
+    // Table header
+    doc.setFillColor(245, 245, 245);
+    doc.rect(15, y - 4, pw - 30, 7, "F");
+    doc.setFontSize(7.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 100, 100);
+    doc.text("Date", 18, y); doc.text("Particulars", 42, y); doc.text("Debit", 115, y, { align: "right" });
+    doc.text("Credit", 140, y, { align: "right" }); doc.text("Balance", pw - 18, y, { align: "right" }); y += 6;
+
+    // Rows
+    doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
+    for (const entry of ledgerEntries) {
+      checkPage(7);
+      doc.setFontSize(7.5);
+      doc.text(format(parseISO(entry.date), "dd MMM yy"), 18, y);
+      const partText = doc.splitTextToSize(entry.particular, 65);
+      doc.text(partText[0], 42, y);
+      doc.text(entry.debit > 0 ? formatCurrency(entry.debit) : "–", 115, y, { align: "right" });
+      doc.text(entry.credit > 0 ? formatCurrency(entry.credit) : "–", 140, y, { align: "right" });
+      doc.setFont("helvetica", "bold");
+      doc.text(`${formatCurrency(Math.abs(entry.balance))} ${entry.balance > 0 ? "Dr" : entry.balance < 0 ? "Cr" : ""}`, pw - 18, y, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      y += 5;
+    }
+
+    // Footer row
+    checkPage(10);
+    y += 2;
+    doc.setDrawColor(50, 50, 50); doc.line(15, y, pw - 15, y); y += 5;
+    doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 30, 30);
+    doc.text("Closing Balance", 18, y);
+    doc.text(formatCurrency(totalDebit), 115, y, { align: "right" });
+    doc.text(formatCurrency(totalCredit), 140, y, { align: "right" });
+    doc.text(`${formatCurrency(Math.abs(closingBalance))} ${closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}`, pw - 18, y, { align: "right" });
+
+    // Page footer
+    const footerY = ph - 10;
+    doc.setFontSize(7); doc.setFont("helvetica", "normal"); doc.setTextColor(160, 160, 160);
+    doc.text(`Generated by ${company?.name || "CollectWeb"}`, pw / 2, footerY, { align: "center" });
+
+    return doc.output("blob");
+  }, [customer, ledgerEntries, totalDebit, totalCredit, closingBalance, company]);
+
+  const handleSharePDF = useCallback(async () => {
+    const blob = generateLedgerPDFBlob();
+    if (!blob || !customer) return;
+    const filename = `${customer.name}_Ledger_${new Date().toISOString().split("T")[0]}.pdf`;
+
+    try {
+      const file = new File([blob], filename, { type: "application/pdf" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: `${customer.name} – Ledger` });
+        return;
+      }
+    } catch (e) {
+      // Share cancelled or unsupported
+    }
+
+    downloadPDF(blob, filename);
+  }, [generateLedgerPDFBlob, customer]);
+
   function exportPDF() {
     if (!customer || ledgerEntries.length === 0) return;
     const w = window.open("", "_blank");
@@ -198,9 +291,15 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               </Button>
             )}
             <div className="ml-auto flex gap-1.5">
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShareOpen(true)}>
-                <Share2 className="h-3 w-3" /> Share
-              </Button>
+              {isMobile ? (
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
+                  <Share2 className="h-3 w-3" /> Share PDF
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShareOpen(true)}>
+                  <Share2 className="h-3 w-3" /> Share
+                </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
