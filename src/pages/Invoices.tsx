@@ -14,7 +14,7 @@ import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { usePermissions } from "@/hooks/usePermissions";
 
-const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue", "delivered"];
+const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "delivered", "paid", "overdue"];
 
 export default function Invoices() {
   const [search, setSearch] = useState("");

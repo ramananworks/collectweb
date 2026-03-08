@@ -1,5 +1,5 @@
 export type UserRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
-export type InvoiceStatus = "pending" | "partial" | "paid" | "overdue" | "delivered";
+export type InvoiceStatus = "pending" | "paid" | "overdue" | "delivered";
 export type PaymentMode = "cash" | "upi" | "bank_transfer";
 export type CompanyPlan = "free" | "pro" | "enterprise";
 

@@ -208,10 +208,13 @@ export function useRecordPayment() {
         .single();
       if (inv) {
         const newPaid = inv.paid_amount + values.amount;
-        const newStatus = newPaid >= inv.amount ? "paid" : "partial";
+        const updates: { paid_amount: number; status?: string } = { paid_amount: newPaid };
+        if (newPaid >= inv.amount) {
+          updates.status = "paid";
+        }
         await supabase
           .from("invoices")
-          .update({ paid_amount: newPaid, status: newStatus })
+          .update(updates)
           .eq("id", values.invoice_id);
       }
     },
