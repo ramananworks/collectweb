@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Mail, Phone, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Plus, Mail, Phone, MoreVertical, Pencil, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/shared/StatusBadges";
 import { useProfiles } from "@/hooks/use-data";
