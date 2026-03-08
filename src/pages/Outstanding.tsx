@@ -16,6 +16,7 @@ import { StatusBadge } from "@/components/shared/StatusBadges";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
 import { downloadPDF } from "@/lib/share-utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 
 export default function Outstanding() {
