@@ -7,3 +7,5 @@ project_id = "fsntgyhqgywbbkeytpxz"
 [functions]
   [functions.auth-email-hook]
     verify_jwt = false
+  [functions.delivery-otp]
+    verify_jwt = false
