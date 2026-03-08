@@ -92,15 +92,6 @@ export default function Outstanding() {
     });
   };
 
-  const handleShareWhatsApp = useCallback(() => {
-    const lines = [`*Outstanding Summary*`, `Total: ${formatCurrency(grandTotal)}`, `Customers: ${outstandingData.length}`, ""];
-    if (areaFilter !== "all") lines.splice(1, 0, `Area: ${areaFilter}`);
-    for (const { customer, invoices: custInv, total } of outstandingData) {
-      lines.push(`▸ ${customer.name} — ${formatCurrency(total)} (${custInv.length} inv)`);
-    }
-    if (company?.name) lines.push("", `— ${company.name}`);
-    shareViaWhatsApp(lines.join("\n"));
-  }, [outstandingData, grandTotal, company, areaFilter]);
 
   const handleExportPDF = useCallback(() => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
