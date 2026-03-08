@@ -32,14 +32,16 @@ import { useSyncStatus } from "@/hooks/use-sync-status";
 import { WifiOff, Wifi, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const navItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/customers", icon: Users, label: "Customers" },
-  { to: "/invoices", icon: FileText, label: "Invoices" },
-  { to: "/collections", icon: CreditCard, label: "Collections" },
-  { to: "/reports", icon: BarChart3, label: "Reports" },
-  { to: "/users", icon: UserCog, label: "Team" },
-  { to: "/settings", icon: Settings, label: "Company Settings" },
+import { usePermissions } from "@/hooks/usePermissions";
+
+const allNavItems = [
+  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
+  { to: "/customers", icon: Users, label: "Customers", roles: null },
+  { to: "/invoices", icon: FileText, label: "Invoices", roles: null },
+  { to: "/collections", icon: CreditCard, label: "Collections", roles: ["owner", "manager", "collection_staff"] as string[] },
+  { to: "/reports", icon: BarChart3, label: "Reports", roles: ["owner", "manager"] as string[] },
+  { to: "/users", icon: UserCog, label: "Team", roles: ["owner"] as string[] },
+  { to: "/settings", icon: Settings, label: "Company Settings", roles: ["owner", "manager"] as string[] },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
