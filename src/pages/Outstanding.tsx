@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Search, IndianRupee, ChevronDown, ChevronRight, Download, MessageCircle } from "lucide-react";
+import { Search, IndianRupee, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
-import { downloadPDF, shareViaWhatsApp } from "@/lib/share-utils";
+import { downloadPDF } from "@/lib/share-utils";
 import jsPDF from "jspdf";
 
 export default function Outstanding() {
@@ -92,15 +92,6 @@ export default function Outstanding() {
     });
   };
 
-  const handleShareWhatsApp = useCallback(() => {
-    const lines = [`*Outstanding Summary*`, `Total: ${formatCurrency(grandTotal)}`, `Customers: ${outstandingData.length}`, ""];
-    if (areaFilter !== "all") lines.splice(1, 0, `Area: ${areaFilter}`);
-    for (const { customer, invoices: custInv, total } of outstandingData) {
-      lines.push(`▸ ${customer.name} — ${formatCurrency(total)} (${custInv.length} inv)`);
-    }
-    if (company?.name) lines.push("", `— ${company.name}`);
-    shareViaWhatsApp(lines.join("\n"));
-  }, [outstandingData, grandTotal, company, areaFilter]);
 
   const handleExportPDF = useCallback(() => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -199,9 +190,6 @@ export default function Outstanding() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleShareWhatsApp}>
-            <MessageCircle className="h-4 w-4" /> WhatsApp
-          </Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
             <Download className="h-4 w-4" /> PDF
           </Button>
