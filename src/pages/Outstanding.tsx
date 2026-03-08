@@ -190,9 +190,6 @@ export default function Outstanding() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleShareWhatsApp}>
-            <MessageCircle className="h-4 w-4" /> WhatsApp
-          </Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
             <Download className="h-4 w-4" /> PDF
           </Button>
