@@ -1,42 +1,33 @@
 
 
-## Include Mock Data for Development
+## Dynamic Overdue Detection Using Due-Date Hierarchy
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+Currently, the due date is resolved at invoice creation time and stored. The overdue check simply compares the stored `due_date` against today. This means if customer or company default due days change after invoice creation, overdue detection won't reflect the updated terms.
 
-### What will change
+### Problem
+All invoices have a `due_date` (NOT NULL), but there's no way to distinguish whether it was explicitly set on the invoice or computed from customer/company defaults. We need to track the source so overdue detection can dynamically re-resolve when defaults change.
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+### Changes
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+**1. Database migration — add `due_date_source` column to `invoices`**
+- Add column `due_date_source text NOT NULL DEFAULT 'company'` with values: `'invoice'`, `'customer'`, `'company'`
+- Existing invoices get `'company'` as default (safe assumption)
 
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+**2. `src/components/forms/CreateInvoiceDialog.tsx`**
+- Pass the resolved `source` alongside the due date when creating an invoice
 
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+**3. `src/hooks/use-data.ts`**
+- `useCreateInvoice` / `useBulkImportInvoices`: accept and store `due_date_source`
+- `useInvoices` overdue detection: for invoices where `due_date_source` is `'customer'` or `'company'`, re-resolve the due date using `resolveDueDate()` with current customer/company data before comparing against today. For `'invoice'` source, use the stored `due_date` as-is.
+- This requires fetching customers and company data inside `useInvoices` query, or moving overdue detection to a higher-level hook that has access to all three datasets.
 
-### Technical details
+**4. `src/lib/due-date-resolver.ts`**
+- No changes needed — already has the hierarchy logic.
 
-Each hook will be updated like this pattern:
-```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
-}
-```
+### Technical detail
+The overdue detection in `useInvoices` will need to join customer data. Two options:
+- **Option A**: Fetch customers inside the `useInvoices` query and do a lookup map — simple, self-contained.
+- **Option B**: Create a new composite hook that combines invoices + customers + company — cleaner separation.
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+I'll use **Option A** for simplicity: fetch customers alongside invoices in the same query function, build a map, and re-resolve due dates for non-invoice-level sources before the overdue check.
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
