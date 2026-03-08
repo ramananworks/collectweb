@@ -25,6 +25,7 @@ export default function Outstanding() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [collectTarget, setCollectTarget] = useState<{ customerId: string; invoiceId: string } | null>(null);
   const { canRecordPayments } = usePermissions();
+  const isMobile = useIsMobile();
 
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
