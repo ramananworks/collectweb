@@ -28,6 +28,8 @@ type CollectionFormValues = z.infer<typeof collectionSchema>;
 interface RecordPaymentDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  prefillCustomerId?: string;
+  prefillInvoiceId?: string;
 }
 
 export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange }: RecordPaymentDialogProps = {}) {
