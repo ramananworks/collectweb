@@ -202,8 +202,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile header */}
         <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)}>
-            <Menu className="h-5 w-5 text-foreground" />
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex items-center justify-center h-12 w-12 -ml-2 rounded-lg active:bg-accent transition-colors"
+          >
+            <Menu className="h-7 w-7 text-foreground" />
           </button>
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-md object-cover" />
