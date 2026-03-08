@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { IndianRupee, TrendingUp, AlertTriangle, Users, UserPlus, FileText, Wallet, Share2 } from "lucide-react";
+import { IndianRupee, TrendingUp, AlertTriangle, Users, UserPlus, FileText, Wallet, Share2, Bell } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -42,6 +42,7 @@ export default function Dashboard() {
   const today = new Date().toISOString().split("T")[0];
   const todayCollection = filteredPayments.filter((p) => p.date === today).reduce((a, p) => a + p.amount, 0);
   const overdueAmount = filteredInvoices.filter((i) => i.status === "overdue").reduce((a, i) => a + (i.amount - i.paid_amount), 0);
+  const overdueInvoices = useMemo(() => filteredInvoices.filter((i) => i.status === "overdue"), [filteredInvoices]);
   const customerCount = new Set(filteredInvoices.map((i) => i.customer_id)).size;
 
   const recentInvoices = filteredInvoices.slice(0, 4);
@@ -163,6 +164,26 @@ export default function Dashboard() {
       </div>
 
       <DashboardQuickActions />
+
+      {overdueInvoices.length > 0 && (
+        <button
+          onClick={() => setDrillDown("overdue")}
+          className="w-full rounded-xl border border-destructive/30 bg-destructive/5 p-4 flex items-start gap-3 text-left hover:bg-destructive/10 transition-colors"
+        >
+          <div className="rounded-full bg-destructive/10 p-2 mt-0.5">
+            <Bell className="h-4 w-4 text-destructive" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-destructive">
+              {overdueInvoices.length} overdue invoice{overdueInvoices.length > 1 ? "s" : ""}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {formatCurrency(overdueAmount)} outstanding from {new Set(overdueInvoices.map((i) => i.customer_id)).size} customer{new Set(overdueInvoices.map((i) => i.customer_id)).size > 1 ? "s" : ""} — tap to view details
+            </p>
+          </div>
+          <AlertTriangle className="h-4 w-4 text-destructive/60 mt-1 shrink-0" />
+        </button>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Total Outstanding" value={totalOutstanding} icon={IndianRupee} variant="default" onClick={() => setDrillDown("outstanding")} />
