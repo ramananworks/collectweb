@@ -134,6 +134,39 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "resend_invite") {
+      // Get user info to re-invite
+      const { data: authUser, error: getUserErr } = await adminClient.auth.admin.getUserById(userId);
+      if (getUserErr || !authUser?.user) {
+        return new Response(JSON.stringify({ error: "User not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Check if user has never signed in (pending invitation)
+      if (authUser.user.last_sign_in_at) {
+        return new Response(JSON.stringify({ error: "This user has already accepted their invitation" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(
+        authUser.user.email!,
+        {
+          data: authUser.user.user_metadata,
+          redirectTo: "https://collectweb.lovable.app/set-password",
+        }
+      );
+
+      if (inviteErr) throw inviteErr;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "delete") {
       await adminClient.from("user_roles").delete().eq("user_id", userId);
       await adminClient.from("profiles").delete().eq("id", userId);
