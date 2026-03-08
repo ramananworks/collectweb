@@ -176,6 +176,7 @@ export default function Customers() {
         <div className="p-8 text-center text-muted-foreground">No customers found</div>
       )}
       <CustomerLedgerSheet customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
+      <EditCustomerDialog customer={editingCustomer} open={!!editingCustomer} onOpenChange={(o) => { if (!o) setEditingCustomer(null); }} />
     </div>
   );
 }
