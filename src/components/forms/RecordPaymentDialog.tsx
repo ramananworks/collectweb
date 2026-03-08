@@ -107,7 +107,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
-                <Select onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); }} defaultValue={field.value}>
+                <Select onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); }} value={field.value}>
                   <FormControl>
                     <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
                   </FormControl>
