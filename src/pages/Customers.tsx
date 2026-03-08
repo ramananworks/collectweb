@@ -127,6 +127,13 @@ export default function Customers() {
                       <h3 className="font-semibold">{c.name}</h3>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                         <Phone className="h-3 w-3" /> {c.phone}
+                        <a
+                          href={`tel:${c.phone}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 h-5 w-5 transition-colors"
+                        >
+                          <Phone className="h-3 w-3" />
+                        </a>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
