@@ -10,6 +10,7 @@ import DashboardQuickActions from "@/components/dashboard/DashboardQuickActions"
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { useCustomers, useInvoices, usePayments, useAreas, formatCurrency } from "@/hooks/use-data";
 import { differenceInDays } from "date-fns";
+import { toast } from "@/hooks/use-toast";
 
 const barColors = ["hsl(160, 84%, 39%)", "hsl(38, 92%, 50%)", "hsl(25, 85%, 55%)", "hsl(0, 72%, 51%)"];
 
