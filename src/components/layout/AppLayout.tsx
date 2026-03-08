@@ -89,6 +89,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const companyName = company?.name || "My Company";
+  const displayName = profile?.name || "User";
+  const displayEmail = profile?.email || "";
+  const displayRole = role || "staff";
+
   const handleSignOut = async () => {
     await signOut();
     // Clear all storage and replace history so back button won't return to dashboard
