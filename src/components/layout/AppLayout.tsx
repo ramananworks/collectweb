@@ -128,10 +128,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <p className="text-xs text-sidebar-foreground">{displayRole}</p>
           </div>
           <button
-            className="ml-auto lg:hidden text-sidebar-foreground"
+            className="ml-auto lg:hidden flex items-center justify-center h-12 w-12 -mr-2 rounded-lg active:bg-sidebar-accent transition-colors text-sidebar-foreground"
             onClick={() => setSidebarOpen(false)}
           >
-            <X className="h-5 w-5" />
+            <X className="h-7 w-7" />
           </button>
         </div>
 
