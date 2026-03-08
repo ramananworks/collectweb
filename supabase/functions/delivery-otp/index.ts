@@ -42,20 +42,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify caller role allows delivery operations
-    const { data: callerRole, error: roleError } = await callerClient
+    // Verify caller role allows delivery operations (multi-role aware)
+    const { data: callerRoles, error: roleError } = await callerClient
       .from("user_roles")
       .select("role, company_id")
-      .eq("user_id", caller.id)
-      .single();
-    console.log("Role lookup:", callerRole, "error:", roleError?.message);
+      .eq("user_id", caller.id);
+    console.log("Role lookup:", callerRoles, "error:", roleError?.message);
 
-    if (!callerRole || !["owner", "manager", "delivery_staff"].includes(callerRole.role)) {
+    const roleList = (callerRoles || []).map((r: any) => r.role);
+    const allowedRoles = ["owner", "manager", "delivery_staff"];
+    if (!roleList.some((r: string) => allowedRoles.includes(r))) {
       return new Response(JSON.stringify({ error: "Insufficient permissions" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Get company_id from the first role record
+    const callerCompanyId = callerRoles?.[0]?.company_id;
 
     const { action, invoiceId, otpCode, location } = await req.json();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
