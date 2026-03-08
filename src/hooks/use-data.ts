@@ -61,7 +61,28 @@ export function useInvoices() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as Invoice[];
+      const today = new Date().toISOString().slice(0, 10);
+      const overdueIds: string[] = [];
+      const invoices = (data as Invoice[]).map((inv) => {
+        if (
+          (inv.status === "pending" || inv.status === "delivered") &&
+          inv.due_date < today &&
+          inv.paid_amount < inv.amount
+        ) {
+          overdueIds.push(inv.id);
+          return { ...inv, status: "overdue" };
+        }
+        return inv;
+      });
+      // Background DB update for newly overdue invoices
+      if (overdueIds.length > 0) {
+        supabase
+          .from("invoices")
+          .update({ status: "overdue" })
+          .in("id", overdueIds)
+          .then();
+      }
+      return invoices;
     },
   });
 }
