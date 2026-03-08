@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Mail, Phone, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Plus, Mail, Phone, MoreVertical, Pencil, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/shared/StatusBadges";
 import { useProfiles } from "@/hooks/use-data";
@@ -74,6 +74,23 @@ export default function UserManagement() {
 
   const [deleteUser, setDeleteUser] = useState<{ id: string; name: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+
+  const handleResendInvite = async (userId: string, name: string) => {
+    setResendingId(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-member", {
+        body: { action: "resend_invite", userId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Invitation resent to ${name}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to resend invitation");
+    } finally {
+      setResendingId(null);
+    }
+  };
 
   const handleToggleRole = (role: AppRole) => {
     setEditRoles((prev) =>
@@ -189,6 +206,13 @@ export default function UserManagement() {
                         }}
                       >
                         <Pencil className="h-4 w-4 mr-2" /> Change Roles
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={resendingId === member.id}
+                        onClick={() => handleResendInvite(member.id, member.name)}
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${resendingId === member.id ? "animate-spin" : ""}`} />
+                        {resendingId === member.id ? "Resending..." : "Resend Invite"}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
