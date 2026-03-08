@@ -174,12 +174,14 @@ export function useCreateInvoice() {
       invoice_date: string;
       amount: number;
       due_date: string;
+      due_date_source?: string;
       description?: string;
     }) => {
       const row = {
         ...values,
         company_id: profile!.company_id!,
         description: values.description || null,
+        due_date_source: values.due_date_source || "company",
         paid_amount: 0,
         status: "pending",
       };
