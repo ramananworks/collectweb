@@ -128,9 +128,22 @@ export default function Customers() {
                         <Phone className="h-3 w-3" /> {c.phone}
                       </div>
                     </div>
-                    <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
-                      <p className="text-xs text-muted-foreground">Outstanding</p>
-                      <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
+                    <div className="flex items-start gap-2">
+                      {canManageCustomers && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => { e.stopPropagation(); setEditingCustomer(c); }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
+                        <p className="text-xs text-muted-foreground">Outstanding</p>
+                        <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
+                      </div>
+                    </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
