@@ -38,7 +38,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
   const [shareOpen, setShareOpen] = useState(false);
-
+  const isMobile = useIsMobile();
   const allEntries = useMemo<LedgerEntry[]>(() => {
     if (!customer) return [];
 
