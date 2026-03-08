@@ -183,8 +183,8 @@ export default function Outstanding() {
                           <th className="text-right px-2 py-2 font-medium">Amount</th>
                           <th className="text-right px-2 py-2 font-medium">Paid</th>
                           <th className="text-right px-2 py-2 font-medium">Balance</th>
-                          <th className="text-center px-4 py-2 font-medium">Status</th>
-                        </tr>
+                          <th className="text-center px-2 py-2 font-medium">Status</th>
+                          {canRecordPayments && <th className="text-center px-4 py-2 font-medium">Action</th>}
                       </thead>
                       <tbody>
                         {custInvoices.map((inv) => (
