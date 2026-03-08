@@ -47,7 +47,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleSignOut = async () => {
     await signOut();
-    window.location.href = "/login";
+    // Clear all storage and replace history so back button won't return to dashboard
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.replace("/login");
   };
 
   return (

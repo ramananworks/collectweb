@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Redirect invited users to set-password page
         if (event === "PASSWORD_RECOVERY") {
-          window.location.href = "/set-password";
+          window.location.replace("/set-password");
         }
       }
     );

@@ -30,7 +30,8 @@ export default function Login() {
       }
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
-      navigate("/dashboard");
+      // Replace history so Android back button won't return to login
+      window.location.replace("/dashboard");
     }
   };
 
