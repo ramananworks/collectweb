@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
 import { usePayments, useCustomers, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
@@ -9,23 +10,26 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
 export default function Collections() {
   const [search, setSearch] = useState("");
+  const [modeFilter, setModeFilter] = useState("all");
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
 
   const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"]] });
 
+  const filteredPayments = modeFilter === "all" ? payments : payments.filter((p) => p.mode === modeFilter);
+
   const customerCollections = customers
     .map((customer) => {
-      const collections = payments.filter((p) => p.customer_name === customer.name);
+      const collections = filteredPayments.filter((p) => p.customer_name === customer.name);
       const totalCollected = collections.reduce((sum, p) => sum + p.amount, 0);
       return { ...customer, collections, totalCollected };
     })
     .filter((c) => c.collections.length > 0)
     .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
 
-  const totalCollections = payments.length;
-  const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+  const totalCollections = filteredPayments.length;
+  const totalAmount = filteredPayments.reduce((sum, p) => sum + p.amount, 0);
 
   function toggleCustomer(customerId: string) {
     setExpandedCustomers((prev) => {
@@ -60,9 +64,22 @@ export default function Collections() {
         <RecordPaymentDialog />
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+      <div className="flex gap-2">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Search customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <Select value={modeFilter} onValueChange={setModeFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Mode" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Modes</SelectItem>
+            <SelectItem value="cash">Cash</SelectItem>
+            <SelectItem value="upi">UPI</SelectItem>
+            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-3">
