@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef, ReactNode } fro
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type AppRole = "owner" | "manager" | "staff";
+type AppRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
 
 interface Profile {
   id: string;
@@ -49,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // First, restore session from storage
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -61,17 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       initializedRef.current = true;
     });
 
-    // Then listen for auth state changes (sign in, sign out, token refresh, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // Skip if this is the initial event and we already handled it via getSession
         if (!initializedRef.current) return;
 
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Use setTimeout to avoid potential deadlocks with Supabase auth internals
           setTimeout(async () => {
             await fetchProfileAndRole(session.user.id);
           }, 0);
@@ -80,7 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setRole(null);
         }
 
-        // Redirect invited users to set-password page
         if (event === "PASSWORD_RECOVERY") {
           window.location.replace("/set-password");
         }

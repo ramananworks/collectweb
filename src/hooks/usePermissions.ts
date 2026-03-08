@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 
-type AppRole = "owner" | "manager" | "staff";
+type AppRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
 
 interface Permissions {
   role: AppRole | null;
@@ -9,11 +9,15 @@ interface Permissions {
   /** Add/Edit customers, invoices, payments & areas */
   isManager: boolean;
   /** View all, Add payments only */
-  isStaff: boolean;
+  isCollectionStaff: boolean;
+  /** Create invoices, view customers/invoices, record payments, delivery OTP */
+  isDeliveryStaff: boolean;
   /** Can add/edit customers */
   canManageCustomers: boolean;
   /** Can add/edit invoices */
   canManageInvoices: boolean;
+  /** Can create invoices (includes delivery staff) */
+  canCreateInvoices: boolean;
   /** Can record payments */
   canRecordPayments: boolean;
   /** Can manage areas & company settings */
@@ -22,6 +26,10 @@ interface Permissions {
   canManageTeam: boolean;
   /** Can bulk import */
   canBulkImport: boolean;
+  /** Can view reports */
+  canViewReports: boolean;
+  /** Can initiate delivery confirmation */
+  canConfirmDelivery: boolean;
 }
 
 export function usePermissions(): Permissions {
@@ -29,18 +37,23 @@ export function usePermissions(): Permissions {
 
   const isOwner = role === "owner";
   const isManager = role === "manager";
-  const isStaff = role === "staff";
+  const isCollectionStaff = role === "collection_staff";
+  const isDeliveryStaff = role === "delivery_staff";
 
   return {
     role,
     isOwner,
     isManager,
-    isStaff,
+    isCollectionStaff,
+    isDeliveryStaff,
     canManageCustomers: isOwner || isManager,
     canManageInvoices: isOwner || isManager,
-    canRecordPayments: isOwner || isManager || isStaff, // all roles
+    canCreateInvoices: isOwner || isManager || isDeliveryStaff,
+    canRecordPayments: isOwner || isManager || isCollectionStaff || isDeliveryStaff,
     canManageSettings: isOwner,
     canManageTeam: isOwner,
     canBulkImport: isOwner || isManager,
+    canViewReports: isOwner || isManager,
+    canConfirmDelivery: isOwner || isManager || isDeliveryStaff,
   };
 }
