@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,13 +33,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type AppRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
 
@@ -54,40 +49,56 @@ function useUserRoles() {
   });
 }
 
+function getRolesForUser(roles: { user_id: string; role: AppRole }[], userId: string): AppRole[] {
+  return roles.filter((r) => r.user_id === userId).map((r) => r.role);
+}
+
+const editableRoles: { value: AppRole; label: string }[] = [
+  { value: "manager", label: "Manager" },
+  { value: "collection_staff", label: "Collection Staff" },
+  { value: "delivery_staff", label: "Delivery Staff" },
+];
+
 export default function UserManagement() {
   const { data: profiles = [] } = useProfiles();
   const { data: roles = [] } = useUserRoles();
   const [inviteOpen, setInviteOpen] = useState(false);
-  const { role, user } = useAuth();
-  const canManage = role === "owner" || role === "manager";
+  const { roles: myRoles, user } = useAuth();
+  const isOwner = myRoles.includes("owner");
+  const canManage = isOwner || myRoles.includes("manager");
   const queryClient = useQueryClient();
 
-  const [editUser, setEditUser] = useState<{ id: string; name: string; currentRole: AppRole } | null>(null);
-  const [editRole, setEditRole] = useState<AppRole>("collection_staff");
+  const [editUser, setEditUser] = useState<{ id: string; name: string; currentRoles: AppRole[] } | null>(null);
+  const [editRoles, setEditRoles] = useState<AppRole[]>([]);
   const [editLoading, setEditLoading] = useState(false);
 
   const [deleteUser, setDeleteUser] = useState<{ id: string; name: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const getRoleForUser = (userId: string): AppRole => {
-    return roles.find((r) => r.user_id === userId)?.role as AppRole || "collection_staff";
+  const handleToggleRole = (role: AppRole) => {
+    setEditRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+    );
   };
 
-  const handleEditRole = async () => {
-    if (!editUser) return;
+  const handleEditRoles = async () => {
+    if (!editUser || editRoles.length === 0) {
+      toast.error("Select at least one role");
+      return;
+    }
     setEditLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("manage-member", {
-        body: { action: "update_role", userId: editUser.id, role: editRole },
+        body: { action: "update_roles", userId: editUser.id, roles: editRoles },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success(`${editUser.name}'s role updated to ${editRole}`);
+      toast.success(`${editUser.name}'s roles updated`);
       queryClient.invalidateQueries({ queryKey: ["user_roles"] });
       queryClient.invalidateQueries({ queryKey: ["profiles"] });
       setEditUser(null);
     } catch (err: any) {
-      toast.error(err.message || "Failed to update role");
+      toast.error(err.message || "Failed to update roles");
     } finally {
       setEditLoading(false);
     }
@@ -113,6 +124,10 @@ export default function UserManagement() {
     }
   };
 
+  const rolesUnchanged = editUser
+    ? JSON.stringify([...editRoles].sort()) === JSON.stringify([...editUser.currentRoles].sort())
+    : true;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -129,9 +144,10 @@ export default function UserManagement() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {profiles.map((member) => {
-          const memberRole = getRoleForUser(member.id);
+          const memberRoles = getRolesForUser(roles, member.id);
           const isSelf = member.id === user?.id;
-          const canEdit = canManage && !isSelf && !(memberRole === "owner" && role !== "owner");
+          const memberIsOwner = memberRoles.includes("owner");
+          const canEdit = canManage && !isSelf && !(memberIsOwner && !isOwner);
 
           return (
             <div key={member.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in">
@@ -140,9 +156,11 @@ export default function UserManagement() {
                   {member.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold truncate">{member.name}</h3>
-                    <RoleBadge role={memberRole} />
+                    {memberRoles.map((r) => (
+                      <RoleBadge key={r} role={r} />
+                    ))}
                     {isSelf && <span className="text-xs text-muted-foreground">(you)</span>}
                   </div>
                   <div className="mt-2 space-y-1">
@@ -166,11 +184,11 @@ export default function UserManagement() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         onClick={() => {
-                          setEditUser({ id: member.id, name: member.name, currentRole: memberRole });
-                          setEditRole(memberRole);
+                          setEditUser({ id: member.id, name: member.name, currentRoles: memberRoles });
+                          setEditRoles([...memberRoles]);
                         }}
                       >
-                        <Pencil className="h-4 w-4 mr-2" /> Change Role
+                        <Pencil className="h-4 w-4 mr-2" /> Change Roles
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
@@ -189,31 +207,40 @@ export default function UserManagement() {
 
       <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} />
 
-      {/* Edit Role Dialog */}
+      {/* Edit Roles Dialog */}
       <Dialog open={!!editUser} onOpenChange={(o) => { if (!o) setEditUser(null); }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Change Role</DialogTitle>
-            <DialogDescription>Update {editUser?.name}'s role</DialogDescription>
+            <DialogTitle>Change Roles</DialogTitle>
+            <DialogDescription>Update {editUser?.name}'s roles. Select one or more.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <Select value={editRole} onValueChange={(v) => setEditRole(v as AppRole)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {role === "owner" && <SelectItem value="owner">Owner</SelectItem>}
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="collection_staff">Collection Staff</SelectItem>
-                <SelectItem value="delivery_staff">Delivery Staff</SelectItem>
-              </SelectContent>
-            </Select>
+            {isOwner && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="role-owner"
+                  checked={editRoles.includes("owner")}
+                  onCheckedChange={() => handleToggleRole("owner")}
+                />
+                <Label htmlFor="role-owner" className="text-sm font-medium">Owner</Label>
+              </div>
+            )}
+            {editableRoles.map((r) => (
+              <div key={r.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`role-${r.value}`}
+                  checked={editRoles.includes(r.value)}
+                  onCheckedChange={() => handleToggleRole(r.value)}
+                />
+                <Label htmlFor={`role-${r.value}`} className="text-sm font-medium">{r.label}</Label>
+              </div>
+            ))}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditUser(null)}>Cancel</Button>
               <Button
                 className="gradient-primary text-primary-foreground"
-                disabled={editLoading || editRole === editUser?.currentRole}
-                onClick={handleEditRole}
+                disabled={editLoading || rolesUnchanged || editRoles.length === 0}
+                onClick={handleEditRoles}
               >
                 {editLoading ? "Saving..." : "Save"}
               </Button>

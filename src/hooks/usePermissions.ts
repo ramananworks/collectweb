@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 type AppRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
 
 interface Permissions {
-  role: AppRole | null;
+  roles: AppRole[];
   /** Full access to everything */
   isOwner: boolean;
   /** Add/Edit customers, invoices, payments & areas */
@@ -33,15 +33,15 @@ interface Permissions {
 }
 
 export function usePermissions(): Permissions {
-  const { role } = useAuth();
+  const { roles } = useAuth();
 
-  const isOwner = role === "owner";
-  const isManager = role === "manager";
-  const isCollectionStaff = role === "collection_staff";
-  const isDeliveryStaff = role === "delivery_staff";
+  const isOwner = roles.includes("owner");
+  const isManager = roles.includes("manager");
+  const isCollectionStaff = roles.includes("collection_staff");
+  const isDeliveryStaff = roles.includes("delivery_staff");
 
   return {
-    role,
+    roles,
     isOwner,
     isManager,
     isCollectionStaff,

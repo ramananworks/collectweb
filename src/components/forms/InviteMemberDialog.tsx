@@ -6,16 +6,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+
+type AppRole = "manager" | "collection_staff" | "delivery_staff";
+
+const roleOptions: { value: AppRole; label: string }[] = [
+  { value: "manager", label: "Manager" },
+  { value: "collection_staff", label: "Collection Staff" },
+  { value: "delivery_staff", label: "Delivery Staff" },
+];
 
 const schema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Valid email required"),
   phone: z.string().optional(),
-  role: z.enum(["manager", "collection_staff", "delivery_staff"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -27,26 +35,43 @@ interface Props {
 
 export function InviteMemberDialog({ open, onOpenChange }: Props) {
   const [loading, setLoading] = useState(false);
+  const [selectedRoles, setSelectedRoles] = useState<AppRole[]>(["collection_staff"]);
   const qc = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", phone: "", role: "collection_staff" },
+    defaultValues: { name: "", email: "", phone: "" },
   });
 
+  const handleToggleRole = (role: AppRole) => {
+    setSelectedRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+    );
+  };
+
   const onSubmit = async (values: FormValues) => {
+    if (selectedRoles.length === 0) {
+      toast.error("Select at least one role");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("invite-member", {
-        body: { ...values, redirectUrl: `${window.location.origin}/set-password` },
+        body: {
+          ...values,
+          roles: selectedRoles,
+          redirectUrl: `${window.location.origin}/set-password`,
+        },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success(`${values.name} has been invited as ${values.role}`);
+      toast.success(`${values.name} has been invited as ${selectedRoles.join(", ")}`);
       qc.invalidateQueries({ queryKey: ["profiles"] });
+      qc.invalidateQueries({ queryKey: ["user_roles"] });
       form.reset();
+      setSelectedRoles(["collection_staff"]);
       onOpenChange(false);
     } catch (err: any) {
       toast.error(err.message || "Failed to invite member");
@@ -85,25 +110,25 @@ export function InviteMemberDialog({ open, onOpenChange }: Props) {
                 <FormMessage />
               </FormItem>
             )} />
-            <FormField control={form.control} name="role" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select role" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="collection_staff">Collection Staff</SelectItem>
-                    <SelectItem value="delivery_staff">Delivery Staff</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Roles</Label>
+              {roleOptions.map((r) => (
+                <div key={r.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`invite-role-${r.value}`}
+                    checked={selectedRoles.includes(r.value)}
+                    onCheckedChange={() => handleToggleRole(r.value)}
+                  />
+                  <Label htmlFor={`invite-role-${r.value}`} className="text-sm">{r.label}</Label>
+                </div>
+              ))}
+              {selectedRoles.length === 0 && (
+                <p className="text-xs text-destructive">Select at least one role</p>
+              )}
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-              <Button type="submit" disabled={loading} className="gradient-primary text-primary-foreground">
+              <Button type="submit" disabled={loading || selectedRoles.length === 0} className="gradient-primary text-primary-foreground">
                 {loading ? "Inviting..." : "Invite Member"}
               </Button>
             </div>

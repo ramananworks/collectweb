@@ -15,7 +15,6 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify the caller is authenticated and is owner/manager
     const authHeader = req.headers.get("Authorization")!;
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -27,14 +26,15 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    // Verify caller has owner/manager role
-    const { data: callerRole } = await callerClient
+
+    // Verify caller has owner role
+    const { data: callerRoles } = await callerClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", caller.id)
-      .single();
+      .eq("user_id", caller.id);
 
-    if (!callerRole || callerRole.role !== "owner") {
+    const callerRoleList = (callerRoles || []).map((r: any) => r.role);
+    if (!callerRoleList.includes("owner")) {
       return new Response(JSON.stringify({ error: "Insufficient permissions. Only owners can invite members." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -55,23 +55,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, name, phone, role, redirectUrl } = await req.json();
+    const { email, name, phone, role, roles, redirectUrl } = await req.json();
 
-    if (!email || !name || !role) {
+    // Support both single role (legacy) and roles array
+    const assignRoles: string[] = Array.isArray(roles) && roles.length > 0
+      ? roles
+      : role ? [role] : [];
+
+    if (!email || !name || assignRoles.length === 0) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Use admin client to invite user by email
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
+    // Pass first role in metadata for handle_new_user trigger, we'll add extras after
     const { data: newUser, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       data: {
         name,
         company_id: callerProfile.company_id,
-        role,
+        role: assignRoles[0],
+        roles: JSON.stringify(assignRoles),
       },
       redirectTo: redirectUrl || undefined,
     });
@@ -81,6 +87,16 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Insert additional roles beyond the first (trigger handles the first one)
+    if (newUser.user && assignRoles.length > 1) {
+      const extraRoles = assignRoles.slice(1).map((r: string) => ({
+        user_id: newUser.user!.id,
+        role: r,
+        company_id: callerProfile.company_id,
+      }));
+      await adminClient.from("user_roles").insert(extraRoles);
     }
 
     // Update phone if provided

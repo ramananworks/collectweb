@@ -28,13 +28,16 @@ Deno.serve(async (req) => {
     }
 
     // Verify caller is owner or manager
-    const { data: callerRole } = await callerClient
+    const { data: callerRoles } = await callerClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", caller.id)
-      .single();
+      .eq("user_id", caller.id);
 
-    if (!callerRole || !["owner", "manager"].includes(callerRole.role)) {
+    const callerRoleList = (callerRoles || []).map((r: any) => r.role);
+    const callerIsOwner = callerRoleList.includes("owner");
+    const callerIsManager = callerRoleList.includes("manager");
+
+    if (!callerIsOwner && !callerIsManager) {
       return new Response(JSON.stringify({ error: "Only owners and managers can manage members." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -55,7 +58,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { action, userId, role } = await req.json();
+    const { action, userId, role, roles } = await req.json();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Verify target user belongs to same company
@@ -80,41 +83,51 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Prevent modifying owners (only owners can manage other owners)
-    const { data: targetRole } = await adminClient
+    // Prevent modifying owners unless caller is owner
+    const { data: targetRoles } = await adminClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .single();
+      .eq("user_id", userId);
 
-    if (targetRole?.role === "owner" && callerRole.role !== "owner") {
+    const targetRoleList = (targetRoles || []).map((r: any) => r.role);
+    if (targetRoleList.includes("owner") && !callerIsOwner) {
       return new Response(JSON.stringify({ error: "Only owners can manage other owners" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (action === "update_role") {
-      if (!role || !["owner", "manager", "collection_staff", "delivery_staff"].includes(role)) {
-        return new Response(JSON.stringify({ error: "Invalid role" }), {
+    // Support both old single-role and new multi-role update
+    if (action === "update_role" || action === "update_roles") {
+      const newRoles: string[] = action === "update_roles" && Array.isArray(roles)
+        ? roles
+        : role ? [role] : [];
+
+      const validRoles = ["owner", "manager", "collection_staff", "delivery_staff"];
+      if (newRoles.length === 0 || newRoles.some((r: string) => !validRoles.includes(r))) {
+        return new Response(JSON.stringify({ error: "Invalid roles" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Only owners can promote to owner
-      if (role === "owner" && callerRole.role !== "owner") {
+
+      // Only owners can assign owner role
+      if (newRoles.includes("owner") && !callerIsOwner) {
         return new Response(JSON.stringify({ error: "Only owners can assign the owner role" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const { error } = await adminClient
-        .from("user_roles")
-        .update({ role })
-        .eq("user_id", userId);
-
-      if (error) throw error;
+      // Delete existing roles and insert new ones
+      await adminClient.from("user_roles").delete().eq("user_id", userId);
+      const inserts = newRoles.map((r: string) => ({
+        user_id: userId,
+        role: r,
+        company_id: callerProfile.company_id,
+      }));
+      const { error: insertError } = await adminClient.from("user_roles").insert(inserts);
+      if (insertError) throw insertError;
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -122,7 +135,6 @@ Deno.serve(async (req) => {
     }
 
     if (action === "delete") {
-      // Delete profile and role first, then auth user
       await adminClient.from("user_roles").delete().eq("user_id", userId);
       await adminClient.from("profiles").delete().eq("id", userId);
       const { error } = await adminClient.auth.admin.deleteUser(userId);
