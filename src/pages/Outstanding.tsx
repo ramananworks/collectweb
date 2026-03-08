@@ -222,6 +222,13 @@ export default function Outstanding() {
           );
         })}
       </div>
+
+      <RecordPaymentDialog
+        open={!!collectTarget}
+        onOpenChange={(v) => !v && setCollectTarget(null)}
+        prefillCustomerId={collectTarget?.customerId}
+        prefillInvoiceId={collectTarget?.invoiceId}
+      />
     </div>
   );
 }
