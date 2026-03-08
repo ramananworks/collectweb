@@ -1,42 +1,39 @@
 
 
-## Include Mock Data for Development
+## Simplify Invoice Statuses
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+### New Status Flow
+| Status | Meaning | Color |
+|--------|---------|-------|
+| `pending` | Created, delivery not yet confirmed | Yellow (warning) |
+| `delivered` | Delivery OTP confirmed | Blue (primary) |
+| `paid` | Fully paid | Green (success) |
+| `overdue` | Past due date, not fully paid | Red (destructive) |
 
-### What will change
+**Removed:** `partial` — no longer a valid status.
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+### Changes
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+**1. Database migration**
+- Update existing invoices with `status = 'partial'` to `'pending'` (they have balance remaining, not yet paid in full — treat as pending)
+- Keep default as `'pending'`
 
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+**2. `src/types/index.ts`**
+- Change `InvoiceStatus` to `"pending" | "paid" | "overdue" | "delivered"`
 
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+**3. `src/components/shared/StatusBadges.tsx`**
+- Remove `partial` entry
+- Change `pending` color from blue/info to yellow/warning
 
-### Technical details
+**4. `src/pages/Invoices.tsx`**
+- Remove `"partial"` from `statusFilters`
 
-Each hook will be updated like this pattern:
-```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
-}
-```
+**5. `src/pages/Reports.tsx`**
+- Remove `"Partial"` SelectItem from status filter
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+**6. `src/hooks/use-data.ts`**
+- In `useRecordPayment`: when payment recorded but not fully paid, keep status as-is (pending/delivered) instead of setting to `"partial"`. Only update to `"paid"` when fully paid.
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
+**7. `supabase/functions/delivery-otp/index.ts`**
+- No change needed — already sets status to `"delivered"` on OTP verify.
+
