@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Building2,
+  IndianRupee,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
