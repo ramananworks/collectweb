@@ -49,6 +49,21 @@ function useUserRoles() {
   });
 }
 
+function usePendingInvites(userIds: string[]) {
+  return useQuery({
+    queryKey: ["pending_invites", userIds],
+    queryFn: async () => {
+      if (userIds.length === 0) return {} as Record<string, boolean>;
+      const { data, error } = await supabase.functions.invoke("manage-member", {
+        body: { action: "check_invite_status", userId: userIds },
+      });
+      if (error) throw error;
+      return (data?.pending || {}) as Record<string, boolean>;
+    },
+    enabled: userIds.length > 0,
+  });
+}
+
 function getRolesForUser(roles: { user_id: string; role: AppRole }[], userId: string): AppRole[] {
   return roles.filter((r) => r.user_id === userId).map((r) => r.role);
 }
@@ -62,6 +77,8 @@ const editableRoles: { value: AppRole; label: string }[] = [
 export default function UserManagement() {
   const { data: profiles = [] } = useProfiles();
   const { data: roles = [] } = useUserRoles();
+  const otherUserIds = profiles.filter((p) => p.id !== undefined).map((p) => p.id);
+  const { data: pendingInvites = {} } = usePendingInvites(otherUserIds);
   const [inviteOpen, setInviteOpen] = useState(false);
   const { roles: myRoles, user } = useAuth();
   const isOwner = myRoles.includes("owner");
@@ -165,6 +182,7 @@ export default function UserManagement() {
           const isSelf = member.id === user?.id;
           const memberIsOwner = memberRoles.includes("owner");
           const canEdit = canManage && !isSelf && !(memberIsOwner && !isOwner);
+          const isPending = pendingInvites[member.id] === true;
 
           return (
             <div key={member.id} className="rounded-xl bg-card p-5 stat-card-shadow hover:stat-card-shadow-hover transition-all animate-fade-in">
@@ -207,13 +225,15 @@ export default function UserManagement() {
                       >
                         <Pencil className="h-4 w-4 mr-2" /> Change Roles
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        disabled={resendingId === member.id}
-                        onClick={() => handleResendInvite(member.id, member.name)}
-                      >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${resendingId === member.id ? "animate-spin" : ""}`} />
-                        {resendingId === member.id ? "Resending..." : "Resend Invite"}
-                      </DropdownMenuItem>
+                      {isPending && (
+                        <DropdownMenuItem
+                          disabled={resendingId === member.id}
+                          onClick={() => handleResendInvite(member.id, member.name)}
+                        >
+                          <RefreshCw className={`h-4 w-4 mr-2 ${resendingId === member.id ? "animate-spin" : ""}`} />
+                          {resendingId === member.id ? "Resending..." : "Resend Invite"}
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
                         onClick={() => setDeleteUser({ id: member.id, name: member.name })}

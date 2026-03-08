@@ -134,8 +134,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "check_invite_status") {
+      // Return pending status for multiple users
+      const userIds: string[] = Array.isArray(userId) ? userId : [userId];
+      const pending: Record<string, boolean> = {};
+      for (const uid of userIds) {
+        const { data: authUser } = await adminClient.auth.admin.getUserById(uid);
+        pending[uid] = !!(authUser?.user && !authUser.user.last_sign_in_at);
+      }
+      return new Response(JSON.stringify({ pending }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "resend_invite") {
-      // Get user info to re-invite
       const { data: authUser, error: getUserErr } = await adminClient.auth.admin.getUserById(userId);
       if (getUserErr || !authUser?.user) {
         return new Response(JSON.stringify({ error: "User not found" }), {
@@ -144,7 +156,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Check if user has never signed in (pending invitation)
       if (authUser.user.last_sign_in_at) {
         return new Response(JSON.stringify({ error: "This user has already accepted their invitation" }), {
           status: 400,
