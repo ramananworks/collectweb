@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search, IndianRupee, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,8 @@ import { useCustomers, useInvoices, useAreas, formatCurrency } from "@/hooks/use
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
+import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function Outstanding() {
   const [search, setSearch] = useState("");
