@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Search, IndianRupee, ChevronDown, ChevronRight } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { Search, IndianRupee, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCustomers, useInvoices, useAreas, formatCurrency } from "@/hooks/use-data";
+import { useCustomers, useInvoices, useAreas, useCompany, formatCurrency } from "@/hooks/use-data";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
+import { downloadPDF } from "@/lib/share-utils";
+import jsPDF from "jspdf";
 
 export default function Outstanding() {
   const [search, setSearch] = useState("");
@@ -26,6 +28,7 @@ export default function Outstanding() {
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
   const { data: areas = [] } = useAreas();
+  const { data: company } = useCompany();
 
   const ptr = usePullToRefresh({
     queryKeys: [["customers"], ["invoices"], ["areas"]],
@@ -89,6 +92,84 @@ export default function Outstanding() {
     });
   };
 
+  const handleExportPDF = useCallback(() => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pw = doc.internal.pageSize.getWidth();
+    const ph = doc.internal.pageSize.getHeight();
+    let y = 20;
+
+    const checkPage = (needed: number) => {
+      if (y + needed > ph - 20) { doc.addPage(); y = 20; }
+    };
+
+    // Company name
+    if (company?.name) {
+      doc.setFontSize(16); doc.setFont("helvetica", "bold");
+      doc.text(company.name, pw / 2, y, { align: "center" }); y += 10;
+    }
+
+    // Title + date
+    doc.setFontSize(13); doc.setFont("helvetica", "bold");
+    doc.text("Outstanding Summary", pw / 2, y, { align: "center" }); y += 7;
+    doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(120, 120, 120);
+    doc.text(`Generated on ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, pw / 2, y, { align: "center" }); y += 5;
+    if (areaFilter !== "all") {
+      doc.text(`Area: ${areaFilter}`, pw / 2, y, { align: "center" }); y += 5;
+    }
+    y += 3;
+
+    // Grand total
+    doc.setDrawColor(200, 200, 200); doc.line(15, y, pw - 15, y); y += 8;
+    doc.setTextColor(30, 30, 30); doc.setFontSize(11); doc.setFont("helvetica", "bold");
+    doc.text("Total Outstanding", 20, y);
+    doc.text(formatCurrency(grandTotal), pw - 20, y, { align: "right" }); y += 5;
+    doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(100, 100, 100);
+    doc.text(`${outstandingData.length} customers`, 20, y); y += 8;
+    doc.setDrawColor(200, 200, 200); doc.line(15, y, pw - 15, y); y += 10;
+
+    // Customer breakdowns
+    for (const { customer, invoices: custInv, total } of outstandingData) {
+      checkPage(20 + custInv.length * 6);
+
+      doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 30, 30);
+      doc.text(customer.name, 20, y);
+      doc.text(formatCurrency(total), pw - 20, y, { align: "right" }); y += 5;
+      doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(120, 120, 120);
+      doc.text(`${customer.area || "No area"} · ${custInv.length} invoices`, 20, y); y += 6;
+
+      // Table header
+      doc.setFillColor(245, 245, 245);
+      doc.rect(18, y - 3, pw - 36, 6, "F");
+      doc.setFontSize(7.5); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 100, 100);
+      doc.text("Invoice", 20, y); doc.text("Date", 55, y); doc.text("Amount", 90, y, { align: "right" });
+      doc.text("Paid", 120, y, { align: "right" }); doc.text("Balance", 155, y, { align: "right" });
+      doc.text("Status", pw - 20, y, { align: "right" }); y += 5;
+
+      // Rows
+      doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
+      for (const inv of custInv) {
+        checkPage(7);
+        doc.setFontSize(7.5);
+        doc.text(inv.invoice_number, 20, y);
+        doc.text(inv.invoice_date, 55, y);
+        doc.text(formatCurrency(Number(inv.amount)), 90, y, { align: "right" });
+        doc.text(formatCurrency(Number(inv.paid_amount)), 120, y, { align: "right" });
+        doc.setFont("helvetica", "bold");
+        doc.text(formatCurrency(Number(inv.amount) - Number(inv.paid_amount)), 155, y, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text(inv.status, pw - 20, y, { align: "right" });
+        y += 5;
+      }
+      y += 6;
+    }
+
+    // Footer
+    const footerY = ph - 10;
+    doc.setFontSize(7); doc.setFont("helvetica", "normal"); doc.setTextColor(160, 160, 160);
+    doc.text(`Generated by ${company?.name || "CollectWeb"}`, pw / 2, footerY, { align: "center" });
+
+    downloadPDF(doc.output("blob"), `outstanding-summary-${new Date().toISOString().split("T")[0]}.pdf`);
+  }, [outstandingData, grandTotal, company, areaFilter]);
   return (
     <div
       ref={ptr.containerRef}
@@ -114,6 +195,9 @@ export default function Outstanding() {
             {outstandingData.length} customers
           </p>
         </div>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
+          <Download className="h-4 w-4" /> PDF
+        </Button>
       </div>
 
       {/* Filters */}
