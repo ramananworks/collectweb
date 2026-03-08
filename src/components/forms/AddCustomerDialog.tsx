@@ -243,7 +243,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
                   </Button>
                 ) : <span />}
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit" className="gradient-primary text-primary-foreground" disabled={addCustomer.isPending}>
+                <Button type="submit" className="gradient-primary text-primary-foreground px-8" disabled={addCustomer.isPending}>
                   {addCustomer.isPending ? "Adding..." : "Add"}
                 </Button>
               </div>
