@@ -69,7 +69,7 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
       gstin: values.gstin || null,
       credit_limit: values.credit_limit,
       default_due_days: values.default_due_days ?? null,
-      assigned_to: values.assigned_to || null,
+      assigned_to: (values.assigned_to && values.assigned_to !== "__none__") ? values.assigned_to : null,
     }, {
       onSuccess: () => {
         toast({ title: "Customer updated", description: `${values.name} has been updated.` });
