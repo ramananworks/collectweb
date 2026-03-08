@@ -19,24 +19,36 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    console.log("Auth header present:", !!authHeader);
+    
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "No authorization header" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user: caller } } = await callerClient.auth.getUser();
+    const { data: { user: caller }, error: userError } = await callerClient.auth.getUser();
+    console.log("User lookup result:", caller?.id, "error:", userError?.message);
+    
     if (!caller) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      return new Response(JSON.stringify({ error: "Unauthorized", detail: userError?.message }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Verify caller role allows delivery operations
-    const { data: callerRole } = await callerClient
+    const { data: callerRole, error: roleError } = await callerClient
       .from("user_roles")
       .select("role, company_id")
       .eq("user_id", caller.id)
       .single();
+    console.log("Role lookup:", callerRole, "error:", roleError?.message);
 
     if (!callerRole || !["owner", "manager", "delivery_staff"].includes(callerRole.role)) {
       return new Response(JSON.stringify({ error: "Insufficient permissions" }), {
