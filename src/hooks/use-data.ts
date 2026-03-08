@@ -361,6 +361,7 @@ export function useBulkImportInvoices() {
         company_id: profile!.company_id!,
         paid_amount: 0,
         status: "pending",
+        due_date_source: "invoice" as const,
       }));
       const { error } = await supabase.from("invoices").insert(rows);
       if (error) throw error;
