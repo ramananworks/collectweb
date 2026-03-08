@@ -17,6 +17,7 @@ export default function Customers() {
   const [areaFilter, setAreaFilter] = useState("all");
   const [userFilter, setUserFilter] = useState("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
   const { data: profiles = [] } = useProfiles();

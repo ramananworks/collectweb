@@ -274,6 +274,28 @@ export function useRecordPayment() {
   });
 }
 
+export function useUpdateCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (values: {
+      id: string;
+      name: string;
+      phone: string;
+      address: string;
+      area: string;
+      gstin?: string | null;
+      credit_limit: number;
+      default_due_days?: number | null;
+      assigned_to?: string | null;
+    }) => {
+      const { id, ...rest } = values;
+      const { error } = await supabase.from("customers").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["customers"] }),
+  });
+}
+
 export function useAddArea() {
   const qc = useQueryClient();
   const { profile } = useAuth();
