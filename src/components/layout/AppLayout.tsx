@@ -30,6 +30,7 @@ import { useCompany } from "@/hooks/use-data";
 import { useNetworkStatus } from "@/hooks/use-network-status";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { WifiOff, Wifi, Clock } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
