@@ -236,7 +236,13 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
               </Collapsible>
 
               {/* Submit area with safe bottom padding */}
-              <div className="flex justify-end gap-2 pt-3 pb-6">
+              <div className="flex flex-wrap items-center gap-2 pt-3 pb-6">
+                {supportsContacts() && (
+                  <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={pickFromContacts}>
+                    <Contact className="h-3.5 w-3.5" /> From Contacts
+                  </Button>
+                )}
+                <div className="flex-1" />
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
                 <Button type="submit" className="gradient-primary text-primary-foreground" disabled={addCustomer.isPending}>
                   {addCustomer.isPending ? "Adding..." : "Add Customer"}
