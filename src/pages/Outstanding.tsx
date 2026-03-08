@@ -28,6 +28,7 @@ export default function Outstanding() {
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
   const { data: areas = [] } = useAreas();
+  const { data: company } = useCompany();
 
   const ptr = usePullToRefresh({
     queryKeys: [["customers"], ["invoices"], ["areas"]],
