@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
           customer_id: invoice.customer_id,
           otp_code: otp,
           expires_at: expiresAt,
-          company_id: callerRole.company_id,
+          company_id: callerCompanyId,
         });
 
       if (insertError) throw insertError;
