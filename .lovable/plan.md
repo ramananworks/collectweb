@@ -1,42 +1,63 @@
 
 
-## Include Mock Data for Development
+## Plan: Multi-Role Assignment for Team Members
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+### Problem
+Currently each user has a single role row in `user_roles`. An owner cannot assign both "Collection Staff" and "Delivery Staff" to the same employee.
 
-### What will change
+### Approach
+The `user_roles` table already has a structure that supports multiple rows per user (composite unique on `user_id + role`). We need to shift from "single role per user" to "multiple roles per user" across the entire stack.
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+### Database Changes
+1. **Remove the unique constraint** on `(user_id, role)` if it prevents multiple role rows — actually this constraint allows it (one row per role). The issue is the app currently uses `.single()` queries expecting one role. We need to allow multiple rows per user_id (different roles).
+2. No schema migration needed — the existing `user_roles` table already supports multiple rows per user with different roles.
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+### Code Changes
 
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+**1. AuthContext (`src/contexts/AuthContext.tsx`)**
+- Change `role: AppRole | null` to `roles: AppRole[]`
+- Fetch all roles: `.select("role").eq("user_id", userId)` (remove `.single()`)
+- Expose `roles` array instead of single `role`
 
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+**2. usePermissions (`src/hooks/usePermissions.ts`)**
+- Accept `roles` array from AuthContext
+- `isOwner = roles.includes("owner")`, etc.
+- Permissions become unions: `canConfirmDelivery = isOwner || isManager || isDeliveryStaff`
 
-### Technical details
+**3. AppLayout (`src/components/layout/AppLayout.tsx`)**
+- Filter nav items checking if any of user's roles match the allowed roles array
 
-Each hook will be updated like this pattern:
-```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
-}
-```
+**4. UserManagement (`src/pages/UserManagement.tsx`)**
+- Display multiple role badges per user
+- **Edit Role dialog**: Replace single `<Select>` with checkboxes for each role (Manager, Collection Staff, Delivery Staff)
+- Call manage-member edge function with a roles array
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+**5. InviteMemberDialog (`src/components/forms/InviteMemberDialog.tsx`)**
+- Allow selecting multiple roles via checkboxes when inviting
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
+**6. Edge Functions**
+- **`manage-member`**: `update_role` action → delete existing roles, insert new role rows
+- **`invite-member`**: Accept roles array in metadata
+- **`delivery-otp`**: Check if user has delivery-capable role (any of their roles)
+
+**7. `handle_new_user` DB function**
+- Update to handle a JSON array of roles from `raw_user_meta_data` and insert multiple `user_roles` rows
+
+**8. StatusBadges (`src/components/shared/StatusBadges.tsx`)**
+- Support rendering multiple `<RoleBadge>` components per user
+
+**9. `useUserRoles` hook in UserManagement**
+- Group roles by `user_id` to return `Map<string, AppRole[]>`
+
+### Summary of Files to Modify
+- `src/contexts/AuthContext.tsx` — roles array
+- `src/hooks/usePermissions.ts` — array-based checks
+- `src/components/layout/AppLayout.tsx` — multi-role nav filtering
+- `src/pages/UserManagement.tsx` — multi-select UI for roles
+- `src/components/forms/InviteMemberDialog.tsx` — multi-select on invite
+- `src/components/shared/StatusBadges.tsx` — render multiple badges
+- `supabase/functions/manage-member/index.ts` — handle roles array
+- `supabase/functions/invite-member/index.ts` — handle roles array
+- `supabase/functions/delivery-otp/index.ts` — check any matching role
+- DB function `handle_new_user` — insert multiple role rows (migration)
+
