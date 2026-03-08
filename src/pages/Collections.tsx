@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { Search, ChevronDown, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
+import { Search, ChevronDown, ChevronRight, CalendarIcon, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
 import { usePayments, useCustomers, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
@@ -11,13 +16,20 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 export default function Collections() {
   const [search, setSearch] = useState("");
   const [modeFilter, setModeFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
 
   const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"]] });
 
-  const filteredPayments = modeFilter === "all" ? payments : payments.filter((p) => p.mode === modeFilter);
+  const filteredPayments = payments.filter((p) => {
+    if (modeFilter !== "all" && p.mode !== modeFilter) return false;
+    if (dateFrom && p.date < format(dateFrom, "yyyy-MM-dd")) return false;
+    if (dateTo && p.date > format(dateTo, "yyyy-MM-dd")) return false;
+    return true;
+  });
 
   const customerCollections = customers
     .map((customer) => {
