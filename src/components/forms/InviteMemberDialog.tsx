@@ -60,7 +60,7 @@ export function InviteMemberDialog({ open, onOpenChange }: Props) {
         body: {
           ...values,
           roles: selectedRoles,
-          redirectUrl: `${window.location.origin}/set-password`,
+          redirectUrl: "https://collectweb.lovable.app/set-password",
         },
       });
 
