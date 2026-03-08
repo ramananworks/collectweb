@@ -51,10 +51,42 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStatus();
 
-  const companyName = company?.name || "My Company";
-  const displayName = profile?.name || "User";
-  const displayEmail = profile?.email || "";
-  const displayRole = role || "staff";
+  const backPressedRef = useRef(false);
+  const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Android back button: double-press to minimize/exit, never navigate to login
+  useEffect(() => {
+    const handlePopState = () => {
+      // Always push state back so we never leave the app via back button
+      window.history.pushState(null, "", window.location.href);
+
+      if (backPressedRef.current) {
+        // Second press — try to minimize or close
+        const android = (window as any).Android;
+        if (android && typeof android.minimizeApp === "function") {
+          android.minimizeApp();
+        } else if (android && typeof android.exitApp === "function") {
+          android.exitApp();
+        }
+        backPressedRef.current = false;
+      } else {
+        backPressedRef.current = true;
+        toast({ title: "Press back again to exit" });
+        backTimerRef.current = setTimeout(() => {
+          backPressedRef.current = false;
+        }, 2000);
+      }
+    };
+
+    // Push an initial state so popstate fires on back press
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (backTimerRef.current) clearTimeout(backTimerRef.current);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
