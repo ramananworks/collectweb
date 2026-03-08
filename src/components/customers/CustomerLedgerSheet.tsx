@@ -291,9 +291,15 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               </Button>
             )}
             <div className="ml-auto flex gap-1.5">
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShareOpen(true)}>
-                <Share2 className="h-3 w-3" /> Share
-              </Button>
+              {isMobile ? (
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
+                  <Share2 className="h-3 w-3" /> Share PDF
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShareOpen(true)}>
+                  <Share2 className="h-3 w-3" /> Share
+                </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
