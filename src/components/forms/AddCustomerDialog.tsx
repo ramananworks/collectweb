@@ -12,8 +12,11 @@ import { Plus, ChevronDown, Contact } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
 
-const supportsContactPicker = "contacts" in navigator && "ContactsManager" in window;
-const supportsAndroidBridge = typeof window !== "undefined" && !!(window as any).Android?.pickContact;
+function supportsContacts() {
+  const hasAndroid = typeof window !== "undefined" && !!(window as any).Android?.pickContact;
+  const hasWebPicker = typeof navigator !== "undefined" && "contacts" in navigator && "ContactsManager" in window;
+  return hasAndroid || hasWebPicker;
+}
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
@@ -139,7 +142,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
         <DialogHeader className="px-5 pt-5 pb-3 shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle>Add New Customer</DialogTitle>
-            {(supportsContactPicker || supportsAndroidBridge) && (
+            {supportsContacts() && (
               <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={pickFromContacts}>
                 <Contact className="h-3.5 w-3.5" /> From Contacts
               </Button>
