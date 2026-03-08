@@ -151,12 +151,12 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
               <FormField control={form.control} name="assigned_to" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Assigned To</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} value={field.value || "__none__"}>
                     <FormControl>
                       <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
+                      <SelectItem value="__none__">Unassigned</SelectItem>
                       {profiles.map((p) => (
                         <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
                       ))}
