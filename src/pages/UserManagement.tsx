@@ -49,6 +49,21 @@ function useUserRoles() {
   });
 }
 
+function usePendingInvites(userIds: string[]) {
+  return useQuery({
+    queryKey: ["pending_invites", userIds],
+    queryFn: async () => {
+      if (userIds.length === 0) return {} as Record<string, boolean>;
+      const { data, error } = await supabase.functions.invoke("manage-member", {
+        body: { action: "check_invite_status", userId: userIds },
+      });
+      if (error) throw error;
+      return (data?.pending || {}) as Record<string, boolean>;
+    },
+    enabled: userIds.length > 0,
+  });
+}
+
 function getRolesForUser(roles: { user_id: string; role: AppRole }[], userId: string): AppRole[] {
   return roles.filter((r) => r.user_id === userId).map((r) => r.role);
 }
