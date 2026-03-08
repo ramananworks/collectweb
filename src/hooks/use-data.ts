@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { enqueueMutation } from "@/lib/offline-queue";
 import { toast } from "sonner";
+import { resolveDueDate } from "@/lib/due-date-resolver";
 
 export type Customer = Tables<"customers">;
 export type Invoice = Tables<"invoices">;
