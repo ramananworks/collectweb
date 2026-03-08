@@ -1,17 +1,42 @@
 
 
-## Simplify Customer Ledger: Replace Export dropdown with single PDF button
+## Include Mock Data for Development
 
-Currently the customer ledger has a Share button + an Export dropdown (CSV + Print PDF). The user wants to match the Outstanding page pattern: on mobile show "Share PDF", on desktop show a single "PDF" download button. Remove the Export dropdown entirely.
+Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
 
-### Changes in `src/components/customers/CustomerLedgerSheet.tsx`
+### What will change
 
-1. **Remove the Export dropdown** (lines 303-313) — delete the `DropdownMenu` with CSV and Print/Save PDF options
-2. **Remove unused imports**: `DropdownMenu`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuTrigger`
-3. **Remove unused functions**: `exportCSV`, `exportPDF`, `fmtAmount`, `downloadBlob`
-4. **Update desktop button** (lines 298-301): Replace the Share modal button with a PDF download button using `handleSharePDF` (which already falls back to `downloadPDF` when share API is unavailable)
-   - Mobile: `<Share2 /> Share` (triggers native share)
-   - Desktop: `<Download /> PDF` (downloads the PDF)
-5. **Remove `ShareOptionsModal`** usage and `shareOpen` state since desktop no longer opens it
-6. **Clean up imports**: Remove `ShareOptionsModal`, `ShareSummaryData`, `DropdownMenu` components
+**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
 
+- Add a `const DEV_MODE = true;` flag at the top of the file
+- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
+- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+
+**2. Mock data included:**
+- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
+- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
+- **5 payments** with different modes (cash, UPI, bank transfer)
+- **6 areas** matching the customer areas
+- **1 company** (Sharma Traders Pvt Ltd)
+- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+
+**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+
+### Technical details
+
+Each hook will be updated like this pattern:
+```typescript
+export function useCustomers() {
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
+      // ... existing Supabase query
+    },
+  });
+}
+```
+
+The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+
+When you're ready to re-enable real data, simply set `DEV_MODE = false`.
