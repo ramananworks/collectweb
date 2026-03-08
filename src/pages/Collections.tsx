@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { Search, ChevronDown, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
+import { Search, ChevronDown, ChevronRight, CalendarIcon, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
 import { usePayments, useCustomers, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
@@ -11,13 +16,20 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 export default function Collections() {
   const [search, setSearch] = useState("");
   const [modeFilter, setModeFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
 
   const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"]] });
 
-  const filteredPayments = modeFilter === "all" ? payments : payments.filter((p) => p.mode === modeFilter);
+  const filteredPayments = payments.filter((p) => {
+    if (modeFilter !== "all" && p.mode !== modeFilter) return false;
+    if (dateFrom && p.date < format(dateFrom, "yyyy-MM-dd")) return false;
+    if (dateTo && p.date > format(dateTo, "yyyy-MM-dd")) return false;
+    return true;
+  });
 
   const customerCollections = customers
     .map((customer) => {
@@ -64,13 +76,13 @@ export default function Collections() {
         <RecordPaymentDialog />
       </div>
 
-      <div className="flex gap-2">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[160px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={modeFilter} onValueChange={setModeFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Mode" />
           </SelectTrigger>
           <SelectContent>
@@ -80,6 +92,38 @@ export default function Collections() {
             <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Date range filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal text-xs", !dateFrom && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+              {dateFrom ? format(dateFrom, "dd MMM yyyy") : "From date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+        <span className="text-xs text-muted-foreground">to</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal text-xs", !dateTo && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+              {dateTo ? format(dateTo, "dd MMM yyyy") : "To date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateTo} onSelect={setDateTo} disabled={(d) => dateFrom ? d < dateFrom : false} initialFocus className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+        {(dateFrom || dateTo) && (
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
 
       <div className="space-y-3">
