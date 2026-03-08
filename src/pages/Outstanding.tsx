@@ -95,7 +95,7 @@ export default function Outstanding() {
   };
 
 
-  const handleExportPDF = useCallback(() => {
+  const handleExportPDF = useCallback(async () => {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pw = doc.internal.pageSize.getWidth();
     const ph = doc.internal.pageSize.getHeight();
