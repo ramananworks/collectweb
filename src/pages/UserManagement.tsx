@@ -77,6 +77,8 @@ const editableRoles: { value: AppRole; label: string }[] = [
 export default function UserManagement() {
   const { data: profiles = [] } = useProfiles();
   const { data: roles = [] } = useUserRoles();
+  const otherUserIds = profiles.filter((p) => p.id !== undefined).map((p) => p.id);
+  const { data: pendingInvites = {} } = usePendingInvites(otherUserIds);
   const [inviteOpen, setInviteOpen] = useState(false);
   const { roles: myRoles, user } = useAuth();
   const isOwner = myRoles.includes("owner");
