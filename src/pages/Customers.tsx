@@ -127,16 +127,16 @@ export default function Customers() {
                       <h3 className="font-semibold">{c.name}</h3>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                         <Phone className="h-3 w-3" /> {c.phone}
-                        <a
-                          href={`tel:${c.phone}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 h-5 w-5 transition-colors"
-                        >
-                          <Phone className="h-3 w-3" />
-                        </a>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
+                      <a
+                        href={`tel:${c.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 h-7 w-7 transition-colors"
+                      >
+                        <Phone className="h-3.5 w-3.5" />
+                      </a>
                       {canManageCustomers && (
                         <Button
                           variant="ghost"
@@ -147,14 +147,16 @@ export default function Customers() {
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
                       )}
-                      <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
-                        <p className="text-xs text-muted-foreground">Outstanding</p>
-                        <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
-                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                    <MapPin className="h-3 w-3 shrink-0" /> {c.address}
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <MapPin className="h-3 w-3 shrink-0" /> {c.address}
+                    </div>
+                    <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
+                      <p className="text-xs text-muted-foreground">Outstanding</p>
+                      <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
+                    </div>
                   </div>
                   {c.gstin && (
                     <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
