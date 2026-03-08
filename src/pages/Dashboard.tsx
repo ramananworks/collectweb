@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { IndianRupee, TrendingUp, AlertTriangle, Users, UserPlus, FileText, Wallet, Share2 } from "lucide-react";
+import { IndianRupee, TrendingUp, AlertTriangle, Users, UserPlus, FileText, Wallet, Share2, Bell } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
