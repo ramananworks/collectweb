@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type AppRole = "owner" | "manager" | "staff";
+type AppRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
 
 function useUserRoles() {
   return useQuery({
