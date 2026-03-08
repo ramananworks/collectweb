@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
-import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { useMemo, useState, useCallback } from "react";
+import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { CalendarIcon, X, Download, Share2 } from "lucide-react";
 import ShareOptionsModal from "@/components/shared/ShareOptionsModal";
 import type { ShareSummaryData } from "@/lib/share-utils";
+import { downloadPDF } from "@/lib/share-utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -13,6 +14,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useInvoices, usePayments, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
+import { useIsMobile } from "@/hooks/use-mobile";
+import jsPDF from "jspdf";
 
 interface CustomerLedgerSheetProps {
   customer: Customer | null;
