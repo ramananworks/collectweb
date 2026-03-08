@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -46,6 +46,16 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     resolver: zodResolver(collectionSchema),
     defaultValues: { customer_id: prefillCustomerId || "", invoice_id: prefillInvoiceId || "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: authProfile?.name || "", notes: "" },
   });
+
+  useEffect(() => {
+    if (open && prefillCustomerId) {
+      form.setValue("customer_id", prefillCustomerId);
+      form.setValue("invoice_id", prefillInvoiceId || "");
+    }
+    if (!open) {
+      form.reset();
+    }
+  }, [open, prefillCustomerId, prefillInvoiceId]);
 
   const selectedCustomerId = form.watch("customer_id");
 
