@@ -144,7 +144,6 @@ export default function Customers() {
                         <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
                       </div>
                     </div>
-                    </div>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                     <MapPin className="h-3 w-3 shrink-0" /> {c.address}
