@@ -19,42 +19,8 @@ type DrillDownType = "outstanding" | "todayCollection" | "overdue" | null;
 export default function Dashboard() {
   const [areaFilter, setAreaFilter] = useState("all");
   const [drillDown, setDrillDown] = useState<DrillDownType>(null);
-  const backPressedRef = useRef(false);
-  const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Android back button: double-press to exit/minimize
-  useEffect(() => {
-    const handlePopState = () => {
-      // Push state back so we stay on this page
-      window.history.pushState(null, "", window.location.href);
 
-      if (backPressedRef.current) {
-        // Second press — try to minimize or close
-        const android = (window as any).Android;
-        if (android && typeof android.minimizeApp === "function") {
-          android.minimizeApp();
-        } else if (android && typeof android.exitApp === "function") {
-          android.exitApp();
-        }
-        backPressedRef.current = false;
-      } else {
-        backPressedRef.current = true;
-        toast({ title: "Press back again to exit" });
-        backTimerRef.current = setTimeout(() => {
-          backPressedRef.current = false;
-        }, 2000);
-      }
-    };
-
-    // Push an initial state so popstate fires on back press
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-      if (backTimerRef.current) clearTimeout(backTimerRef.current);
-    };
-  }, []);
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
   const { data: payments = [] } = usePayments();
