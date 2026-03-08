@@ -74,6 +74,23 @@ export default function UserManagement() {
 
   const [deleteUser, setDeleteUser] = useState<{ id: string; name: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+
+  const handleResendInvite = async (userId: string, name: string) => {
+    setResendingId(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-member", {
+        body: { action: "resend_invite", userId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Invitation resent to ${name}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to resend invitation");
+    } finally {
+      setResendingId(null);
+    }
+  };
 
   const handleToggleRole = (role: AppRole) => {
     setEditRoles((prev) =>
