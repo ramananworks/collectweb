@@ -204,7 +204,8 @@ export default function UserManagement() {
               <SelectContent>
                 {role === "owner" && <SelectItem value="owner">Owner</SelectItem>}
                 <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="staff">Staff</SelectItem>
+                <SelectItem value="collection_staff">Collection Staff</SelectItem>
+                <SelectItem value="delivery_staff">Delivery Staff</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex justify-end gap-2">

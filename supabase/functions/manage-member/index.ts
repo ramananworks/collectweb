@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "update_role") {
-      if (!role || !["owner", "manager", "staff"].includes(role)) {
+      if (!role || !["owner", "manager", "collection_staff", "delivery_staff"].includes(role)) {
         return new Response(JSON.stringify({ error: "Invalid role" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
