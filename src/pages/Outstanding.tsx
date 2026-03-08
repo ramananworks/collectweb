@@ -195,6 +195,9 @@ export default function Outstanding() {
             {outstandingData.length} customers
           </p>
         </div>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
+          <Download className="h-4 w-4" /> PDF
+        </Button>
       </div>
 
       {/* Filters */}
