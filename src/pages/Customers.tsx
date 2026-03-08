@@ -164,7 +164,7 @@ export default function Customers() {
                     </span>
                     {c.default_due_days != null && (
                       <span className="text-xs text-muted-foreground">
-                        Terms: <span className="font-medium text-foreground">{c.default_due_days}d</span>
+                        Terms: <span className="font-medium text-foreground">{c.default_due_days} days</span>
                       </span>
                     )}
                     <span className={`text-xs font-medium ${c.credit_limit > 0 && c.outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
