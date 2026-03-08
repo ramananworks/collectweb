@@ -63,7 +63,7 @@ export default function UserManagement() {
   const queryClient = useQueryClient();
 
   const [editUser, setEditUser] = useState<{ id: string; name: string; currentRole: AppRole } | null>(null);
-  const [editRole, setEditRole] = useState<AppRole>("staff");
+  const [editRole, setEditRole] = useState<AppRole>("collection_staff");
   const [editLoading, setEditLoading] = useState(false);
 
   const [deleteUser, setDeleteUser] = useState<{ id: string; name: string } | null>(null);
