@@ -49,7 +49,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile, role, signOut } = useAuth();
+  const { profile, roles, signOut } = useAuth();
   const { data: company } = useCompany();
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStatus();
@@ -60,11 +60,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Android back button: double-press to minimize/exit, never navigate to login
   useEffect(() => {
     const handlePopState = () => {
-      // Always push state back so we never leave the app via back button
       window.history.pushState(null, "", window.location.href);
 
       if (backPressedRef.current) {
-        // Second press — try to minimize or close
         const android = (window as any).Android;
         if (android && typeof android.minimizeApp === "function") {
           android.minimizeApp();
@@ -81,7 +79,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Push an initial state so popstate fires on back press
     window.history.pushState(null, "", window.location.href);
     window.addEventListener("popstate", handlePopState);
 
@@ -94,22 +91,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const companyName = company?.name || "My Company";
   const displayName = profile?.name || "User";
   const displayEmail = profile?.email || "";
-  const { role: permRole } = usePermissions();
+
   const roleLabels: Record<string, string> = {
     owner: "Owner",
     manager: "Manager",
     collection_staff: "Collection Staff",
     delivery_staff: "Delivery Staff",
   };
-  const displayRole = roleLabels[role || ""] || role || "Staff";
+  const displayRole = roles.length > 0
+    ? roles.map((r) => roleLabels[r] || r).join(", ")
+    : "Staff";
 
   const navItems = allNavItems.filter(
-    (item) => item.roles === null || (role && item.roles.includes(role))
+    (item) => item.roles === null || roles.some((r) => item.roles!.includes(r))
   );
 
   const handleSignOut = async () => {
     await signOut();
-    // Clear all storage and replace history so back button won't return to dashboard
     localStorage.clear();
     sessionStorage.clear();
     window.location.replace("/login");
