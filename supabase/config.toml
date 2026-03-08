@@ -1,6 +1,8 @@
 project_id = "fsntgyhqgywbbkeytpxz"
 
 [auth]
+site_url = "https://collectweb.lovable.app"
+additional_redirect_urls = ["https://collectweb.lovable.app/set-password", "https://collectweb.lovable.app/dashboard", "https://collectweb.lovable.app"]
   [auth.email]
     otp_length = 6
 
