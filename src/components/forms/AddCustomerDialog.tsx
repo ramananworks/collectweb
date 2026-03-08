@@ -142,14 +142,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
       )}
       <DialogContent className="sm:max-w-md max-h-[100dvh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-5 pt-5 pb-3 shrink-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle>Add New Customer</DialogTitle>
-            {supportsContacts() && (
-              <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={pickFromContacts}>
-                <Contact className="h-3.5 w-3.5" /> From Contacts
-              </Button>
-            )}
-          </div>
+          <DialogTitle>Add New Customer</DialogTitle>
         </DialogHeader>
         <div className="overflow-y-auto flex-1 px-5 pb-5" style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}>
           <Form {...form}>
@@ -243,7 +236,13 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
               </Collapsible>
 
               {/* Submit area with safe bottom padding */}
-              <div className="flex justify-end gap-2 pt-3 pb-6">
+              <div className="flex flex-wrap items-center gap-2 pt-3 pb-6">
+                {supportsContacts() && (
+                  <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={pickFromContacts}>
+                    <Contact className="h-3.5 w-3.5" /> From Contacts
+                  </Button>
+                )}
+                <div className="flex-1" />
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
                 <Button type="submit" className="gradient-primary text-primary-foreground" disabled={addCustomer.isPending}>
                   {addCustomer.isPending ? "Adding..." : "Add Customer"}
