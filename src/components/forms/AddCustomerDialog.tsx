@@ -142,7 +142,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
         <DialogHeader className="px-5 pt-5 pb-3 shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle>Add New Customer</DialogTitle>
-            {(supportsContactPicker || supportsAndroidBridge) && (
+            {supportsContacts() && (
               <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs" onClick={pickFromContacts}>
                 <Contact className="h-3.5 w-3.5" /> From Contacts
               </Button>
