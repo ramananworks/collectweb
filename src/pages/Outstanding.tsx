@@ -153,23 +153,35 @@ export default function Outstanding() {
           return (
             <div key={customer.id} className="rounded-xl border bg-card overflow-hidden">
               {/* Customer row */}
-              <button
-                onClick={() => toggleExpand(customer.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/50 transition-colors"
-              >
-                {isOpen ? (
-                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <div className="flex items-center gap-2 px-4 py-3">
+                <button
+                  onClick={() => toggleExpand(customer.id)}
+                  className="flex-1 flex items-center gap-3 text-left hover:bg-accent/50 transition-colors rounded-lg -mx-2 px-2 py-0.5"
+                >
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{customer.name}</p>
+                    <p className="text-xs text-muted-foreground">{customer.area || "No area"} · {custInvoices.length} invoices</p>
+                  </div>
+                  <span className="text-sm font-semibold text-destructive whitespace-nowrap">
+                    {formatCurrency(total)}
+                  </span>
+                </button>
+                {canRecordPayments && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs shrink-0"
+                    onClick={() => setCollectTarget({ customerId: customer.id, invoiceId: "" })}
+                  >
+                    Collect
+                  </Button>
                 )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{customer.name}</p>
-                  <p className="text-xs text-muted-foreground">{customer.area || "No area"} · {custInvoices.length} invoices</p>
-                </div>
-                <span className="text-sm font-semibold text-destructive whitespace-nowrap">
-                  {formatCurrency(total)}
-                </span>
-              </button>
+              </div>
 
               {/* Invoice breakdown */}
               {isOpen && (
