@@ -15,7 +15,7 @@ const schema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Valid email required"),
   phone: z.string().optional(),
-  role: z.enum(["manager", "staff"]),
+  role: z.enum(["manager", "collection_staff", "delivery_staff"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -31,7 +31,7 @@ export function InviteMemberDialog({ open, onOpenChange }: Props) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", phone: "", role: "staff" },
+    defaultValues: { name: "", email: "", phone: "", role: "collection_staff" },
   });
 
   const onSubmit = async (values: FormValues) => {
@@ -94,7 +94,8 @@ export function InviteMemberDialog({ open, onOpenChange }: Props) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="collection_staff">Collection Staff</SelectItem>
+                    <SelectItem value="delivery_staff">Delivery Staff</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

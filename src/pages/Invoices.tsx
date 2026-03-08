@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,11 +9,12 @@ import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
 import ScanInvoiceDialog, { ExtractedInvoiceData } from "@/components/forms/ScanInvoiceDialog";
+import { DeliveryConfirmDialog } from "@/components/forms/DeliveryConfirmDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { usePermissions } from "@/hooks/usePermissions";
 
-const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue"];
+const statusFilters: (InvoiceStatus | "all")[] = ["all", "pending", "partial", "paid", "overdue", "delivered"];
 
 export default function Invoices() {
   const [search, setSearch] = useState("");
@@ -21,10 +22,11 @@ export default function Invoices() {
   const [areaFilter, setAreaFilter] = useState("all");
   const [scanDefaults, setScanDefaults] = useState<ExtractedInvoiceData | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [deliveryInvoice, setDeliveryInvoice] = useState<{ id: string; customerName: string } | null>(null);
   const { data: invoices = [], refetch } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
-  const { canManageInvoices, canBulkImport } = usePermissions();
+  const { canManageInvoices, canCreateInvoices, canBulkImport, canConfirmDelivery } = usePermissions();
 
   const ptr = usePullToRefresh({ queryKeys: [["invoices"], ["customers"], ["areas"]] });
 
@@ -62,10 +64,10 @@ export default function Invoices() {
           <h1 className="text-2xl font-bold">Invoices & Loans</h1>
           <p className="text-sm text-muted-foreground">{invoices.length} total records</p>
         </div>
-        {canManageInvoices && (
+        {canCreateInvoices && (
           <div className="flex flex-wrap gap-2">
             {canBulkImport && <BulkImportInvoicesDialog />}
-            <ScanInvoiceDialog onDataExtracted={handleDataExtracted} />
+            {canManageInvoices && <ScanInvoiceDialog onDataExtracted={handleDataExtracted} />}
             <Button className="gradient-primary text-primary-foreground gap-2" onClick={() => { setScanDefaults(null); setCreateOpen(true); }}>
               <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Create</span> Invoice
             </Button>
@@ -125,12 +127,14 @@ export default function Invoices() {
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Balance</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Due Date</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
-                
+                {canConfirmDelivery && (
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Delivery</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {filtered.map((inv) => (
-                <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer">
+                <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs">{inv.invoice_number}</td>
                   <td className="px-4 py-3 font-medium">{inv.customer_name}</td>
                   <td className="px-4 py-3 hidden lg:table-cell text-xs text-muted-foreground">{getCustomerArea(inv.customer_id)}</td>
@@ -140,6 +144,26 @@ export default function Invoices() {
                   <td className="px-4 py-3 hidden md:table-cell font-semibold">{formatCurrency(inv.amount - inv.paid_amount)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{inv.due_date}</td>
                   <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
+                  {canConfirmDelivery && (
+                    <td className="px-4 py-3">
+                      {inv.status !== "delivered" && (inv as any).otp_verified !== true ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeliveryInvoice({ id: inv.id, customerName: inv.customer_name });
+                          }}
+                        >
+                          <Truck className="h-3.5 w-3.5" />
+                          Confirm
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-success font-medium">✅ Delivered</span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -149,6 +173,15 @@ export default function Invoices() {
           <div className="p-8 text-center text-muted-foreground">No invoices found</div>
         )}
       </div>
+
+      {deliveryInvoice && (
+        <DeliveryConfirmDialog
+          open={!!deliveryInvoice}
+          onOpenChange={(o) => { if (!o) setDeliveryInvoice(null); }}
+          invoiceId={deliveryInvoice.id}
+          customerName={deliveryInvoice.customerName}
+        />
+      )}
     </div>
   );
 }

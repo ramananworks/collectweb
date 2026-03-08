@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type AppRole = "owner" | "manager" | "staff";
+type AppRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
 
 function useUserRoles() {
   return useQuery({
@@ -63,14 +63,14 @@ export default function UserManagement() {
   const queryClient = useQueryClient();
 
   const [editUser, setEditUser] = useState<{ id: string; name: string; currentRole: AppRole } | null>(null);
-  const [editRole, setEditRole] = useState<AppRole>("staff");
+  const [editRole, setEditRole] = useState<AppRole>("collection_staff");
   const [editLoading, setEditLoading] = useState(false);
 
   const [deleteUser, setDeleteUser] = useState<{ id: string; name: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const getRoleForUser = (userId: string): AppRole => {
-    return roles.find((r) => r.user_id === userId)?.role || "staff";
+    return roles.find((r) => r.user_id === userId)?.role as AppRole || "collection_staff";
   };
 
   const handleEditRole = async () => {
@@ -204,7 +204,8 @@ export default function UserManagement() {
               <SelectContent>
                 {role === "owner" && <SelectItem value="owner">Owner</SelectItem>}
                 <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="staff">Staff</SelectItem>
+                <SelectItem value="collection_staff">Collection Staff</SelectItem>
+                <SelectItem value="delivery_staff">Delivery Staff</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex justify-end gap-2">

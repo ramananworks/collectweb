@@ -1,5 +1,5 @@
-export type UserRole = "owner" | "manager" | "staff";
-export type InvoiceStatus = "pending" | "partial" | "paid" | "overdue";
+export type UserRole = "owner" | "manager" | "collection_staff" | "delivery_staff";
+export type InvoiceStatus = "pending" | "partial" | "paid" | "overdue" | "delivered";
 export type PaymentMode = "cash" | "upi" | "bank_transfer";
 export type CompanyPlan = "free" | "pro" | "enterprise";
 
@@ -49,6 +49,10 @@ export interface Invoice {
   created_at: string;
   status: InvoiceStatus;
   description?: string;
+  delivered_by?: string;
+  delivery_confirmed_at?: string;
+  otp_verified?: boolean;
+  delivery_location?: { lat: number; lng: number } | null;
 }
 
 export interface Payment {
