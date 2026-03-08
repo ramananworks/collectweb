@@ -208,6 +208,13 @@ export default function UserManagement() {
                         <Pencil className="h-4 w-4 mr-2" /> Change Roles
                       </DropdownMenuItem>
                       <DropdownMenuItem
+                        disabled={resendingId === member.id}
+                        onClick={() => handleResendInvite(member.id, member.name)}
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${resendingId === member.id ? "animate-spin" : ""}`} />
+                        {resendingId === member.id ? "Resending..." : "Resend Invite"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
                         onClick={() => setDeleteUser({ id: member.id, name: member.name })}
                       >
