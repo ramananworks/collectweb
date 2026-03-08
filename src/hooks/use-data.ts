@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { enqueueMutation } from "@/lib/offline-queue";
 import { toast } from "sonner";
+import { resolveDueDate } from "@/lib/due-date-resolver";
 
 export type Customer = Tables<"customers">;
 export type Invoice = Tables<"invoices">;
@@ -56,24 +57,48 @@ export function useInvoices() {
   return useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("invoices")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      // Fetch invoices, customers, and company in parallel for dynamic due-date resolution
+      const [invoicesRes, customersRes, companyRes] = await Promise.all([
+        supabase.from("invoices").select("*").order("created_at", { ascending: false }),
+        supabase.from("customers").select("id, default_due_days"),
+        supabase.from("companies").select("id, default_due_days").limit(1).single(),
+      ]);
+      if (invoicesRes.error) throw invoicesRes.error;
+
+      const customerMap = new Map<string, number | null>();
+      (customersRes.data || []).forEach((c: { id: string; default_due_days: number | null }) => {
+        customerMap.set(c.id, c.default_due_days);
+      });
+      const companyDueDays = companyRes.data?.default_due_days ?? 30;
+
       const today = new Date().toISOString().slice(0, 10);
       const overdueIds: string[] = [];
-      const invoices = (data as Invoice[]).map((inv) => {
+
+      const invoices = (invoicesRes.data as Invoice[]).map((inv) => {
+        // Dynamically re-resolve due date based on source
+        let effectiveDueDate = inv.due_date;
+        const source = (inv as any).due_date_source as string | undefined;
+
+        if (source === "customer" || source === "company") {
+          const resolved = resolveDueDate(
+            { due_date: undefined, invoice_date: inv.invoice_date },
+            { default_due_days: source === "customer" ? customerMap.get(inv.customer_id) : null },
+            { default_due_days: companyDueDays }
+          );
+          effectiveDueDate = resolved.due_date;
+        }
+
         if (
           (inv.status === "pending" || inv.status === "delivered") &&
-          inv.due_date < today &&
+          effectiveDueDate < today &&
           inv.paid_amount < inv.amount
         ) {
           overdueIds.push(inv.id);
-          return { ...inv, status: "overdue" };
+          return { ...inv, due_date: effectiveDueDate, status: "overdue" };
         }
-        return inv;
+        return { ...inv, due_date: effectiveDueDate };
       });
+
       // Background DB update for newly overdue invoices
       if (overdueIds.length > 0) {
         supabase
@@ -174,12 +199,14 @@ export function useCreateInvoice() {
       invoice_date: string;
       amount: number;
       due_date: string;
+      due_date_source?: string;
       description?: string;
     }) => {
       const row = {
         ...values,
         company_id: profile!.company_id!,
         description: values.description || null,
+        due_date_source: values.due_date_source || "company",
         paid_amount: 0,
         status: "pending",
       };
@@ -334,6 +361,7 @@ export function useBulkImportInvoices() {
         company_id: profile!.company_id!,
         paid_amount: 0,
         status: "pending",
+        due_date_source: "invoice" as const,
       }));
       const { error } = await supabase.from("invoices").insert(rows);
       if (error) throw error;

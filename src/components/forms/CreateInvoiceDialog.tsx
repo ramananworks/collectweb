@@ -112,6 +112,7 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
       invoice_date: values.invoice_date,
       amount: values.amount,
       due_date: finalDueDate,
+      due_date_source: resolved?.source || "company",
       description: values.description,
     }, {
       onSuccess: () => {
