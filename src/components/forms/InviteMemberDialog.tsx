@@ -31,7 +31,7 @@ export function InviteMemberDialog({ open, onOpenChange }: Props) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", phone: "", role: "staff" },
+    defaultValues: { name: "", email: "", phone: "", role: "collection_staff" },
   });
 
   const onSubmit = async (values: FormValues) => {
