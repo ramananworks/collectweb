@@ -244,27 +244,16 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
                 <X className="h-3 w-3 mr-1" /> Clear
               </Button>
             )}
-            <div className="ml-auto flex gap-1.5">
+            <div className="ml-auto">
               {isMobile ? (
                 <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
-                  <Share2 className="h-3 w-3" /> Share PDF
-                </Button>
-              ) : (
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShareOpen(true)}>
                   <Share2 className="h-3 w-3" /> Share
                 </Button>
+              ) : (
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
+                  <Download className="h-3 w-3" /> PDF
+                </Button>
               )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
-                    <Download className="h-3 w-3" /> Export
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={exportCSV}>Download CSV</DropdownMenuItem>
-                  <DropdownMenuItem onClick={exportPDF}>Print / Save PDF</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
         </SheetHeader>
