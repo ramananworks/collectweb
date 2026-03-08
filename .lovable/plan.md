@@ -1,39 +1,42 @@
 
 
-# Outstanding Page Plan
+## Include Mock Data for Development
 
-## What to Build
-A new "Outstanding" page accessible from the sidebar that shows all customers with outstanding amounts, with expandable invoice breakdowns per customer.
+Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
 
-## Changes
+### What will change
 
-### 1. New page: `src/pages/Outstanding.tsx`
-- Fetch customers (via `useCustomers`) and invoices (via `useInvoices`)
-- Compute each customer's total outstanding from unpaid invoices (`amount - paid_amount` where status is not "paid")
-- Show customers sorted by outstanding (highest first), with total outstanding summary at top
-- Each customer row is an expandable accordion showing their unpaid invoices (invoice number, date, amount, paid, balance, status badge)
-- Search filter by customer name
-- Area filter dropdown
-- Pull-to-refresh support
+**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
 
-### 2. Update `src/components/layout/AppLayout.tsx`
-- Add nav item: `{ to: "/outstanding", icon: IndianRupee, label: "Outstanding", roles: null }`
+- Add a `const DEV_MODE = true;` flag at the top of the file
+- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
+- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
 
-### 3. Update `src/App.tsx`
-- Add route: `/outstanding` with `ProtectedLayout`
+**2. Mock data included:**
+- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
+- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
+- **5 payments** with different modes (cash, UPI, bank transfer)
+- **6 areas** matching the customer areas
+- **1 company** (Sharma Traders Pvt Ltd)
+- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
 
-### Layout
-```text
-┌─────────────────────────────────┐
-│ Outstanding (₹ total)    [filters] │
-├─────────────────────────────────┤
-│ ▸ Customer A    ₹50,000        │
-│   ├ INV-001  ₹20,000  ₹5,000  │
-│   └ INV-003  ₹30,000  ₹0      │
-│ ▸ Customer B    ₹25,000        │
-│   └ INV-002  ₹25,000  ₹0      │
-└─────────────────────────────────┘
+**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+
+### Technical details
+
+Each hook will be updated like this pattern:
+```typescript
+export function useCustomers() {
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
+      // ... existing Supabase query
+    },
+  });
+}
 ```
 
-Each invoice row shows: invoice number, invoice date, total amount, paid amount, balance, and status badge. Customer rows show name, area, and total outstanding.
+The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
 
+When you're ready to re-enable real data, simply set `DEV_MODE = false`.
