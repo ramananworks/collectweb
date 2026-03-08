@@ -39,6 +39,7 @@ const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
   { to: "/customers", icon: Users, label: "Customers", roles: null },
   { to: "/invoices", icon: FileText, label: "Invoices", roles: null },
+  { to: "/outstanding", icon: IndianRupee, label: "Outstanding", roles: null },
   { to: "/collections", icon: CreditCard, label: "Collections", roles: ["owner", "manager", "collection_staff"] as string[] },
   { to: "/reports", icon: BarChart3, label: "Reports", roles: ["owner", "manager"] as string[] },
   { to: "/users", icon: UserCog, label: "Team", roles: ["owner"] as string[] },
