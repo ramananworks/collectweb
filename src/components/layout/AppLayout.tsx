@@ -136,7 +136,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.to;
             return (
@@ -144,13 +144,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 key={item.to}
                 to={item.to}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                className={`flex items-center gap-4 rounded-xl px-4 min-h-[56px] text-base font-medium transition-all active:scale-[0.98] ${
                   isActive
                     ? "gradient-primary text-primary-foreground shadow-md"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 }`}
               >
-                <item.icon className="h-4.5 w-4.5 shrink-0" />
+                <item.icon className="h-6 w-6 shrink-0" />
                 {item.label}
               </NavLink>
             );
