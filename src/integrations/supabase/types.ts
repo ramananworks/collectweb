@@ -145,6 +145,61 @@ export type Database = {
           },
         ]
       }
+      delivery_otps: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          customer_id: string
+          expires_at: string
+          id: string
+          invoice_id: string
+          otp_code: string
+          verified: boolean | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          customer_id: string
+          expires_at: string
+          id?: string
+          invoice_id: string
+          otp_code: string
+          verified?: boolean | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          customer_id?: string
+          expires_at?: string
+          id?: string
+          invoice_id?: string
+          otp_code?: string
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_otps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_otps_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_otps_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number
@@ -153,12 +208,16 @@ export type Database = {
           created_at: string
           customer_id: string
           customer_name: string
+          delivered_by: string | null
+          delivery_confirmed_at: string | null
+          delivery_location: Json | null
           description: string | null
           due_date: string
           id: string
           invoice_date: string
           invoice_number: string
           local_id: string | null
+          otp_verified: boolean | null
           paid_amount: number
           status: string
           synced: boolean
@@ -170,12 +229,16 @@ export type Database = {
           created_at?: string
           customer_id: string
           customer_name: string
+          delivered_by?: string | null
+          delivery_confirmed_at?: string | null
+          delivery_location?: Json | null
           description?: string | null
           due_date: string
           id?: string
           invoice_date?: string
           invoice_number: string
           local_id?: string | null
+          otp_verified?: boolean | null
           paid_amount?: number
           status?: string
           synced?: boolean
@@ -187,12 +250,16 @@ export type Database = {
           created_at?: string
           customer_id?: string
           customer_name?: string
+          delivered_by?: string | null
+          delivery_confirmed_at?: string | null
+          delivery_location?: Json | null
           description?: string | null
           due_date?: string
           id?: string
           invoice_date?: string
           invoice_number?: string
           local_id?: string | null
+          otp_verified?: boolean | null
           paid_amount?: number
           status?: string
           synced?: boolean
@@ -210,6 +277,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_delivered_by_fkey"
+            columns: ["delivered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
