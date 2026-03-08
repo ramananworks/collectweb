@@ -42,6 +42,7 @@ export default function Dashboard() {
   const today = new Date().toISOString().split("T")[0];
   const todayCollection = filteredPayments.filter((p) => p.date === today).reduce((a, p) => a + p.amount, 0);
   const overdueAmount = filteredInvoices.filter((i) => i.status === "overdue").reduce((a, i) => a + (i.amount - i.paid_amount), 0);
+  const overdueInvoices = useMemo(() => filteredInvoices.filter((i) => i.status === "overdue"), [filteredInvoices]);
   const customerCount = new Set(filteredInvoices.map((i) => i.customer_id)).size;
 
   const recentInvoices = filteredInvoices.slice(0, 4);
