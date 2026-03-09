@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { formatCurrency, useCompany } from "@/hooks/use-data";
-import { downloadPDF } from "@/lib/share-utils";
+import { downloadPDF, sharePDFFile } from "@/lib/share-utils";
 import { formatDisplayDate } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
