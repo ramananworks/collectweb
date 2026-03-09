@@ -27,6 +27,7 @@ export default function GlobalFAB() {
     if (a.key === "customer") return canManageCustomers;
     if (a.key === "invoice") return canCreateInvoices;
     if (a.key === "payment") return canRecordPayments;
+    if (a.key === "delivery") return canConfirmDelivery;
     return true;
   }), [canManageCustomers, canCreateInvoices, canRecordPayments]);
 
