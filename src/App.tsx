@@ -42,6 +42,8 @@ const App = () => (
         <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <AppLockProvider>
+          <AppLockScreen />
           <Routes>
             <Route path="/" element={<SplashScreen />} />
             <Route path="/home" element={<Home />} />
