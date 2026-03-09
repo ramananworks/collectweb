@@ -13,6 +13,7 @@ import {
   X,
   Building2,
   IndianRupee,
+  Key,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ import { toast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
+import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
@@ -59,6 +61,7 @@ const allNavItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, roles, signOut } = useAuth();
@@ -284,6 +287,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuItem
                 onClick={() => {
                   hapticLight();
+                  setChangePasswordOpen(true);
+                }}
+              >
+                <Key className="mr-2 h-4 w-4" />
+                Change Password
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  hapticLight();
                   setLogoutOpen(true);
                 }}
                 className="text-destructive focus:text-destructive"
@@ -322,6 +334,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </div>
   );
 }
