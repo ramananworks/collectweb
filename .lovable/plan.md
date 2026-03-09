@@ -1,42 +1,76 @@
 
 
-## Include Mock Data for Development
+## Plan: Haptic Feedback via Android Bridge
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+Since your app already runs inside an Android WebView wrapper with a JavaScript bridge (`window.Android`), we don't need Capacitor. Instead, we'll extend your existing Android bridge pattern to support haptic feedback.
 
-### What will change
+### Approach
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+1. **Create a haptic utility** (`src/lib/haptics.ts`) that calls the Android bridge for vibration feedback, with silent fallback when the bridge isn't available (browser/desktop).
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+2. **Add haptic triggers** to key interactions across the app.
 
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+### New File: `src/lib/haptics.ts`
 
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+A small utility with methods like:
+- `hapticLight()` — button taps, toggles (10ms vibration)
+- `hapticMedium()` — form submissions, confirmations (25ms)
+- `hapticHeavy()` — destructive actions, errors (50ms)
+- `hapticSuccess()` — success pattern (short-short vibration)
 
-### Technical details
+Each method checks for `window.Android.vibrate(ms)` first, then falls back to the Web Vibration API (`navigator.vibrate()`), then silently no-ops.
 
-Each hook will be updated like this pattern:
-```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
+### Integration Points
+
+- **Button taps**: Nav items in `AppLayout.tsx`, quick action buttons
+- **Form submissions**: `CreateInvoiceDialog`, `AddCustomerDialog`, `RecordPaymentDialog`, `EditCustomerDialog`
+- **Success states**: After successful invoice creation, payment recording, delivery confirmation
+- **Error states**: Validation failures, API errors
+- **Destructive actions**: Logout confirmation, delete actions
+
+### Important Note for Your Android App
+
+Your Android wrapper needs to expose a `vibrate` method on the bridge. You'll need to add this to your Android `WebAppInterface` class:
+
+```java
+@JavascriptInterface
+public void vibrate(int milliseconds) {
+    Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    if (v != null && v.hasVibrator()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            v.vibrate(milliseconds);
+        }
+    }
+}
+
+@JavascriptInterface
+public void vibratePattern(String patternJson) {
+    // patternJson = "[0, 30, 50, 30]"
+    Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    if (v != null) {
+        long[] pattern = parsePattern(patternJson);
+        v.vibrate(pattern, -1);
+    }
 }
 ```
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+And add the permission in `AndroidManifest.xml`:
+```xml
+<uses-permission android:name="android.permission.VIBRATE"/>
+```
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `src/lib/haptics.ts` | Create — haptic utility functions |
+| `src/components/layout/AppLayout.tsx` | Modify — add haptic on nav tap, logout |
+| `src/components/forms/CreateInvoiceDialog.tsx` | Modify — haptic on submit success/error |
+| `src/components/forms/AddCustomerDialog.tsx` | Modify — haptic on submit success/error |
+| `src/components/forms/RecordPaymentDialog.tsx` | Modify — haptic on submit success/error |
+| `src/components/forms/EditCustomerDialog.tsx` | Modify — haptic on submit success/error |
+| `src/components/forms/DeliveryConfirmDialog.tsx` | Modify — haptic on OTP verify success |
+| `src/components/dashboard/DashboardQuickActions.tsx` | Modify — haptic on quick action tap |
+
