@@ -1,59 +1,42 @@
 
 
-## Plan: Audit Payment Collection Logic to Prevent Double Balance Adjustments
+## Include Mock Data for Development
 
-### Problem Identified
+Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
 
-After auditing the codebase, there are two sources of double-counting risk:
+### What will change
 
-1. **`invoices.paid_amount` is mutated directly** in `useRecordPayment` (line 260: `inv.paid_amount + values.amount`). If this runs twice (race condition, retry), `paid_amount` becomes inflated. The value should be **derived from the sum of payments**, not incremented.
+**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
 
-2. **`customers.outstanding` is a stale static column** (always set to `0` on insert, never updated). The Customers page reads `c.outstanding` directly, showing incorrect data. This should be **computed from invoices** on the frontend.
+- Add a `const DEV_MODE = true;` flag at the top of the file
+- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
+- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
 
-### Changes
+**2. Mock data included:**
+- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
+- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
+- **5 payments** with different modes (cash, UPI, bank transfer)
+- **6 areas** matching the customer areas
+- **1 company** (Sharma Traders Pvt Ltd)
+- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
 
-**1. `src/hooks/use-data.ts` — Derive `paid_amount` from payments instead of mutating**
+**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
 
-In `useRecordPayment`, after inserting the payment, replace the direct increment logic:
+### Technical details
 
+Each hook will be updated like this pattern:
 ```typescript
-// BEFORE (buggy — races cause double-counting):
-const newPaid = inv.paid_amount + values.amount;
-
-// AFTER (derived — always correct):
-const { data: totalPaid } = await supabase
-  .from("payments")
-  .select("amount")
-  .eq("invoice_id", values.invoice_id);
-const newPaid = (totalPaid || []).reduce((sum, p) => sum + Number(p.amount), 0);
+export function useCustomers() {
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
+      // ... existing Supabase query
+    },
+  });
+}
 ```
 
-Then update the invoice with the reconciled `paid_amount` and derived status. Also add a guard: if `newPaid > inv.amount`, cap it to prevent negative balances (don't allow overpayment unless we want credit).
+The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
 
-**2. `src/hooks/use-data.ts` — Add a `useCustomerOutstanding` helper or enrich `useCustomers`**
-
-Create a derived computation that replaces the stale `customers.outstanding` column:
-
-```typescript
-// In useCustomers or a new hook, compute outstanding from invoices:
-const outstanding = invoices
-  .filter(inv => inv.customer_id === customerId && inv.status !== "paid")
-  .reduce((sum, inv) => sum + (inv.amount - inv.paid_amount), 0);
-```
-
-**3. `src/pages/Customers.tsx` — Use derived outstanding instead of `c.outstanding`**
-
-Replace `c.outstanding` references (lines 136, 138, 156, 157) with the computed value from invoices data. Import `useInvoices` and build a `customerOutstandingMap` in a `useMemo`.
-
-**4. Validation in `RecordPaymentDialog.tsx` — Prevent overpayment**
-
-Add a check in the form's amount validation: the entered amount must not exceed the invoice balance (`inv.amount - actualPaidFromPayments`). This prevents negative balances at the input level.
-
-### Files Modified
-- `src/hooks/use-data.ts` — reconcile `paid_amount` from payments sum; remove direct increment
-- `src/pages/Customers.tsx` — derive outstanding from invoices instead of stale column
-- `src/components/forms/RecordPaymentDialog.tsx` — add overpayment guard
-
-### No Database Changes Required
-The `customers.outstanding` column can remain (harmless) but will no longer be read for display. All balances become ledger-derived.
-
+When you're ready to re-enable real data, simply set `DEV_MODE = false`.

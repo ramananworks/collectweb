@@ -250,16 +250,25 @@ export function useRecordPayment() {
       // Insert payment
       const { error } = await supabase.from("payments").insert(row);
       if (error) throw error;
-      // Update invoice paid_amount and status
+
+      // Reconcile paid_amount from sum of all payments (ledger-derived, not incremented)
+      const { data: allPayments } = await supabase
+        .from("payments")
+        .select("amount")
+        .eq("invoice_id", values.invoice_id);
+      const reconciledPaid = (allPayments || []).reduce((sum, p) => sum + Number(p.amount), 0);
+
+      // Get invoice amount to determine status
       const { data: inv } = await supabase
         .from("invoices")
-        .select("amount, paid_amount")
+        .select("amount")
         .eq("id", values.invoice_id)
         .single();
       if (inv) {
-        const newPaid = inv.paid_amount + values.amount;
-        const updates: { paid_amount: number; status?: string } = { paid_amount: newPaid };
-        if (newPaid >= inv.amount) {
+        // Cap paid_amount to invoice amount to prevent negative balance
+        const cappedPaid = Math.min(reconciledPaid, inv.amount);
+        const updates: { paid_amount: number; status?: string } = { paid_amount: cappedPaid };
+        if (cappedPaid >= inv.amount) {
           updates.status = "paid";
         }
         await supabase

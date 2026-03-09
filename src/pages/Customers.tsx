@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Phone, MapPin, MapPinned, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCustomers, useAreas, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
+import { useCustomers, useAreas, useCompany, useInvoices, formatCurrency, type Customer } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import EditCustomerDialog from "@/components/forms/EditCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
@@ -20,9 +20,22 @@ export default function Customers() {
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
   const { data: company } = useCompany();
+  const { data: invoices = [] } = useInvoices();
   const { canManageCustomers, canBulkImport } = usePermissions();
 
-  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["invoices"]] });
+
+  // Derive outstanding from invoices (ledger-based) instead of stale customers.outstanding column
+  const customerOutstandingMap = useMemo(() => {
+    const map = new Map<string, number>();
+    invoices.forEach((inv) => {
+      if (inv.status !== "paid") {
+        const current = map.get(inv.customer_id) || 0;
+        map.set(inv.customer_id, current + (Number(inv.amount) - Number(inv.paid_amount)));
+      }
+    });
+    return map;
+  }, [invoices]);
 
   const areaNames = areas.map((a) => a.name);
 
@@ -129,34 +142,41 @@ export default function Customers() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3 shrink-0" /> {c.address}
-                    </div>
-                    <div className={`text-right ${c.outstanding > 0 ? "text-destructive" : "text-success"}`}>
-                      <p className="text-xs text-muted-foreground">Outstanding</p>
-                      <p className="text-sm font-bold">{formatCurrency(c.outstanding)}</p>
-                    </div>
-                  </div>
-                  {c.gstin && (
-                    <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
-                  )}
-                  {!c.gstin && <div className="mb-1" />}
-                  {!c.gstin && <div className="mb-2" />}
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <span className="text-xs text-muted-foreground">
-                      Credit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Terms: <span className="font-medium text-foreground">
-                        {c.default_due_days != null ? c.default_due_days : (company?.default_due_days ?? 30)} days
-                      </span>
-                      {c.default_due_days == null && <span className="text-muted-foreground/60 ml-0.5">(co.)</span>}
-                    </span>
-                    <span className={`text-xs font-medium ${c.credit_limit > 0 && c.outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
-                      {c.credit_limit > 0 ? `${((c.outstanding / c.credit_limit) * 100).toFixed(0)}% used` : "—"}
-                    </span>
-                  </div>
+                  {(() => {
+                    const outstanding = customerOutstandingMap.get(c.id) || 0;
+                    return (
+                      <>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <MapPin className="h-3 w-3 shrink-0" /> {c.address}
+                          </div>
+                          <div className={`text-right ${outstanding > 0 ? "text-destructive" : "text-success"}`}>
+                            <p className="text-xs text-muted-foreground">Outstanding</p>
+                            <p className="text-sm font-bold">{formatCurrency(outstanding)}</p>
+                          </div>
+                        </div>
+                        {c.gstin && (
+                          <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
+                        )}
+                        {!c.gstin && <div className="mb-1" />}
+                        {!c.gstin && <div className="mb-2" />}
+                        <div className="flex items-center justify-between pt-3 border-t border-border">
+                          <span className="text-xs text-muted-foreground">
+                            Credit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Terms: <span className="font-medium text-foreground">
+                              {c.default_due_days != null ? c.default_due_days : (company?.default_due_days ?? 30)} days
+                            </span>
+                            {c.default_due_days == null && <span className="text-muted-foreground/60 ml-0.5">(co.)</span>}
+                          </span>
+                          <span className={`text-xs font-medium ${c.credit_limit > 0 && outstanding / c.credit_limit > 0.8 ? "text-destructive" : "text-success"}`}>
+                            {c.credit_limit > 0 ? `${((outstanding / c.credit_limit) * 100).toFixed(0)}% used` : "—"}
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ))}
           </div>
