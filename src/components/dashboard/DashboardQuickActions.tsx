@@ -39,12 +39,12 @@ export default function DashboardQuickActions() {
               hapticLight();
               setOpenDialog(a.key);
             }}
-            className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl p-2 sm:p-4 bg-card shadow-sm transition-all duration-200 active:scale-95 hover:shadow-md cursor-pointer min-w-0 border border-border/50"
+            className="group flex flex-col items-center justify-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl p-2 sm:p-4 bg-card shadow-sm transition-all duration-300 ease-out active:scale-95 hover:scale-[1.03] hover:shadow-lg hover:-translate-y-0.5 cursor-pointer min-w-0 border border-border/50 hover:border-primary/20"
           >
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${a.gradientClass} flex items-center justify-center`}>
-              <a.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" strokeWidth={1.8} />
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${a.gradientClass} flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}>
+              <a.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white transition-transform duration-300 group-hover:scale-105" strokeWidth={1.8} />
             </div>
-            <span className="text-[10px] sm:text-sm font-medium text-foreground text-center leading-tight">{a.label}</span>
+            <span className="text-[10px] sm:text-sm font-medium text-foreground text-center leading-tight transition-colors duration-300 group-hover:text-primary">{a.label}</span>
           </button>
         ))}
       </div>
