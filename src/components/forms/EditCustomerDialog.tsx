@@ -52,7 +52,6 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
         gstin: customer.gstin || "",
         credit_limit: customer.credit_limit,
         default_due_days: customer.default_due_days ?? undefined,
-        assigned_to: customer.assigned_to || undefined,
       });
     }
   }, [customer, open]); // eslint-disable-line react-hooks/exhaustive-deps
