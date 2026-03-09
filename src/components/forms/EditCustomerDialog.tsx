@@ -33,7 +33,6 @@ interface EditCustomerDialogProps {
 
 export default function EditCustomerDialog({ customer, open, onOpenChange }: EditCustomerDialogProps) {
   const { data: areas = [] } = useAreas();
-  const { data: profiles = [] } = useProfiles();
   const updateCustomer = useUpdateCustomer();
 
   const form = useForm<EditCustomerFormValues>({
