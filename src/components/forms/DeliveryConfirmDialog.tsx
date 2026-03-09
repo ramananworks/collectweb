@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { MapPin, Send, ShieldCheck, Loader2 } from "lucide-react";
+import { hapticMedium, hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 interface DeliveryConfirmDialogProps {
   open: boolean;
