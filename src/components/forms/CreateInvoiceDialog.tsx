@@ -65,7 +65,7 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
       customer_id: "",
       invoice_number: defaultValues?.invoice_number || "",
       invoice_date: defaultValues?.invoice_date || "",
-      amount: defaultValues?.amount || 0,
+      amount: defaultValues?.amount ?? undefined,
       due_date: defaultValues?.due_date || "",
       description: defaultValues?.description || "",
     },
