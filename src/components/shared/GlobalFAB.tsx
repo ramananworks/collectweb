@@ -9,10 +9,10 @@ import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 
 type ActionKey = "customer" | "invoice" | "payment";
 
-const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; colorClass: string; bgClass: string }[] = [
-  { key: "payment", label: "Record Payment", icon: IndianRupee, colorClass: "text-emerald-600", bgClass: "bg-emerald-100" },
-  { key: "invoice", label: "Create Invoice", icon: Receipt, colorClass: "text-indigo-600", bgClass: "bg-indigo-100" },
-  { key: "customer", label: "Add Customer", icon: UserPlus, colorClass: "text-blue-600", bgClass: "bg-blue-100" },
+const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
+  { key: "payment", label: "Record Payment", icon: IndianRupee, gradientClass: "action-payment" },
+  { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
+  { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
 ];
 
 export default function GlobalFAB() {
@@ -65,8 +65,8 @@ export default function GlobalFAB() {
               className="flex items-center gap-3 rounded-full bg-card pl-4 pr-2 py-2 shadow-lg border border-border/50 active:scale-95 transition-transform"
             >
               <span className="text-sm font-medium text-foreground whitespace-nowrap">{action.label}</span>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${action.bgClass}`}>
-                <action.icon className={`h-5 w-5 ${action.colorClass}`} strokeWidth={1.8} />
+              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${action.gradientClass}`}>
+                <action.icon className="h-5 w-5 text-white" strokeWidth={1.8} />
               </div>
             </motion.button>
           ))}

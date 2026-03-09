@@ -8,10 +8,10 @@ import { hapticLight } from "@/lib/haptics";
 
 type ActionKey = "customer" | "invoice" | "payment";
 
-const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; color: string; iconBg: string }[] = [
-  { key: "customer", label: "Add Customer", icon: UserPlus, color: "text-blue-600", iconBg: "bg-blue-100" },
-  { key: "invoice", label: "Create Invoice", icon: Receipt, color: "text-indigo-600", iconBg: "bg-indigo-100" },
-  { key: "payment", label: "Record Payment", icon: IndianRupee, color: "text-emerald-600", iconBg: "bg-emerald-100" },
+const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
+  { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
+  { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
+  { key: "payment", label: "Record Payment", icon: IndianRupee, gradientClass: "action-payment" },
 ];
 
 export default function DashboardQuickActions() {
@@ -38,8 +38,8 @@ export default function DashboardQuickActions() {
             }}
             className="flex flex-col items-center justify-center gap-2 rounded-2xl p-4 bg-card shadow-sm transition-all duration-200 active:scale-95 hover:shadow-md cursor-pointer min-w-0 border border-border/50"
           >
-            <div className={`w-10 h-10 rounded-full ${a.iconBg} flex items-center justify-center`}>
-              <a.icon className={`h-5 w-5 ${a.color}`} strokeWidth={1.8} />
+            <div className={`w-10 h-10 rounded-full ${a.gradientClass} flex items-center justify-center`}>
+              <a.icon className="h-5 w-5 text-white" strokeWidth={1.8} />
             </div>
             <span className="text-sm font-medium text-foreground text-center leading-tight">{a.label}</span>
           </button>
