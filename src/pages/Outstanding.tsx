@@ -295,7 +295,7 @@ export default function Outstanding() {
                       </thead>
                       <tbody>
                         {custInvoices.map((inv) => (
-                          <tr key={inv.id} className="border-b last:border-0">
+                          <tr key={inv.id} className="border-b">
                             <td className="px-4 py-2 font-medium">{inv.invoice_number}</td>
                             <td className="px-2 py-2 text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</td>
                             <td className="px-2 py-2 text-right">{formatCurrency(Number(inv.amount))}</td>
@@ -307,6 +307,15 @@ export default function Outstanding() {
                             </td>
                           </tr>
                         ))}
+                        <tr className="border-t-2 border-border bg-muted/20">
+                          <td className="px-4 py-2 font-bold">Total</td>
+                          <td className="px-2 py-2"></td>
+                          <td className="px-2 py-2"></td>
+                          <td className="px-2 py-2 text-right font-bold text-destructive">
+                            {formatCurrency(total)}
+                          </td>
+                          <td className="px-4 py-2"></td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
