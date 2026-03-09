@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Plus, ChevronDown, Contact } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
+import { hapticLight, hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 function supportsContacts() {
   const hasAndroid = typeof window !== "undefined" && !!(window as any).Android?.pickContact;
@@ -64,12 +65,14 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
       assigned_to: values.assigned_to,
     }, {
       onSuccess: () => {
+        hapticSuccess();
         toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
         form.reset();
         setOptionalOpen(false);
         setOpen(false);
       },
       onError: (err) => {
+        hapticHeavy();
         toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });
@@ -95,6 +98,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
             form.setValue("address", contact.address);
             setOptionalOpen(true);
           }
+          hapticLight();
           toast({ title: "Contact imported", description: `${contact.name || "Contact"} details filled in.` });
           return;
         }
@@ -120,6 +124,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
               setOptionalOpen(true);
             }
           }
+          hapticLight();
           toast({ title: "Contact imported", description: `${c.name?.[0] || "Contact"} details filled in.` });
           return;
         }

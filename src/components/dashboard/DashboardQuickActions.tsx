@@ -4,6 +4,7 @@ import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
+import { hapticLight } from "@/lib/haptics";
 
 type ActionKey = "customer" | "invoice" | "payment";
 
@@ -31,7 +32,10 @@ export default function DashboardQuickActions() {
         {actions.map((a) => (
           <button
             key={a.key}
-            onClick={() => setOpenDialog(a.key)}
+            onClick={() => {
+              hapticLight();
+              setOpenDialog(a.key);
+            }}
             className="flex flex-col items-center justify-center gap-2 rounded-2xl p-4 bg-card shadow-sm transition-all duration-200 active:scale-95 hover:shadow-md cursor-pointer min-w-0 border border-border/50"
           >
             <div className={`w-10 h-10 rounded-full ${a.iconBg} flex items-center justify-center`}>

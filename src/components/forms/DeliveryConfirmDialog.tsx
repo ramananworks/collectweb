@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { MapPin, Send, ShieldCheck, Loader2 } from "lucide-react";
+import { hapticMedium, hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 interface DeliveryConfirmDialogProps {
   open: boolean;
@@ -56,8 +57,10 @@ export function DeliveryConfirmDialog({
         setTestOtp(data.otp);
       }
       setStep("verify");
+      hapticMedium();
       toast.success(data.message || "OTP sent successfully");
     } catch (err: any) {
+      hapticHeavy();
       toast.error(err.message || "Failed to send OTP");
     } finally {
       setLoading(false);
@@ -93,6 +96,7 @@ export function DeliveryConfirmDialog({
       if (data?.error) throw new Error(data.error);
 
       setStep("done");
+      hapticSuccess();
       toast.success("Delivery confirmed! ✅");
       qc.invalidateQueries({ queryKey: ["invoices"] });
 
@@ -101,6 +105,7 @@ export function DeliveryConfirmDialog({
         resetState();
       }, 1500);
     } catch (err: any) {
+      hapticHeavy();
       toast.error(err.message || "OTP verification failed");
     } finally {
       setLoading(false);

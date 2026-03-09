@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
 import { useAreas, useProfiles, useUpdateCustomer, type Customer } from "@/hooks/use-data";
+import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
@@ -72,10 +73,12 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
       assigned_to: (values.assigned_to && values.assigned_to !== "__none__") ? values.assigned_to : null,
     }, {
       onSuccess: () => {
+        hapticSuccess();
         toast({ title: "Customer updated", description: `${values.name} has been updated.` });
         onOpenChange(false);
       },
       onError: (err) => {
+        hapticHeavy();
         toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });

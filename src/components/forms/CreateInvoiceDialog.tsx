@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { useCustomers, useCompany, useCreateInvoice } from "@/hooks/use-data";
 import { resolveDueDate, DueDateSource } from "@/lib/due-date-resolver";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 const invoiceSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
@@ -116,11 +117,13 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
       description: values.description,
     }, {
       onSuccess: () => {
+        hapticSuccess();
         toast({ title: "Invoice created", description: `Invoice for ${cust?.name} has been created.` });
         form.reset();
         setOpen(false);
       },
       onError: (err) => {
+        hapticHeavy();
         toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });

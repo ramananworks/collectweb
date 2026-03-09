@@ -34,6 +34,7 @@ import { WifiOff, Wifi, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 import { usePermissions } from "@/hooks/usePermissions";
+import { hapticLight, hapticMedium } from "@/lib/haptics";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
@@ -133,6 +134,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   );
 
   const handleSignOut = async () => {
+    hapticMedium();
     await signOut();
     localStorage.clear();
     sessionStorage.clear();
@@ -180,7 +182,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <NavLink
                 key={item.to}
                 to={item.to}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  hapticLight();
+                  setSidebarOpen(false);
+                }}
                 className={`flex items-center gap-4 rounded-xl px-4 min-h-[56px] text-base font-medium transition-all active:scale-[0.98] ${
                   isActive
                     ? "gradient-primary text-primary-foreground shadow-md"
@@ -228,7 +233,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </p>
               <p className="text-xs text-sidebar-foreground truncate">{displayEmail}</p>
             </div>
-            <button onClick={() => setLogoutOpen(true)} className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors">
+            <button 
+              onClick={() => {
+                hapticLight();
+                setLogoutOpen(true);
+              }} 
+              className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors"
+            >
               <LogOut className="h-4 w-4" />
             </button>
           </div>
