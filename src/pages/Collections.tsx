@@ -24,7 +24,7 @@ export default function Collections() {
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
 
-  const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"], ["profiles"]] });
 
   const filteredPayments = payments.filter((p) => {
     if (modeFilter !== "all" && p.mode !== modeFilter) return false;
