@@ -1,42 +1,42 @@
 
 
-## Include Mock Data for Development
+## Plan: Change date format to DD-MMM-YY across all reports
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+**Goal**: Update all date displays from `DD/MM/YYYY` to `DD-MMM-YY` (e.g., `09-Mar-26`).
 
-### What will change
+### Changes
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+**1. `src/lib/utils.ts` — Update `formatDisplayDate`**
+Change the central formatter to output `DD-MMM-YY` using short month names (Jan, Feb, etc.) and 2-digit year.
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
-
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
-
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
-
-### Technical details
-
-Each hook will be updated like this pattern:
 ```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
+export function formatDisplayDate(date: string | Date): string {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  const day = String(d.getDate()).padStart(2, "0");
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const month = months[d.getMonth()];
+  const year = String(d.getFullYear()).slice(-2);
+  return `${day}-${month}-${year}`;
 }
 ```
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+This single change covers **all 7 files** importing `formatDisplayDate`: Dashboard, Invoices, Outstanding, DrillDownSheet, CustomerLedgerSheet, share-utils, Collections references.
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
+**2. Inline `format()` calls using `"dd/MM/yyyy"` — 4 files**
+
+Replace all `format(date, "dd/MM/yyyy")` with `format(date, "dd-MMM-yy")` (date-fns format tokens):
+
+- `src/components/customers/CustomerLedgerSheet.tsx` — PDF rows, date picker buttons, table cells (4 occurrences)
+- `src/components/forms/SelectDeliveryInvoiceDialog.tsx` — invoice date display (1 occurrence)
+- `src/pages/Collections.tsx` — date picker buttons (2 occurrences)
+
+**3. `src/lib/share-utils.ts` — `toLocaleDateString` call**
+
+Update the PDF "Generated on" line to use the same DD-MMM-YY format for consistency.
+
+### Summary
+- 1 central utility change covers most usages
+- ~7 inline format string replacements across 3-4 files
+- No backend or schema changes
+
