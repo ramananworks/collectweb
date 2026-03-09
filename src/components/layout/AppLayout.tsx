@@ -14,6 +14,8 @@ import {
   Building2,
   IndianRupee,
   Key,
+  Sun,
+  Moon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -42,6 +44,7 @@ import { useSyncStatus } from "@/hooks/use-sync-status";
 import { WifiOff, Wifi, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
+import { useTheme } from "next-themes";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
@@ -68,6 +71,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: company } = useCompany();
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStatus();
+  const { theme, setTheme } = useTheme();
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -292,6 +296,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               >
                 <Key className="mr-2 h-4 w-4" />
                 Change Password
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  hapticLight();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
+              >
+                {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
