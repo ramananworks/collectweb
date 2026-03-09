@@ -36,6 +36,7 @@ interface RecordPaymentDialogProps {
 export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange, prefillCustomerId, prefillInvoiceId }: RecordPaymentDialogProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [amountAutoFilled, setAmountAutoFilled] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const { data: invoices = [] } = useInvoices();
@@ -57,6 +58,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     if (!open) {
       form.reset();
       setAmountAutoFilled(false);
+      setIsSubmitting(false);
     }
   }, [open, prefillCustomerId, prefillInvoiceId]);
 
@@ -71,7 +73,10 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
   );
 
   function onSubmit(values: CollectionFormValues) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const customer = customers.find((c) => c.id === values.customer_id);
+    const transactionId = crypto.randomUUID();
     recordPayment.mutate({
       invoice_id: values.invoice_id,
       customer_name: customer?.name || "",
@@ -80,16 +85,19 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
       mode: values.mode,
       collected_by: values.collected_by,
       notes: values.notes,
+      local_id: transactionId,
     }, {
       onSuccess: () => {
         hapticSuccess();
         toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${customer?.name}.` });
         form.reset();
+        setIsSubmitting(false);
         setOpen(false);
       },
       onError: (err) => {
         hapticHeavy();
         toast({ title: "Error", description: err.message, variant: "destructive" });
+        setIsSubmitting(false);
       },
     });
   }
@@ -204,8 +212,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             )} />
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={recordPayment.isPending}>
-                {recordPayment.isPending ? "Recording..." : "Record Collection"}
+              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={isSubmitting || recordPayment.isPending}>
+                {isSubmitting || recordPayment.isPending ? "Recording..." : "Record Collection"}
               </Button>
             </div>
           </form>
