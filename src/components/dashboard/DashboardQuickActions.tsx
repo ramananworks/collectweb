@@ -18,7 +18,7 @@ const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradie
 
 export default function DashboardQuickActions() {
   const [openDialog, setOpenDialog] = useState<ActionKey | null>(null);
-  const { canManageCustomers, canCreateInvoices, canRecordPayments } = usePermissions();
+  const { canManageCustomers, canCreateInvoices, canRecordPayments, canConfirmDelivery } = usePermissions();
 
   const actions = useMemo(() => allActions.filter((a) => {
     if (a.key === "customer") return canManageCustomers;
