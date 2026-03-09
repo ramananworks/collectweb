@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
+import { formatDisplayDate } from "@/lib/utils";
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
