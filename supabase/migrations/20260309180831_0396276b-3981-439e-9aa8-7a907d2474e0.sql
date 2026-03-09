@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS payments_local_id_unique ON public.payments (local_id) WHERE local_id IS NOT NULL;
