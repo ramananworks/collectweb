@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Plus, ChevronDown, Contact } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
+import { hapticLight, hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 function supportsContacts() {
   const hasAndroid = typeof window !== "undefined" && !!(window as any).Android?.pickContact;
