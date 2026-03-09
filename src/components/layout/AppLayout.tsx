@@ -283,9 +283,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity">
+              <button className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold shadow-md ring-2 ring-primary/20 hover:ring-primary/40 hover:shadow-lg active:scale-95 transition-all duration-200">
                 {displayName.split(" ").map((n) => n[0]).join("")}
-                <Settings className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-muted text-muted-foreground p-[2px]" />
+                <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-border">
+                  <Settings className="h-2.5 w-2.5 text-muted-foreground" />
+                </span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
