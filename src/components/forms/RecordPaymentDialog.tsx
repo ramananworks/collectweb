@@ -35,6 +35,7 @@ interface RecordPaymentDialogProps {
 
 export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange, prefillCustomerId, prefillInvoiceId }: RecordPaymentDialogProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const [amountAutoFilled, setAmountAutoFilled] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const { data: invoices = [] } = useInvoices();
