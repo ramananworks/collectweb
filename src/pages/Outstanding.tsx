@@ -174,7 +174,14 @@ export default function Outstanding() {
 
       if (isWebView) {
         const dataUri = doc.output("datauristring");
-        window.open(dataUri, "_blank");
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = dataUri;
+        document.body.appendChild(iframe);
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          window.location.href = dataUri;
+        }, 1000);
         return;
       }
 

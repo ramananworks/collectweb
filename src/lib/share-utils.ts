@@ -116,7 +116,14 @@ export function downloadPDF(blob: Blob, filename: string) {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result as string;
-      window.open(base64, "_blank");
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = base64;
+      document.body.appendChild(iframe);
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+        window.location.href = base64;
+      }, 1000);
     };
     reader.readAsDataURL(blob);
     return;
