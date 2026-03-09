@@ -20,9 +20,22 @@ export default function Customers() {
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
   const { data: company } = useCompany();
+  const { data: invoices = [] } = useInvoices();
   const { canManageCustomers, canBulkImport } = usePermissions();
 
-  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["invoices"]] });
+
+  // Derive outstanding from invoices (ledger-based) instead of stale customers.outstanding column
+  const customerOutstandingMap = useMemo(() => {
+    const map = new Map<string, number>();
+    invoices.forEach((inv) => {
+      if (inv.status !== "paid") {
+        const current = map.get(inv.customer_id) || 0;
+        map.set(inv.customer_id, current + (Number(inv.amount) - Number(inv.paid_amount)));
+      }
+    });
+    return map;
+  }, [invoices]);
 
   const areaNames = areas.map((a) => a.name);
 
