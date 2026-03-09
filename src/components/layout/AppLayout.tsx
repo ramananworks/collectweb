@@ -281,12 +281,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <img src={logoImg} alt="CollectWeb" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
             <span className="text-base font-bold truncate">{companyName}</span>
           </div>
-          <DropdownMenu>
+          <DropdownMenu onOpenChange={(open) => { if (open) setGearSpin(true); }}>
             <DropdownMenuTrigger asChild>
               <button className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold shadow-md ring-2 ring-primary/20 hover:ring-primary/40 hover:shadow-lg active:scale-95 transition-all duration-200">
                 {displayName.split(" ").map((n) => n[0]).join("")}
                 <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-border">
-                  <Settings className="h-2.5 w-2.5 text-muted-foreground" />
+                  <Settings
+                    className={`h-2.5 w-2.5 text-muted-foreground transition-transform duration-500 ease-out ${gearSpin ? "animate-[spin_0.5s_ease-out]" : ""}`}
+                    onAnimationEnd={() => setGearSpin(false)}
+                  />
                 </span>
               </button>
             </DropdownMenuTrigger>
