@@ -287,6 +287,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuItem
                 onClick={() => {
                   hapticLight();
+                  setChangePasswordOpen(true);
+                }}
+              >
+                <Key className="mr-2 h-4 w-4" />
+                Change Password
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  hapticLight();
                   setLogoutOpen(true);
                 }}
                 className="text-destructive focus:text-destructive"
