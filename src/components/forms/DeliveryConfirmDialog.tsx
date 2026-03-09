@@ -60,6 +60,7 @@ export function DeliveryConfirmDialog({
       hapticMedium();
       toast.success(data.message || "OTP sent successfully");
     } catch (err: any) {
+      hapticHeavy();
       toast.error(err.message || "Failed to send OTP");
     } finally {
       setLoading(false);
