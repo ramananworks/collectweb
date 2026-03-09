@@ -92,13 +92,21 @@ export default function GlobalFAB() {
           }}
           animate={{ 
             rotate: expanded ? 135 : 0,
-            scale: expanded ? 1 : [1, 1.05, 1]
+            scale: expanded ? 1 : [1, 1.05, 1],
+            boxShadow: expanded
+              ? "0 4px 20px -2px hsl(82 60% 45% / 0.4), 0 2px 8px -1px hsl(0 0% 0% / 0.15)"
+              : [
+                  "0 4px 20px -2px hsl(82 60% 45% / 0.4), 0 2px 8px -1px hsl(0 0% 0% / 0.15)",
+                  "0 6px 32px -2px hsl(82 60% 45% / 0.7), 0 4px 16px -1px hsl(42 85% 58% / 0.35)",
+                  "0 4px 20px -2px hsl(82 60% 45% / 0.4), 0 2px 8px -1px hsl(0 0% 0% / 0.15)",
+                ]
           }}
           transition={{ 
             rotate: { duration: 0.2 },
-            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+            boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" }
           }}
-          className="flex h-14 w-14 items-center justify-center rounded-full gradient-primary text-primary-foreground shadow-lg active:scale-95 transition-transform"
+          className="flex h-14 w-14 items-center justify-center rounded-full gradient-primary text-primary-foreground active:scale-95"
         >
           <Plus className="h-7 w-7" strokeWidth={2.5} />
         </motion.button>
