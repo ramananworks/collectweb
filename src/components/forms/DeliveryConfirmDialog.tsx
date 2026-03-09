@@ -96,6 +96,7 @@ export function DeliveryConfirmDialog({
       if (data?.error) throw new Error(data.error);
 
       setStep("done");
+      hapticSuccess();
       toast.success("Delivery confirmed! ✅");
       qc.invalidateQueries({ queryKey: ["invoices"] });
 
