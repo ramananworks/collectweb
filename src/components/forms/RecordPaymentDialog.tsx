@@ -73,7 +73,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     recordPayment.mutate({
       invoice_id: values.invoice_id,
       customer_name: customer?.name || "",
-      amount: values.amount,
+      amount: values.amount ?? 0,
       date: values.date,
       mode: values.mode,
       collected_by: values.collected_by,
