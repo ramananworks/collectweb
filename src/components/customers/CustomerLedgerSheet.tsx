@@ -142,7 +142,8 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     for (const entry of ledgerEntries) {
       checkPage(7);
       doc.setFontSize(7.5);
-      doc.text(format(parseISO(entry.date), "dd-MMM-yy"yy"yy"yy"), 18, y);
+      const dateStr = format(parseISO(entry.date), "dd-MMM-yy");
+      doc.text(dateStr, 18, y);
       const partText = doc.splitTextToSize(entry.particular, 65);
       doc.text(partText[0], 42, y);
       doc.text(entry.debit > 0 ? formatCurrency(entry.debit) : "–", 115, y, { align: "right" });
