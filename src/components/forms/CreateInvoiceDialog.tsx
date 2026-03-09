@@ -111,7 +111,7 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
       customer_name: cust?.name || "",
       invoice_number: values.invoice_number,
       invoice_date: values.invoice_date,
-      amount: values.amount,
+      amount: values.amount ?? 0,
       due_date: finalDueDate,
       due_date_source: resolved?.source || "company",
       description: values.description,
