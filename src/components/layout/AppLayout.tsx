@@ -298,15 +298,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Key className="mr-2 h-4 w-4" />
                 Change Password
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { hapticLight(); setTheme("light"); }} className={theme === "light" ? "font-semibold" : ""}>
-                <Sun className="mr-2 h-4 w-4" /> Light
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { hapticLight(); setTheme("dark"); }} className={theme === "dark" ? "font-semibold" : ""}>
-                <Moon className="mr-2 h-4 w-4" /> Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { hapticLight(); setTheme("system"); }} className={theme === "system" ? "font-semibold" : ""}>
-                <Monitor className="mr-2 h-4 w-4" /> System
-              </DropdownMenuItem>
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal pt-1 pb-0.5">Display</DropdownMenuLabel>
+              <div className="flex items-center gap-1 px-2 pb-1.5">
+                {([["light", Sun], ["dark", Moon], ["system", Monitor]] as const).map(([t, Icon]) => (
+                  <button
+                    key={t}
+                    onClick={() => { hapticLight(); setTheme(t); }}
+                    className={`flex items-center justify-center h-8 w-8 rounded-md transition-colors ${theme === t ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
               <DropdownMenuItem
                 onClick={() => {
                   hapticLight();
