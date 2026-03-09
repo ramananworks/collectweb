@@ -1,65 +1,42 @@
 
 
-## Plan: Fix PDF share on Android WebView using base64 data URI
+## Include Mock Data for Development
 
-**Root cause**: In Android WebView, both `navigator.share` and `window.open(blobUrl)` are silently blocked when called from async callbacks (not direct user gesture). The PDF generates successfully but nothing happens on the delivery step.
+Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
 
-**Fix**: Convert the PDF blob to a **base64 data URI** and use `window.location.href` to navigate directly to it. WebViews reliably handle `data:application/pdf` URIs by handing off to the system PDF viewer/download manager.
+### What will change
 
-### Changes
+**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
 
-**1. `src/lib/share-utils.ts` — Replace `downloadPDF` with base64 data URI fallback**
+- Add a `const DEV_MODE = true;` flag at the top of the file
+- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
+- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
 
+**2. Mock data included:**
+- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
+- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
+- **5 payments** with different modes (cash, UPI, bank transfer)
+- **6 areas** matching the customer areas
+- **1 company** (Sharma Traders Pvt Ltd)
+- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+
+**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+
+### Technical details
+
+Each hook will be updated like this pattern:
 ```typescript
-export function downloadPDF(blob: Blob, filename: string) {
-  const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
-
-  if (isWebView) {
-    // Convert blob to base64 data URI — WebView handles this reliably
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      window.open(base64, "_blank");
-    };
-    reader.readAsDataURL(blob);
-    return;
-  }
-
-  // Standard browser: anchor download
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+export function useCustomers() {
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
+      // ... existing Supabase query
+    },
+  });
 }
 ```
 
-**2. `src/pages/Outstanding.tsx` — Use `doc.output("datauristring")` directly for WebView**
+The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
 
-Instead of going blob → FileReader → base64, use jsPDF's built-in `output("datauristring")` which returns a ready-to-use data URI. This is simpler and avoids the async FileReader step:
-
-```typescript
-// After generating the PDF doc...
-const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
-
-if (isWebView) {
-  const dataUri = doc.output("datauristring");
-  window.open(dataUri, "_blank");
-  return;
-}
-
-// Non-WebView: try native share, then fall back to anchor download
-```
-
-This skips `navigator.share` entirely on WebView (where it never works) and uses jsPDF's native data URI output.
-
-**3. Apply same pattern** in `DrillDownSheet.tsx` and `CustomerLedgerSheet.tsx`.
-
-### Summary
-- WebView gets a dedicated fast path: jsPDF → data URI → `window.open` (triggers system PDF viewer)
-- Standard browsers keep existing behavior (native share or anchor download)
-- 4 files changed, no backend changes
-
+When you're ready to re-enable real data, simply set `DEV_MODE = false`.

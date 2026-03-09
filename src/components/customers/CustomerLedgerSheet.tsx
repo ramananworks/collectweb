@@ -177,6 +177,14 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     if (!blob || !customer) return;
     const filename = `${customer.name}_Ledger_${new Date().toISOString().split("T")[0]}.pdf`;
 
+    const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
+    if (isWebView) {
+      const reader = new FileReader();
+      reader.onloadend = () => window.open(reader.result as string, "_blank");
+      reader.readAsDataURL(blob);
+      return;
+    }
+
     try {
       const file = new File([blob], filename, { type: "application/pdf" });
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
