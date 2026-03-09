@@ -6,10 +6,12 @@ import { hapticLight } from "@/lib/haptics";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
+import SelectDeliveryInvoiceDialog from "@/components/forms/SelectDeliveryInvoiceDialog";
 
-type ActionKey = "customer" | "invoice" | "payment";
+type ActionKey = "customer" | "invoice" | "payment" | "delivery";
 
 const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
+  { key: "delivery", label: "Confirm Delivery", icon: Truck, gradientClass: "action-delivery" },
   { key: "payment", label: "Record Collection", icon: IndianRupee, gradientClass: "action-payment" },
   { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
   { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
