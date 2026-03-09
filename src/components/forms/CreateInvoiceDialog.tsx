@@ -19,7 +19,7 @@ const invoiceSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
   invoice_number: z.string().trim().min(1, "Invoice number is required").max(50, "Invoice number is too long"),
   invoice_date: z.string().min(1, "Invoice date is required"),
-  amount: z.coerce.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"),
+  amount: z.union([z.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"), z.undefined()]).refine((v) => v !== undefined && v >= 1, { message: "Amount must be greater than 0" }),
   due_date: z.string().optional(),
   description: z.string().trim().max(500, "Description is too long").optional(),
 });
