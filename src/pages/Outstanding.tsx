@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCustomers, useInvoices, useAreas, useCompany, formatCurrency } from "@/hooks/use-data";
+import { formatDisplayDate } from "@/lib/utils";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
