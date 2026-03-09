@@ -1,32 +1,42 @@
 
 
-## Plan: Change Date Format to DD/MM/YYYY in PDF Exports
+## Include Mock Data for Development
 
-Update all PDF generation functions to use consistent `DD/MM/YYYY` date format instead of the current `toLocaleDateString("en-IN")` format.
+Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
 
-### Files to Update
+### What will change
 
-**1. `src/lib/share-utils.ts` (line 55)**
-- Change "Generated on" date from `toLocaleDateString("en-IN", {...})` to `formatDisplayDate(new Date())`
+**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
 
-**2. `src/pages/Outstanding.tsx` (line 117)**
-- Same change for "Generated on" date in the PDF header
+- Add a `const DEV_MODE = true;` flag at the top of the file
+- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
+- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
 
-**3. `src/components/dashboard/DrillDownSheet.tsx` (line 94)**
-- Same change for "Generated on" date in the PDF header
+**2. Mock data included:**
+- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
+- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
+- **5 payments** with different modes (cash, UPI, bank transfer)
+- **6 areas** matching the customer areas
+- **1 company** (Sharma Traders Pvt Ltd)
+- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
 
-**4. `src/components/customers/CustomerLedgerSheet.tsx` (line 122)**
-- Same change for "Generated on" date in the PDF header
+**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
 
-### Implementation
-Import `formatDisplayDate` from `@/lib/utils` in each file and replace:
+### Technical details
+
+Each hook will be updated like this pattern:
 ```typescript
-// Before
-new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
-
-// After
-formatDisplayDate(new Date())
+export function useCustomers() {
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
+      // ... existing Supabase query
+    },
+  });
+}
 ```
 
-This produces `09/03/2026` instead of `09 Mar 2026`.
+The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
 
+When you're ready to re-enable real data, simply set `DEV_MODE = false`.

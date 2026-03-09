@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { formatDisplayDate } from "@/lib/utils";
 
 export interface ShareSummaryData {
   title: string;

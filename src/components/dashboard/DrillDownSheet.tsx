@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { formatCurrency, useCompany } from "@/hooks/use-data";
 import { downloadPDF } from "@/lib/share-utils";
+import { formatDisplayDate } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import jsPDF from "jspdf";
@@ -91,7 +92,7 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
     doc.setFontSize(13); doc.setFont("helvetica", "bold");
     doc.text(title, pw / 2, y, { align: "center" }); y += 7;
     doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(120, 120, 120);
-    doc.text(`Generated on ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, pw / 2, y, { align: "center" }); y += 8;
+    doc.text(`Generated on ${formatDisplayDate(new Date())}`, pw / 2, y, { align: "center" }); y += 8;
     doc.setDrawColor(200, 200, 200); doc.line(15, y, pw - 15, y); y += 8;
     doc.setTextColor(30, 30, 30);
 
