@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Plus, ChevronDown, Contact } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
+import { useAreas, useAddCustomer } from "@/hooks/use-data";
 import { hapticLight, hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 function supportsContacts() {
@@ -29,7 +29,6 @@ const customerSchema = z.object({
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"),
   default_due_days: z.coerce.number().min(0).max(365).optional(),
-  assigned_to: z.string().optional(),
 });
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
@@ -45,12 +44,11 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
   const setOpen = onOpenChange ?? setInternalOpen;
   const [optionalOpen, setOptionalOpen] = useState(false);
   const { data: areas = [] } = useAreas();
-  const { data: profiles = [] } = useProfiles();
   const addCustomer = useAddCustomer();
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined, assigned_to: undefined },
+    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined },
   });
 
   function onSubmit(values: CustomerFormValues) {
@@ -62,7 +60,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
       gstin: values.gstin,
       credit_limit: values.credit_limit,
       default_due_days: values.default_due_days,
-      assigned_to: values.assigned_to,
     }, {
       onSuccess: () => {
         hapticSuccess();
@@ -218,22 +215,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
                     <FormItem>
                       <FormLabel>Default Due Days</FormLabel>
                       <FormControl><Input type="number" inputMode="numeric" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} onFocus={scrollInputIntoView} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="assigned_to" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Assigned To</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {profiles.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )} />
