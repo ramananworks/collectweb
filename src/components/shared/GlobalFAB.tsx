@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, X, UserPlus, Receipt, IndianRupee } from "lucide-react";
+import { Plus, X, UserPlus, Receipt, IndianRupee, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight } from "@/lib/haptics";
