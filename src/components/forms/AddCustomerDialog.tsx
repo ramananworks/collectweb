@@ -60,7 +60,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
       gstin: values.gstin,
       credit_limit: values.credit_limit,
       default_due_days: values.default_due_days,
-      assigned_to: values.assigned_to,
     }, {
       onSuccess: () => {
         hapticSuccess();
