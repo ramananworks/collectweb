@@ -105,6 +105,7 @@ export function DeliveryConfirmDialog({
         resetState();
       }, 1500);
     } catch (err: any) {
+      hapticHeavy();
       toast.error(err.message || "OTP verification failed");
     } finally {
       setLoading(false);

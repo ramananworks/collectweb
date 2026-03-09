@@ -73,10 +73,12 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
       assigned_to: (values.assigned_to && values.assigned_to !== "__none__") ? values.assigned_to : null,
     }, {
       onSuccess: () => {
+        hapticSuccess();
         toast({ title: "Customer updated", description: `${values.name} has been updated.` });
         onOpenChange(false);
       },
       onError: (err) => {
+        hapticHeavy();
         toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });

@@ -134,6 +134,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   );
 
   const handleSignOut = async () => {
+    hapticMedium();
     await signOut();
     localStorage.clear();
     sessionStorage.clear();

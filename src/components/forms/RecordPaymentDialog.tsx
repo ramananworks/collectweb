@@ -80,11 +80,13 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
       notes: values.notes,
     }, {
       onSuccess: () => {
+        hapticSuccess();
         toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${customer?.name}.` });
         form.reset();
         setOpen(false);
       },
       onError: (err) => {
+        hapticHeavy();
         toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });

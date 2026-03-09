@@ -124,6 +124,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
               setOptionalOpen(true);
             }
           }
+          hapticLight();
           toast({ title: "Contact imported", description: `${c.name?.[0] || "Contact"} details filled in.` });
           return;
         }
