@@ -29,7 +29,6 @@ const customerSchema = z.object({
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"),
   default_due_days: z.coerce.number().min(0).max(365).optional(),
-  assigned_to: z.string().optional(),
 });
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
