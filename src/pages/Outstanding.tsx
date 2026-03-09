@@ -27,6 +27,7 @@ export default function Outstanding() {
   const [collectTarget, setCollectTarget] = useState<{ customerId: string; invoiceId: string } | null>(null);
   const { canRecordPayments } = usePermissions();
   const isMobile = useIsMobile();
+  const [exporting, setExporting] = useState(false);
 
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
