@@ -8,10 +8,10 @@ import { hapticLight } from "@/lib/haptics";
 
 type ActionKey = "customer" | "invoice" | "payment";
 
-const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; color: string; iconBg: string }[] = [
-  { key: "customer", label: "Add Customer", icon: UserPlus, color: "text-blue-600", iconBg: "bg-blue-100" },
-  { key: "invoice", label: "Create Invoice", icon: Receipt, color: "text-indigo-600", iconBg: "bg-indigo-100" },
-  { key: "payment", label: "Record Payment", icon: IndianRupee, color: "text-emerald-600", iconBg: "bg-emerald-100" },
+const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
+  { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
+  { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
+  { key: "payment", label: "Record Payment", icon: IndianRupee, gradientClass: "action-payment" },
 ];
 
 export default function DashboardQuickActions() {
