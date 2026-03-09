@@ -27,7 +27,7 @@ const customerSchema = z.object({
   address: z.string().trim().min(5, "Address must be at least 5 characters").max(200, "Address is too long"),
   area: z.string().min(1, "Select an area"),
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
-  credit_limit: z.coerce.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"),
+  credit_limit: z.union([z.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"), z.undefined()]).refine((v) => v !== undefined && v >= 1000, { message: "Minimum credit limit is ₹1,000" }),
   default_due_days: z.coerce.number().min(0).max(365).optional(),
 });
 
