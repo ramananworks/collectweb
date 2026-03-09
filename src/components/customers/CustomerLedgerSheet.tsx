@@ -142,7 +142,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     for (const entry of ledgerEntries) {
       checkPage(7);
       doc.setFontSize(7.5);
-      doc.text(format(parseISO(entry.date), "dd-MMM-"), 18, y);
+      doc.text(format(parseISO(entry.date), "dd-MMM-), 18, y);
       const partText = doc.splitTextToSize(entry.particular, 65);
       doc.text(partText[0], 42, y);
       doc.text(entry.debit > 0 ? formatCurrency(entry.debit) : "–", 115, y, { align: "right" });
@@ -221,7 +221,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !fromDate && "text-muted-foreground")}>
                   <CalendarIcon className="h-3 w-3" />
-                  {fromDate ? format(fromDate, "dd/--MMM-) : "From"}
+                  {fromDate ? format(fromDate, "dd/---MMM-: "From"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -232,7 +232,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !toDate && "text-muted-foreground")}>
                   <CalendarIcon className="h-3 w-3" />
-                  {toDate ? format(toDate, "dd/M-MMM-") : "To"}
+                  {toDate ? format(toDate, "dd/M-M-MMM-: "To"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -276,7 +276,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
                 {ledgerEntries.map((entry, idx) => (
                   <TableRow key={idx} className="text-xs">
                     <TableCell className="py-2.5 text-muted-foreground">
-                      {format(parseISO(entry.date), "dd/MM/yyyy")}
+                      {format(parseISO(entry.date), "dd/MM-MMM-)}
                     </TableCell>
                     <TableCell className="py-2.5 max-w-[200px] truncate">{entry.particular}</TableCell>
                     <TableCell className={`py-2.5 text-right font-medium ${entry.debit > 0 ? "text-destructive" : ""}`}>
