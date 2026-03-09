@@ -98,10 +98,8 @@ export default function Outstanding() {
 
 
   const handleExportPDF = useCallback(async () => {
+    setExporting(true);
     try {
-      const { toast } = await import("@/hooks/use-toast");
-      toast({ title: "Generating PDF…", description: "Please wait" });
-
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pw = doc.internal.pageSize.getWidth();
       const ph = doc.internal.pageSize.getHeight();
