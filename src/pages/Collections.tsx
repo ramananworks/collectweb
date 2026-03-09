@@ -18,9 +18,11 @@ export default function Collections() {
   const [modeFilter, setModeFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [userFilter, setUserFilter] = useState("all");
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
+  const { data: profiles = [] } = useProfiles();
 
   const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"]] });
 
