@@ -181,7 +181,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <NavLink
                 key={item.to}
                 to={item.to}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  hapticLight();
+                  setSidebarOpen(false);
+                }}
                 className={`flex items-center gap-4 rounded-xl px-4 min-h-[56px] text-base font-medium transition-all active:scale-[0.98] ${
                   isActive
                     ? "gradient-primary text-primary-foreground shadow-md"
