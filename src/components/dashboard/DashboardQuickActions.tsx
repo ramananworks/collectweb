@@ -4,6 +4,7 @@ import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
+import { hapticLight } from "@/lib/haptics";
 
 type ActionKey = "customer" | "invoice" | "payment";
 
