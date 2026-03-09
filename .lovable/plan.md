@@ -1,42 +1,63 @@
 
 
-## Include Mock Data for Development
+## Plan: Fix share button on mobile (Android WebView)
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+**Problem**: The share button generates a PDF and tries `navigator.share({ files: [file] })`. In Android WebView, file sharing via Web Share API is often unsupported — `navigator.canShare({ files })` returns false or the call throws. The fallback `downloadPDF` uses an anchor element with `a.download`, which also silently fails in many WebViews since programmatic downloads are blocked.
 
-### What will change
+**Solution**: Add an Android bridge-aware fallback. When neither Web Share nor anchor downloads work, convert the PDF blob to a base64 data URI and open it in a new tab/window, which Android WebView can handle (triggering the system PDF viewer or download manager).
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+### Changes
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+**1. `src/lib/share-utils.ts` — Improve `downloadPDF` fallback**
 
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+Update `downloadPDF` to detect WebView/mobile environments where anchor downloads fail. After attempting the anchor click, add a fallback that opens the blob URL directly via `window.open()`, which triggers the Android system download/viewer.
 
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
-
-### Technical details
-
-Each hook will be updated like this pattern:
 ```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
+export function downloadPDF(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+
+  // Try anchor download first
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // In WebView, anchor downloads often fail silently.
+  // Open blob URL directly as fallback — triggers system viewer/download.
+  if ((window as any).Android || /wv|WebView/i.test(navigator.userAgent)) {
+    window.open(url, "_blank");
+  } else {
+    URL.revokeObjectURL(url);
+  }
 }
 ```
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+**2. `src/pages/Outstanding.tsx` — Wrap share in try/catch with better fallback (lines 170-181)**
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
+The current code catches errors but only falls through to `downloadPDF` if `canShare` is false. Add handling for when `navigator.share` exists but throws (common in WebView):
+
+```typescript
+try {
+  const file = new File([blob], filename, { type: "application/pdf" });
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title: "Outstanding Summary" });
+    return;
+  }
+} catch (e) {
+  // Share cancelled or unsupported — fall through to download
+  if ((e as DOMException)?.name === "AbortError") return;
+}
+downloadPDF(blob, filename);
+```
+
+**3. Same fix in `src/components/dashboard/DrillDownSheet.tsx` (lines ~155-165)** — identical pattern, apply same defensive fallback.
+
+**4. Check other share callers** — `CustomerLedgerSheet.tsx` and `Collections.tsx` likely have the same pattern; apply consistently.
+
+### Summary
+- 1 core fix in `downloadPDF` to handle WebView environments
+- ~4 files with share/PDF logic get consistent error handling
+- No backend changes
+
