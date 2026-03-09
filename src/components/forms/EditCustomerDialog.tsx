@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
-import { useAreas, useProfiles, useUpdateCustomer, type Customer } from "@/hooks/use-data";
+import { useAreas, useUpdateCustomer, type Customer } from "@/hooks/use-data";
 import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -21,7 +21,6 @@ const editCustomerSchema = z.object({
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(0).max(100000000, "Credit limit is too high"),
   default_due_days: z.coerce.number().min(0).max(365).optional().or(z.literal("").transform(() => undefined)),
-  assigned_to: z.string().optional(),
 });
 
 type EditCustomerFormValues = z.infer<typeof editCustomerSchema>;
@@ -34,13 +33,12 @@ interface EditCustomerDialogProps {
 
 export default function EditCustomerDialog({ customer, open, onOpenChange }: EditCustomerDialogProps) {
   const { data: areas = [] } = useAreas();
-  const { data: profiles = [] } = useProfiles();
   const updateCustomer = useUpdateCustomer();
 
   const form = useForm<EditCustomerFormValues>({
     resolver: zodResolver(editCustomerSchema),
     defaultValues: {
-      name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined, assigned_to: undefined,
+      name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined,
     },
   });
 
@@ -54,7 +52,6 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
         gstin: customer.gstin || "",
         credit_limit: customer.credit_limit,
         default_due_days: customer.default_due_days ?? undefined,
-        assigned_to: customer.assigned_to || undefined,
       });
     }
   }, [customer, open]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -70,7 +67,6 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
       gstin: values.gstin || null,
       credit_limit: values.credit_limit,
       default_due_days: values.default_due_days ?? null,
-      assigned_to: (values.assigned_to && values.assigned_to !== "__none__") ? values.assigned_to : null,
     }, {
       onSuccess: () => {
         hapticSuccess();
@@ -148,23 +144,6 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
                 <FormItem>
                   <FormLabel>Default Due Days</FormLabel>
                   <FormControl><Input type="number" inputMode="numeric" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="assigned_to" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assigned To</FormLabel>
-                  <Select onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} value={field.value || "__none__"}>
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="__none__">Unassigned</SelectItem>
-                      {profiles.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )} />
