@@ -1,42 +1,48 @@
 
 
-## Include Mock Data for Development
+## Plan: App Lock Using Phone's Native Lock Screen (On/Off Toggle)
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+Instead of building a custom PIN screen, this approach delegates authentication to the device's own lock screen (fingerprint, face, PIN, pattern) using the **Web Authentication API (WebAuthn)**. The user simply toggles App Lock on or off from the mobile header dropdown.
 
-### What will change
+### How It Works
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+1. **Enable**: User taps "App Lock" toggle ON → browser triggers the device's native lock screen (fingerprint/PIN/pattern) via WebAuthn to register a credential → stored in localStorage per user
+2. **On app resume**: If enabled, a lock overlay appears → user taps "Unlock" → device lock screen is triggered → success unlocks the app
+3. **Disable**: User taps toggle OFF → device lock screen is triggered to verify identity → credential removed
+4. **Fallback**: If WebAuthn/platform authenticator is unavailable, the toggle is hidden or disabled with a message
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+### New Files
 
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+**1. `src/contexts/AppLockContext.tsx`**
+- Context provider with state: `isLocked`, `lockEnabled`, `biometricAvailable`
+- On mount: checks `PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()` to detect device support
+- Stores `app_lock_enabled_<userId>` and WebAuthn credential ID in `localStorage`
+- Listens to `visibilitychange` — when app returns from background, sets `isLocked = true` if enabled
+- `enableLock()`: calls `navigator.credentials.create()` with `authenticatorAttachment: "platform"` to register device authenticator, then stores credential
+- `disableLock()`: calls `navigator.credentials.get()` to verify identity first, then clears storage
+- `unlock()`: calls `navigator.credentials.get()` with stored credential — this triggers the phone's lock screen (fingerprint/PIN/pattern) — on success, sets `isLocked = false`
 
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+**2. `src/components/lock/AppLockScreen.tsx`**
+- Full-screen fixed overlay (z-50) with app logo and "Unlock" button
+- On mount: auto-triggers `unlock()` which opens the device lock screen
+- If verification fails, shows "Try Again" button
+- After 5 failed attempts, forces sign-out
 
-### Technical details
+### Modified Files
 
-Each hook will be updated like this pattern:
-```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
-}
-```
+**3. `src/App.tsx`**
+- Wrap with `AppLockProvider` inside `AuthProvider`
+- Render `<AppLockScreen />` when `isLocked === true`, above all routes
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+**4. `src/components/layout/AppLayout.tsx`**
+- Add `Lock` icon import from lucide-react
+- Add a new `DropdownMenuItem` between "Dark Mode" and "Sign Out" showing "App Lock" with a `Switch` toggle
+- Toggle calls `enableLock()` or `disableLock()` from context
+- If `biometricAvailable` is false, show the item disabled with tooltip "Not supported on this device"
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
+### Technical Notes
+- WebAuthn `authenticatorAttachment: "platform"` ensures it uses the device's built-in authenticator (fingerprint, face, device PIN) — not an external security key
+- No custom PIN needed — the phone's own lock settings handle security
+- Works in Android WebView and modern mobile browsers
+- Graceful degradation: if unsupported, the toggle simply won't appear
+
