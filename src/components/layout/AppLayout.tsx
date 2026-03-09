@@ -75,6 +75,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStatus();
   const { theme, setTheme } = useTheme();
+  const { lockEnabled, biometricAvailable, enableLock, disableLock } = useAppLock();
+  const [lockToggling, setLockToggling] = useState(false);
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
