@@ -16,6 +16,7 @@ import {
   Key,
   Sun,
   Moon,
+  Lock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,6 +50,8 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
 import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
+import { useAppLock } from "@/contexts/AppLockContext";
+import { Switch } from "@/components/ui/switch";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
@@ -72,6 +75,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStatus();
   const { theme, setTheme } = useTheme();
+  const { lockEnabled, biometricAvailable, enableLock, disableLock } = useAppLock();
+  const [lockToggling, setLockToggling] = useState(false);
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -306,6 +311,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </DropdownMenuItem>
+              {biometricAvailable && (
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  onClick={async () => {
+                    if (lockToggling) return;
+                    hapticLight();
+                    setLockToggling(true);
+                    if (lockEnabled) {
+                      await disableLock();
+                    } else {
+                      await enableLock();
+                    }
+                    setLockToggling(false);
+                  }}
+                >
+                  <Lock className="mr-2 h-4 w-4" />
+                  App Lock
+                  <Switch
+                    checked={lockEnabled}
+                    className="ml-auto scale-75"
+                    tabIndex={-1}
+                  />
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => {
                   hapticLight();

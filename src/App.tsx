@@ -6,6 +6,8 @@ import Home from "@/pages/Home";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AppLockProvider } from "@/contexts/AppLockContext";
+import AppLockScreen from "@/components/lock/AppLockScreen";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
 import SplashScreen from "@/pages/SplashScreen";
@@ -40,6 +42,8 @@ const App = () => (
         <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <AppLockProvider>
+          <AppLockScreen />
           <Routes>
             <Route path="/" element={<SplashScreen />} />
             <Route path="/home" element={<Home />} />
@@ -56,6 +60,7 @@ const App = () => (
             <Route path="/outstanding" element={<ProtectedLayout><Outstanding /></ProtectedLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </AppLockProvider>
         </AuthProvider>
       </BrowserRouter>
       </TooltipProvider>
