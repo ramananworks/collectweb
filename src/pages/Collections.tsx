@@ -112,7 +112,7 @@ export default function Collections() {
           <PopoverTrigger asChild>
             <Button variant="outline" className={cn("w-[140px] justify-start text-left font-normal text-xs", !dateTo && "text-muted-foreground")}>
               <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-              {dateTo ? format(dateTo, "dd MMM yyyy") : "To date"}
+              {dateTo ? format(dateTo, "dd/MM/yyyy") : "To date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">

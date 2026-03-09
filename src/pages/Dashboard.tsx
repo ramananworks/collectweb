@@ -216,7 +216,7 @@ export default function Dashboard() {
               <div key={inv.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                 <div>
                   <p className="text-sm font-medium">{inv.customer_name}</p>
-                  <p className="text-xs text-muted-foreground">Due {inv.due_date} · {getCustomerArea(inv.customer_id)}</p>
+                  <p className="text-xs text-muted-foreground">Due {formatDisplayDate(inv.due_date)} · {getCustomerArea(inv.customer_id)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold">{formatCurrency(inv.amount)}</span>

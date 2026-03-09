@@ -99,7 +99,7 @@ export default function SelectDeliveryInvoiceDialog({
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{inv.customer_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {inv.invoice_number} · {format(new Date(inv.invoice_date), "dd MMM yyyy")}
+                      {inv.invoice_number} · {format(new Date(inv.invoice_date), "dd/MM/yyyy")}
                     </p>
                   </div>
                   <span className="text-sm font-semibold text-foreground shrink-0 ml-3">

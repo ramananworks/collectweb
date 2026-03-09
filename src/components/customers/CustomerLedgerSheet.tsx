@@ -276,7 +276,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
                 {ledgerEntries.map((entry, idx) => (
                   <TableRow key={idx} className="text-xs">
                     <TableCell className="py-2.5 text-muted-foreground">
-                      {format(parseISO(entry.date), "dd MMM yy")}
+                      {format(parseISO(entry.date), "dd/MM/yyyy")}
                     </TableCell>
                     <TableCell className="py-2.5 max-w-[200px] truncate">{entry.particular}</TableCell>
                     <TableCell className={`py-2.5 text-right font-medium ${entry.debit > 0 ? "text-destructive" : ""}`}>
