@@ -26,10 +26,10 @@ function getStorageKey(userId: string, key: string) {
   return `app_lock_${key}_${userId}`;
 }
 
-function generateChallenge(): Uint8Array {
+function generateChallenge(): ArrayBuffer {
   const arr = new Uint8Array(32);
   crypto.getRandomValues(arr);
-  return arr;
+  return arr.buffer as ArrayBuffer;
 }
 
 function bufferToBase64(buffer: ArrayBuffer): string {
