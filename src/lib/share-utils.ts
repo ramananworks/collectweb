@@ -53,7 +53,7 @@ export function generateSummaryPDF(data: ShareSummaryData): Blob {
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(120, 120, 120);
-  doc.text(`Generated on ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, pageWidth / 2, y, { align: "center" });
+  doc.text(`Generated on ${formatDisplayDate(new Date())}`, pageWidth / 2, y, { align: "center" });
   y += 8;
 
   // Divider
