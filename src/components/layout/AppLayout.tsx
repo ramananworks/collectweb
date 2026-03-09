@@ -58,12 +58,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const sidebarOpenRef = useRef(sidebarOpen);
 
-  // Android back button: double-press to minimize/exit, never navigate to login
+  // Keep sidebar ref in sync
+  useEffect(() => {
+    sidebarOpenRef.current = sidebarOpen;
+  }, [sidebarOpen]);
+
+  // Android back button: close overlays first, then double-press to minimize/exit
   useEffect(() => {
     const handlePopState = () => {
       window.history.pushState(null, "", window.location.href);
 
+      // 1. Close sidebar if open
+      if (sidebarOpenRef.current) {
+        setSidebarOpen(false);
+        return;
+      }
+
+      // 2. Close any open dialog/sheet/alert
+      const openOverlay = document.querySelector(
+        '[role="dialog"], [role="alertdialog"]'
+      );
+      if (openOverlay) {
+        document.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+        );
+        return;
+      }
+
+      // 3. Existing double-press to exit logic
       if (backPressedRef.current) {
         const android = (window as any).Android;
         if (android && typeof android.minimizeApp === "function") {
