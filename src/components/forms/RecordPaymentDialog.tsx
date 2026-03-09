@@ -129,7 +129,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="invoice_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Invoice</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCustomerId}>
+                <Select onValueChange={(val) => { field.onChange(val); const inv = invoices.find(i => i.id === val); if (inv) { const balance = inv.amount - (inv.paid_amount || 0); form.setValue("amount", balance); setAmountAutoFilled(true); } }} value={field.value} disabled={!selectedCustomerId}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={selectedCustomerId ? "Select invoice" : "Select customer first"} />
