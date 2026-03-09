@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, X, UserPlus, Receipt, IndianRupee } from "lucide-react";
+import { Plus, X, UserPlus, Receipt, IndianRupee, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight } from "@/lib/haptics";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
+import SelectDeliveryInvoiceDialog from "@/components/forms/SelectDeliveryInvoiceDialog";
 
-type ActionKey = "customer" | "invoice" | "payment";
+type ActionKey = "customer" | "invoice" | "payment" | "delivery";
 
 const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
+  { key: "delivery", label: "Confirm Delivery", icon: Truck, gradientClass: "action-delivery" },
   { key: "payment", label: "Record Collection", icon: IndianRupee, gradientClass: "action-payment" },
   { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
   { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
@@ -19,12 +21,13 @@ export default function GlobalFAB() {
   const [expanded, setExpanded] = useState(false);
   const [openDialog, setOpenDialog] = useState<ActionKey | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { canManageCustomers, canCreateInvoices, canRecordPayments } = usePermissions();
+  const { canManageCustomers, canCreateInvoices, canRecordPayments, canConfirmDelivery } = usePermissions();
 
   const actions = useMemo(() => allActions.filter((a) => {
     if (a.key === "customer") return canManageCustomers;
     if (a.key === "invoice") return canCreateInvoices;
     if (a.key === "payment") return canRecordPayments;
+    if (a.key === "delivery") return canConfirmDelivery;
     return true;
   }), [canManageCustomers, canCreateInvoices, canRecordPayments]);
 
@@ -74,6 +77,8 @@ export default function GlobalFAB() {
                 ? "0 6px 28px -2px hsl(217 91% 60% / 0.5), 0 3px 12px -1px hsl(236 72% 79% / 0.3)"
                 : action.key === "invoice"
                 ? "0 6px 28px -2px hsl(263 70% 50% / 0.5), 0 3px 12px -1px hsl(280 100% 70% / 0.3)"
+                : action.key === "delivery"
+                ? "0 6px 28px -2px hsl(25 95% 53% / 0.5), 0 3px 12px -1px hsl(45 93% 47% / 0.3)"
                 : "0 6px 28px -2px hsl(142 71% 45% / 0.5), 0 3px 12px -1px hsl(160 84% 39% / 0.3)"
               }}
               whileTap={{ scale: 0.95 }}
@@ -122,6 +127,7 @@ export default function GlobalFAB() {
       <AddCustomerDialog open={openDialog === "customer"} onOpenChange={(v) => !v && setOpenDialog(null)} />
       <CreateInvoiceDialog open={openDialog === "invoice"} onOpenChange={(v) => !v && setOpenDialog(null)} />
       <RecordPaymentDialog open={openDialog === "payment"} onOpenChange={(v) => !v && setOpenDialog(null)} />
+      <SelectDeliveryInvoiceDialog open={openDialog === "delivery"} onOpenChange={(v) => !v && setOpenDialog(null)} />
     </>
   );
 }

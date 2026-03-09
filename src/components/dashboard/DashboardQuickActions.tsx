@@ -1,34 +1,37 @@
 import { useState, useMemo } from "react";
-import { UserPlus, Receipt, IndianRupee } from "lucide-react";
+import { UserPlus, Receipt, IndianRupee, Truck } from "lucide-react";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
+import SelectDeliveryInvoiceDialog from "@/components/forms/SelectDeliveryInvoiceDialog";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight } from "@/lib/haptics";
 
-type ActionKey = "customer" | "invoice" | "payment";
+type ActionKey = "customer" | "invoice" | "payment" | "delivery";
 
 const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
   { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
   { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
   { key: "payment", label: "Record Collection", icon: IndianRupee, gradientClass: "action-payment" },
+  { key: "delivery", label: "Confirm Delivery", icon: Truck, gradientClass: "action-delivery" },
 ];
 
 export default function DashboardQuickActions() {
   const [openDialog, setOpenDialog] = useState<ActionKey | null>(null);
-  const { canManageCustomers, canCreateInvoices, canRecordPayments } = usePermissions();
+  const { canManageCustomers, canCreateInvoices, canRecordPayments, canConfirmDelivery } = usePermissions();
 
   const actions = useMemo(() => allActions.filter((a) => {
     if (a.key === "customer") return canManageCustomers;
     if (a.key === "invoice") return canCreateInvoices;
     if (a.key === "payment") return canRecordPayments;
+    if (a.key === "delivery") return canConfirmDelivery;
     return true;
   }), [canManageCustomers, canCreateInvoices, canRecordPayments]);
 
   return (
     <div className="rounded-2xl bg-card p-5 shadow-sm">
       <h2 className="text-base font-semibold mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-3 gap-3 overflow-x-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-x-auto">
         {actions.map((a) => (
           <button
             key={a.key}
@@ -49,6 +52,7 @@ export default function DashboardQuickActions() {
       <AddCustomerDialog open={openDialog === "customer"} onOpenChange={(v) => !v && setOpenDialog(null)} />
       <CreateInvoiceDialog open={openDialog === "invoice"} onOpenChange={(v) => !v && setOpenDialog(null)} />
       <RecordPaymentDialog open={openDialog === "payment"} onOpenChange={(v) => !v && setOpenDialog(null)} />
+      <SelectDeliveryInvoiceDialog open={openDialog === "delivery"} onOpenChange={(v) => !v && setOpenDialog(null)} />
     </div>
   );
 }
