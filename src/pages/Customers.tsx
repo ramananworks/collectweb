@@ -15,16 +15,14 @@ import { usePermissions } from "@/hooks/usePermissions";
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
-  const [userFilter, setUserFilter] = useState("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
-  const { data: profiles = [] } = useProfiles();
   const { data: company } = useCompany();
   const { canManageCustomers, canBulkImport } = usePermissions();
 
-  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["profiles"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"]] });
 
   const areaNames = areas.map((a) => a.name);
 
