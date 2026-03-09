@@ -16,6 +16,7 @@ import {
   Key,
   Sun,
   Moon,
+  Monitor,
 } from "lucide-react";
 import {
   DropdownMenu,
