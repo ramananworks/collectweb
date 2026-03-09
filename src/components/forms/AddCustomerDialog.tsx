@@ -65,12 +65,14 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
       assigned_to: values.assigned_to,
     }, {
       onSuccess: () => {
+        hapticSuccess();
         toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
         form.reset();
         setOptionalOpen(false);
         setOpen(false);
       },
       onError: (err) => {
+        hapticHeavy();
         toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });
