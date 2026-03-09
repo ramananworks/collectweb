@@ -294,7 +294,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 animate-[scale-in_0.2s_ease-out] origin-top-right">
               <DropdownMenuLabel className="font-normal">
                 <p className="text-sm font-medium truncate">{displayName}</p>
                 <p className="text-xs text-muted-foreground truncate">{displayRole}</p>
