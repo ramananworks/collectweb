@@ -19,7 +19,7 @@ const editCustomerSchema = z.object({
   address: z.string().trim().max(200, "Address is too long").optional(),
   area: z.string().min(1, "Select an area"),
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
-  credit_limit: z.coerce.number().min(0).max(100000000, "Credit limit is too high"),
+  credit_limit: z.union([z.number().min(0).max(100000000, "Credit limit is too high"), z.undefined()]).refine((v) => v !== undefined, { message: "Credit limit is required" }),
   default_due_days: z.coerce.number().min(0).max(365).optional().or(z.literal("").transform(() => undefined)),
 });
 
@@ -65,7 +65,7 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
       address: values.address || "",
       area: values.area,
       gstin: values.gstin || null,
-      credit_limit: values.credit_limit,
+      credit_limit: values.credit_limit ?? 0,
       default_due_days: values.default_due_days ?? null,
     }, {
       onSuccess: () => {
@@ -136,7 +136,18 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
               <FormField control={form.control} name="credit_limit" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Credit Limit (₹)</FormLabel>
-                  <FormControl><Input type="number" inputMode="numeric" {...field} /></FormControl>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="500000"
+                      value={field.value ?? ""}
+                      onFocus={() => {
+                        if (field.value === 0) field.onChange(undefined);
+                      }}
+                      onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

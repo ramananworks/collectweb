@@ -17,7 +17,7 @@ import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 const collectionSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
   invoice_id: z.string().min(1, "Select an invoice"),
-  amount: z.coerce.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"),
+  amount: z.union([z.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"), z.undefined()]).refine((v) => v !== undefined && v >= 1, { message: "Amount must be greater than 0" }),
   date: z.string().min(1, "Collection date is required"),
   mode: z.enum(["cash", "upi", "bank_transfer"], { required_error: "Select collection mode" }),
   collected_by: z.string().min(1, "Select collector"),
@@ -45,7 +45,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
 
   const form = useForm<CollectionFormValues>({
     resolver: zodResolver(collectionSchema),
-    defaultValues: { customer_id: prefillCustomerId || "", invoice_id: prefillInvoiceId || "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: authProfile?.name || "", notes: "" },
+    defaultValues: { customer_id: prefillCustomerId || "", invoice_id: prefillInvoiceId || "", amount: undefined, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: authProfile?.name || "", notes: "" },
   });
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     recordPayment.mutate({
       invoice_id: values.invoice_id,
       customer_name: customer?.name || "",
-      amount: values.amount,
+      amount: values.amount ?? 0,
       date: values.date,
       mode: values.mode,
       collected_by: values.collected_by,
@@ -148,7 +148,17 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="amount" render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount (₹)</FormLabel>
-                <FormControl><Input type="number" placeholder="25000" {...field} /></FormControl>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="25000"
+                    value={field.value ?? ""}
+                    onFocus={() => {
+                      if (field.value === 0) field.onChange(undefined);
+                    }}
+                    onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
