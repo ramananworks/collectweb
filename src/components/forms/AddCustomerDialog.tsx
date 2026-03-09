@@ -218,22 +218,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="assigned_to" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Assigned To</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {profiles.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
                 </CollapsibleContent>
               </Collapsible>
 
