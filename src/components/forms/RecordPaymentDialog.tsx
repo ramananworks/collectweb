@@ -58,6 +58,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     if (!open) {
       form.reset();
       setAmountAutoFilled(false);
+      setIsSubmitting(false);
     }
   }, [open, prefillCustomerId, prefillInvoiceId]);
 
