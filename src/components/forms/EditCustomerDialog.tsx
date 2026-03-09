@@ -21,7 +21,6 @@ const editCustomerSchema = z.object({
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
   credit_limit: z.coerce.number().min(0).max(100000000, "Credit limit is too high"),
   default_due_days: z.coerce.number().min(0).max(365).optional().or(z.literal("").transform(() => undefined)),
-  assigned_to: z.string().optional(),
 });
 
 type EditCustomerFormValues = z.infer<typeof editCustomerSchema>;
