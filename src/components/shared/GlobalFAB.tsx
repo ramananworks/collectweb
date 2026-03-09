@@ -127,6 +127,7 @@ export default function GlobalFAB() {
       <AddCustomerDialog open={openDialog === "customer"} onOpenChange={(v) => !v && setOpenDialog(null)} />
       <CreateInvoiceDialog open={openDialog === "invoice"} onOpenChange={(v) => !v && setOpenDialog(null)} />
       <RecordPaymentDialog open={openDialog === "payment"} onOpenChange={(v) => !v && setOpenDialog(null)} />
+      <SelectDeliveryInvoiceDialog open={openDialog === "delivery"} onOpenChange={(v) => !v && setOpenDialog(null)} />
     </>
   );
 }
