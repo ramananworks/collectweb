@@ -320,31 +320,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 {theme === "dark" ? <Sun className="mr-2 h-5 w-5" /> : <Moon className="mr-2 h-5 w-5" />}
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </DropdownMenuItem>
-              {biometricAvailable && (
-                <DropdownMenuItem
-                  className="py-3 px-3 text-base"
-                  onSelect={(e) => e.preventDefault()}
-                  onClick={async () => {
-                    if (lockToggling) return;
-                    hapticLight();
-                    setLockToggling(true);
-                    if (lockEnabled) {
-                      await disableLock();
-                    } else {
-                      await enableLock();
-                    }
-                    setLockToggling(false);
-                  }}
-                >
-                  <Lock className="mr-2 h-5 w-5" />
+              <DropdownMenuItem
+                className={`py-3 px-3 text-base ${!biometricAvailable ? "opacity-50 cursor-not-allowed" : ""}`}
+                onSelect={(e) => e.preventDefault()}
+                onClick={async () => {
+                  if (!biometricAvailable || lockToggling) return;
+                  hapticLight();
+                  setLockToggling(true);
+                  if (lockEnabled) {
+                    await disableLock();
+                  } else {
+                    await enableLock();
+                  }
+                  setLockToggling(false);
+                }}
+              >
+                <Lock className="mr-2 h-5 w-5" />
+                <span className="flex flex-col">
                   App Lock
-                  <Switch
-                    checked={lockEnabled}
-                    className="ml-auto scale-75"
-                    tabIndex={-1}
-                  />
-                </DropdownMenuItem>
-              )}
+                  {!biometricAvailable && (
+                    <span className="text-xs text-muted-foreground font-normal">Device auth not available</span>
+                  )}
+                </span>
+                <Switch
+                  checked={lockEnabled}
+                  disabled={!biometricAvailable}
+                  className="ml-auto scale-75"
+                  tabIndex={-1}
+                />
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="my-1.5" />
               <DropdownMenuItem
                 className="py-3 px-3 text-base text-destructive focus:text-destructive"
