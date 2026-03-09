@@ -1,42 +1,41 @@
 
 
-## Include Mock Data for Development
+## Plan: Add "Confirm Delivery" to FAB and Quick Actions
 
-Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
+### Challenge
+The `DeliveryConfirmDialog` requires an `invoiceId` and `customerName`, so unlike other quick actions that open a standalone form, this one needs the user to first select which pending invoice to confirm. We need an intermediate selection step.
 
-### What will change
+### Approach
+Create a new `SelectDeliveryInvoiceDialog` that:
+1. Fetches pending (undelivered, non-OTP-verified) invoices
+2. Shows a searchable list for the user to pick one
+3. On selection, opens the existing `DeliveryConfirmDialog`
 
-**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
+Then wire this into both the FAB and Dashboard Quick Actions.
 
-- Add a `const DEV_MODE = true;` flag at the top of the file
-- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
-- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
+### Changes
 
-**2. Mock data included:**
-- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
-- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
-- **5 payments** with different modes (cash, UPI, bank transfer)
-- **6 areas** matching the customer areas
-- **1 company** (Sharma Traders Pvt Ltd)
-- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
+**1. New file: `src/components/forms/SelectDeliveryInvoiceDialog.tsx`**
+- Dialog with a search input and scrollable list of pending invoices (filtered to `status === 'pending'` and `otp_verified !== true`)
+- Uses `useInvoices()` hook to fetch data
+- On selecting an invoice, closes itself and opens `DeliveryConfirmDialog` with the selected `invoiceId` and `customerName`
+- Combines both dialogs internally for clean API: `open`, `onOpenChange` props only
 
-**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
+**2. Update `src/components/shared/GlobalFAB.tsx`**
+- Add `"delivery"` to `ActionKey` type
+- Add delivery action entry: `{ key: "delivery", label: "Confirm Delivery", icon: Truck, gradientClass: "action-delivery" }` (using orange/amber gradient class)
+- Filter by `canConfirmDelivery` permission
+- Render `SelectDeliveryInvoiceDialog` for `openDialog === "delivery"`
+- Add matching glow color for hover effect (amber/orange hue)
 
-### Technical details
+**3. Update `src/components/dashboard/DashboardQuickActions.tsx`**
+- Same additions: new action key, entry, permission filter, and dialog render
 
-Each hook will be updated like this pattern:
-```typescript
-export function useCustomers() {
-  return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      if (DEV_MODE) return mockCustomers;
-      // ... existing Supabase query
-    },
-  });
-}
-```
+**4. Update `src/index.css`** (if needed)
+- Add `.action-delivery` gradient class (amber/orange theme) to match existing action gradient pattern
 
-The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
+### Technical Notes
+- Permission gated by `canConfirmDelivery` (owner, manager, delivery_staff)
+- Grid changes from `grid-cols-3` to `grid-cols-4` in Quick Actions if 4 actions visible, or stays responsive
+- Delivery action uses `Truck` icon from lucide-react (already imported in Invoices page)
 
-When you're ready to re-enable real data, simply set `DEV_MODE = false`.
