@@ -311,6 +311,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </DropdownMenuItem>
+              {biometricAvailable && (
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  onClick={async () => {
+                    if (lockToggling) return;
+                    hapticLight();
+                    setLockToggling(true);
+                    if (lockEnabled) {
+                      await disableLock();
+                    } else {
+                      await enableLock();
+                    }
+                    setLockToggling(false);
+                  }}
+                >
+                  <Lock className="mr-2 h-4 w-4" />
+                  App Lock
+                  <Switch
+                    checked={lockEnabled}
+                    className="ml-auto scale-75"
+                    tabIndex={-1}
+                  />
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => {
                   hapticLight();
