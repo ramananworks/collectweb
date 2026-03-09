@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Phone, MapPin, MapPinned, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCustomers, useAreas, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
+import { useCustomers, useAreas, useCompany, useInvoices, formatCurrency, type Customer } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import EditCustomerDialog from "@/components/forms/EditCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
