@@ -221,7 +221,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !fromDate && "text-muted-foreground")}>
                   <CalendarIcon className="h-3 w-3" />
-                  {fromDate ? format(fromDate, "dd MMM yy") : "From"}
+                  {fromDate ? format(fromDate, "dd/MM/yyyy") : "From"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
