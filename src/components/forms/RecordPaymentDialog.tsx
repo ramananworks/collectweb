@@ -12,6 +12,7 @@ import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useInvoices, useCustomers, useProfiles, useRecordPayment, formatCurrency } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/AuthContext";
+import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 const collectionSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
