@@ -50,6 +50,8 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
 import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
+import { useAppLock } from "@/contexts/AppLockContext";
+import { Switch } from "@/components/ui/switch";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
