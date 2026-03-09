@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
-import { usePayments, useCustomers, formatCurrency } from "@/hooks/use-data";
+import { usePayments, useCustomers, useProfiles, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
@@ -18,14 +18,17 @@ export default function Collections() {
   const [modeFilter, setModeFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [userFilter, setUserFilter] = useState("all");
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
+  const { data: profiles = [] } = useProfiles();
 
-  const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"], ["profiles"]] });
 
   const filteredPayments = payments.filter((p) => {
     if (modeFilter !== "all" && p.mode !== modeFilter) return false;
+    if (userFilter !== "all" && p.collected_by !== userFilter) return false;
     if (dateFrom && p.date < format(dateFrom, "yyyy-MM-dd")) return false;
     if (dateTo && p.date > format(dateTo, "yyyy-MM-dd")) return false;
     return true;
@@ -90,6 +93,17 @@ export default function Collections() {
             <SelectItem value="cash">Cash</SelectItem>
             <SelectItem value="upi">UPI</SelectItem>
             <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={userFilter} onValueChange={setUserFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Staff" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Staff</SelectItem>
+            {profiles.map((p) => (
+              <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
