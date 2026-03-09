@@ -210,41 +210,25 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
     return doc.output("blob");
   }, [type, hasData, isPayments, invoices, payments, company, totalOutstanding, totalOverdue, pendingCount, invoiceAreaKeys, paymentAreaKeys, groupedInvoices, groupedPayments]);
 
+  const [exporting, setExporting] = useState(false);
+
   const handlePDF = useCallback(async () => {
-    const blob = generatePDFBlob();
-    if (!blob || !type) return;
-    const label = type === "todayCollection" ? "Collection" : type === "overdue" ? "Overdue" : "Outstanding";
-    const filename = `${label}_Summary_${new Date().toISOString().split("T")[0]}.pdf`;
-
-    const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
-    if (isWebView) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = base64;
-        document.body.appendChild(iframe);
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-          window.location.href = base64;
-        }, 1000);
-      };
-      reader.readAsDataURL(blob);
-      return;
-    }
-
+    setExporting(true);
     try {
-      const file = new File([blob], filename, { type: "application/pdf" });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: titles[type] });
-        return;
+      const blob = generatePDFBlob();
+      if (!blob || !type) return;
+      const label = type === "todayCollection" ? "Collection" : type === "overdue" ? "Overdue" : "Outstanding";
+      const filename = `${label}_Summary_${new Date().toISOString().split("T")[0]}.pdf`;
+
+      const shared = await sharePDFFile(blob, filename, titles[type]);
+      if (!shared) {
+        downloadPDF(blob, filename);
       }
     } catch (e) {
-      if ((e as DOMException)?.name === "AbortError") return;
+      console.error("PDF share failed:", e);
+    } finally {
+      setExporting(false);
     }
-
-    downloadPDF(blob, filename);
   }, [generatePDFBlob, type]);
 
   if (!type) return null;
