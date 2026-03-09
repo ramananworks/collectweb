@@ -1,57 +1,42 @@
 
 
-## Plan: Fix PDF share on Android WebView — use `window.location.href` instead of `window.open`
+## Include Mock Data for Development
 
-**Root cause**: `window.open(dataUri, "_blank")` is also blocked by Android WebView's popup blocker, even with data URIs. The toast appears, PDF generates, but `window.open` silently fails.
+Since authentication is turned off for development, the database queries return empty results due to security policies. This plan adds mock/fallback data directly into the data hooks so all pages display realistic sample data.
 
-**Fix**: Replace `window.open(dataUri)` with `window.location.href = dataUri`. This navigates the current page to the data URI, which Android WebView intercepts and hands off to the system PDF viewer/download manager. Since this replaces the current page, we need to handle it carefully — but Android WebView typically intercepts `data:application/pdf` URIs before navigation actually occurs.
+### What will change
 
-An even more robust approach: use an **invisible iframe** to load the data URI, which avoids navigating away and isn't subject to popup blocking.
+**1. Update `src/hooks/use-data.ts`** - Add a `DEV_MODE` flag and mock data constants
 
-### Changes
+- Add a `const DEV_MODE = true;` flag at the top of the file
+- Define mock data arrays matching the exact database types (`Customer`, `Invoice`, `Payment`, `Area`, `Company`, `Profile`) using the data from the existing `src/lib/mock-data.ts` as reference but conforming to the Supabase table schemas
+- Update each query hook (`useCustomers`, `useInvoices`, `usePayments`, `useAreas`, `useCompany`, `useProfiles`) to return mock data immediately when `DEV_MODE` is true, skipping the database call
 
-**1. `src/lib/share-utils.ts` — Update `downloadPDF` WebView path**
+**2. Mock data included:**
+- **6 customers** across different areas (MG Road, Station Area, Gandhi Nagar, etc.) with varying outstanding balances and credit limits
+- **6 invoices** with mixed statuses (pending, partial, paid, overdue)
+- **5 payments** with different modes (cash, UPI, bank transfer)
+- **6 areas** matching the customer areas
+- **1 company** (Sharma Traders Pvt Ltd)
+- **4 profiles** (owner, manager, 2 staff members) for the assigned-to dropdown and user filter
 
-Replace `window.open(base64, "_blank")` with an iframe-based approach:
+**3. Mutation hooks** (`useAddCustomer`, `useCreateInvoice`, `useRecordPayment`, etc.) will remain unchanged -- they will still attempt real database operations. This is acceptable since mock data is only for visual development/preview.
 
+### Technical details
+
+Each hook will be updated like this pattern:
 ```typescript
-if (isWebView) {
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    const base64 = reader.result as string;
-    // Use a hidden iframe — not blocked by popup blocker
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    iframe.src = base64;
-    document.body.appendChild(iframe);
-    // Also try direct navigation as ultimate fallback
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-      window.location.href = base64;
-    }, 1000);
-  };
-  reader.readAsDataURL(blob);
-  return;
+export function useCustomers() {
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      if (DEV_MODE) return mockCustomers;
+      // ... existing Supabase query
+    },
+  });
 }
 ```
 
-**2. `src/pages/Outstanding.tsx` (line 177) — Same fix**
+The mock data UUIDs will use simple placeholder values (e.g., `"00000000-0000-0000-0000-000000000001"`) to avoid conflicts. All fields will match the exact Supabase `Row` types (including `created_at` as ISO strings, `bill_image_url`, `assigned_to`, etc.).
 
-Replace `window.open(dataUri, "_blank")` with:
-```typescript
-const iframe = document.createElement("iframe");
-iframe.style.display = "none";
-iframe.src = dataUri;
-document.body.appendChild(iframe);
-setTimeout(() => {
-  document.body.removeChild(iframe);
-  window.location.href = dataUri;
-}, 1000);
-```
-
-**3. Apply same pattern** in `DrillDownSheet.tsx` and `CustomerLedgerSheet.tsx`.
-
-### Summary
-- 4 files updated: replace all `window.open(dataUri)` with iframe + `window.location.href` fallback
-- No backend changes
-
+When you're ready to re-enable real data, simply set `DEV_MODE = false`.

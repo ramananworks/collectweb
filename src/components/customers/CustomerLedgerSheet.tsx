@@ -180,7 +180,17 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
     if (isWebView) {
       const reader = new FileReader();
-      reader.onloadend = () => window.open(reader.result as string, "_blank");
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = base64;
+        document.body.appendChild(iframe);
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          window.location.href = base64;
+        }, 1000);
+      };
       reader.readAsDataURL(blob);
       return;
     }
