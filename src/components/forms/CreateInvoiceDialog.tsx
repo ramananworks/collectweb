@@ -78,12 +78,12 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
         customer_id: "",
         invoice_number: defaultValues.invoice_number || "",
         invoice_date: defaultValues.invoice_date || "",
-        amount: defaultValues.amount || 0,
+        amount: defaultValues.amount ?? undefined,
         due_date: defaultValues.due_date || "",
         description: defaultValues.description || "",
       });
     } else if (!open) {
-      form.reset({ customer_id: "", invoice_number: "", invoice_date: "", amount: 0, due_date: "", description: "" });
+      form.reset({ customer_id: "", invoice_number: "", invoice_date: "", amount: undefined, due_date: "", description: "" });
     }
   }, [open, defaultValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
