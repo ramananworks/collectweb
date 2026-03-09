@@ -289,7 +289,6 @@ export default function Outstanding() {
                           <th className="text-left px-4 py-2 font-medium">Invoice</th>
                           <th className="text-left px-2 py-2 font-medium">Date</th>
                           <th className="text-right px-2 py-2 font-medium">Amount</th>
-                          <th className="text-right px-2 py-2 font-medium">Paid</th>
                           <th className="text-right px-2 py-2 font-medium">Balance</th>
                           <th className="text-center px-4 py-2 font-medium">Status</th>
                         </tr>
@@ -300,7 +299,6 @@ export default function Outstanding() {
                             <td className="px-4 py-2 font-medium">{inv.invoice_number}</td>
                             <td className="px-2 py-2 text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</td>
                             <td className="px-2 py-2 text-right">{formatCurrency(Number(inv.amount))}</td>
-                            <td className="px-2 py-2 text-right">{formatCurrency(Number(inv.paid_amount))}</td>
                             <td className="px-2 py-2 text-right font-medium text-destructive">
                               {formatCurrency(Number(inv.amount) - Number(inv.paid_amount))}
                             </td>
