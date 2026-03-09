@@ -58,7 +58,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
       address: values.address,
       area: values.area,
       gstin: values.gstin,
-      credit_limit: values.credit_limit,
+      credit_limit: values.credit_limit ?? 0,
       default_due_days: values.default_due_days,
     }, {
       onSuccess: () => {
