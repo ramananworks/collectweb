@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Plus, ChevronDown, Contact } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAreas, useAddCustomer, useProfiles } from "@/hooks/use-data";
+import { useAreas, useAddCustomer } from "@/hooks/use-data";
 import { hapticLight, hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 function supportsContacts() {
