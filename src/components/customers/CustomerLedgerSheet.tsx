@@ -179,12 +179,12 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
 
     try {
       const file = new File([blob], filename, { type: "application/pdf" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: `${customer.name} – Ledger` });
         return;
       }
     } catch (e) {
-      // Share cancelled or unsupported
+      if ((e as DOMException)?.name === "AbortError") return;
     }
 
     downloadPDF(blob, filename);

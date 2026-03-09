@@ -170,12 +170,13 @@ export default function Outstanding() {
 
     try {
       const file = new File([blob], filename, { type: "application/pdf" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: "Outstanding Summary" });
         return;
       }
     } catch (e) {
-      // Share cancelled or unsupported — fall through to download
+      if ((e as DOMException)?.name === "AbortError") return;
+      // Share failed — fall through to download
     }
 
     downloadPDF(blob, filename);
