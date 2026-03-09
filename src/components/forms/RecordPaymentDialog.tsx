@@ -74,6 +74,15 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
 
   function onSubmit(values: CollectionFormValues) {
     if (isSubmitting) return;
+    // Overpayment guard: prevent payment exceeding invoice balance
+    const selectedInv = invoices.find(i => i.id === values.invoice_id);
+    if (selectedInv && values.amount !== undefined) {
+      const balance = Number(selectedInv.amount) - Number(selectedInv.paid_amount);
+      if (values.amount > balance) {
+        toast({ title: "Overpayment", description: `Amount exceeds invoice balance of ${formatCurrency(balance)}.`, variant: "destructive" });
+        return;
+      }
+    }
     setIsSubmitting(true);
     const customer = customers.find((c) => c.id === values.customer_id);
     const transactionId = crypto.randomUUID();
