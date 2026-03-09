@@ -77,6 +77,8 @@ export default function GlobalFAB() {
                 ? "0 6px 28px -2px hsl(217 91% 60% / 0.5), 0 3px 12px -1px hsl(236 72% 79% / 0.3)"
                 : action.key === "invoice"
                 ? "0 6px 28px -2px hsl(263 70% 50% / 0.5), 0 3px 12px -1px hsl(280 100% 70% / 0.3)"
+                : action.key === "delivery"
+                ? "0 6px 28px -2px hsl(25 95% 53% / 0.5), 0 3px 12px -1px hsl(45 93% 47% / 0.3)"
                 : "0 6px 28px -2px hsl(142 71% 45% / 0.5), 0 3px 12px -1px hsl(160 84% 39% / 0.3)"
               }}
               whileTap={{ scale: 0.95 }}
