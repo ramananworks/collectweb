@@ -28,6 +28,7 @@ export default function Collections() {
 
   const filteredPayments = payments.filter((p) => {
     if (modeFilter !== "all" && p.mode !== modeFilter) return false;
+    if (userFilter !== "all" && p.collected_by !== userFilter) return false;
     if (dateFrom && p.date < format(dateFrom, "yyyy-MM-dd")) return false;
     if (dateTo && p.date > format(dateTo, "yyyy-MM-dd")) return false;
     return true;
