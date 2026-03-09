@@ -294,32 +294,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 animate-[scale-in_0.2s_ease-out] origin-top-right">
-              <DropdownMenuLabel className="font-normal">
-                <p className="text-sm font-medium truncate">{displayName}</p>
-                <p className="text-xs text-muted-foreground truncate">{displayRole}</p>
+            <DropdownMenuContent align="end" className="w-64 p-2 animate-[scale-in_0.2s_ease-out] origin-top-right">
+              <DropdownMenuLabel className="px-3 py-2.5 font-normal">
+                <p className="text-base font-semibold truncate">{displayName}</p>
+                <p className="text-sm text-muted-foreground truncate">{displayRole}</p>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="my-1.5" />
               <DropdownMenuItem
+                className="py-3 px-3 text-base"
                 onClick={() => {
                   hapticLight();
                   setChangePasswordOpen(true);
                 }}
               >
-                <Key className="mr-2 h-4 w-4" />
+                <Key className="mr-2 h-5 w-5" />
                 Change Password
               </DropdownMenuItem>
               <DropdownMenuItem
+                className="py-3 px-3 text-base"
                 onClick={() => {
                   hapticLight();
                   setTheme(theme === "dark" ? "light" : "dark");
                 }}
               >
-                {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                {theme === "dark" ? <Sun className="mr-2 h-5 w-5" /> : <Moon className="mr-2 h-5 w-5" />}
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </DropdownMenuItem>
               {biometricAvailable && (
                 <DropdownMenuItem
+                  className="py-3 px-3 text-base"
                   onSelect={(e) => e.preventDefault()}
                   onClick={async () => {
                     if (lockToggling) return;
@@ -333,7 +336,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     setLockToggling(false);
                   }}
                 >
-                  <Lock className="mr-2 h-4 w-4" />
+                  <Lock className="mr-2 h-5 w-5" />
                   App Lock
                   <Switch
                     checked={lockEnabled}
@@ -342,14 +345,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   />
                 </DropdownMenuItem>
               )}
+              <DropdownMenuSeparator className="my-1.5" />
               <DropdownMenuItem
+                className="py-3 px-3 text-base text-destructive focus:text-destructive"
                 onClick={() => {
                   hapticLight();
                   setLogoutOpen(true);
                 }}
-                className="text-destructive focus:text-destructive"
               >
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-2 h-5 w-5" />
                 Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
