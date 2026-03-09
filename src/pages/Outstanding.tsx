@@ -16,7 +16,7 @@ import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 import { usePermissions } from "@/hooks/usePermissions";
-import { downloadPDF } from "@/lib/share-utils";
+import { downloadPDF, sharePDFFile } from "@/lib/share-utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import jsPDF from "jspdf";
 
