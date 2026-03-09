@@ -34,6 +34,7 @@ import { WifiOff, Wifi, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 import { usePermissions } from "@/hooks/usePermissions";
+import { hapticLight, hapticMedium } from "@/lib/haptics";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
