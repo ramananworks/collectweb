@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Share2, Download } from "lucide-react";
+import { Share2, Download, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { formatCurrency, useCompany } from "@/hooks/use-data";
-import { downloadPDF } from "@/lib/share-utils";
+import { downloadPDF, sharePDFFile } from "@/lib/share-utils";
 import { formatDisplayDate } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -210,41 +210,25 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
     return doc.output("blob");
   }, [type, hasData, isPayments, invoices, payments, company, totalOutstanding, totalOverdue, pendingCount, invoiceAreaKeys, paymentAreaKeys, groupedInvoices, groupedPayments]);
 
+  const [exporting, setExporting] = useState(false);
+
   const handlePDF = useCallback(async () => {
-    const blob = generatePDFBlob();
-    if (!blob || !type) return;
-    const label = type === "todayCollection" ? "Collection" : type === "overdue" ? "Overdue" : "Outstanding";
-    const filename = `${label}_Summary_${new Date().toISOString().split("T")[0]}.pdf`;
-
-    const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
-    if (isWebView) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = base64;
-        document.body.appendChild(iframe);
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-          window.location.href = base64;
-        }, 1000);
-      };
-      reader.readAsDataURL(blob);
-      return;
-    }
-
+    setExporting(true);
     try {
-      const file = new File([blob], filename, { type: "application/pdf" });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: titles[type] });
-        return;
+      const blob = generatePDFBlob();
+      if (!blob || !type) return;
+      const label = type === "todayCollection" ? "Collection" : type === "overdue" ? "Overdue" : "Outstanding";
+      const filename = `${label}_Summary_${new Date().toISOString().split("T")[0]}.pdf`;
+
+      const shared = await sharePDFFile(blob, filename, titles[type]);
+      if (!shared) {
+        downloadPDF(blob, filename);
       }
     } catch (e) {
-      if ((e as DOMException)?.name === "AbortError") return;
+      console.error("PDF share failed:", e);
+    } finally {
+      setExporting(false);
     }
-
-    downloadPDF(blob, filename);
   }, [generatePDFBlob, type]);
 
   if (!type) return null;
@@ -255,15 +239,9 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
         <SheetHeader className="flex flex-row items-center justify-between pr-8">
           <SheetTitle className="text-lg">{titles[type]}</SheetTitle>
           {hasData && (
-            isMobile ? (
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handlePDF}>
-                <Share2 className="h-3.5 w-3.5" /> Share
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handlePDF}>
-                <Download className="h-3.5 w-3.5" /> PDF
-              </Button>
-            )
+            <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handlePDF} disabled={exporting}>
+              {exporting ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Sharing…</> : isMobile ? <><Share2 className="h-3.5 w-3.5" /> Share</> : <><Download className="h-3.5 w-3.5" /> PDF</>}
+            </Button>
           )}
         </SheetHeader>
 

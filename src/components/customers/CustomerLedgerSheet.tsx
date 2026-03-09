@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import { format, parseISO, startOfDay, endOfDay } from "date-fns";
-import { CalendarIcon, X, Download, Share2 } from "lucide-react";
-import { downloadPDF } from "@/lib/share-utils";
+import { CalendarIcon, X, Download, Share2, Loader2 } from "lucide-react";
+import { downloadPDF, sharePDFFile } from "@/lib/share-utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -172,40 +172,25 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     return doc.output("blob");
   }, [customer, ledgerEntries, totalDebit, totalCredit, closingBalance, company]);
 
+  const [exporting, setExporting] = useState(false);
+
   const handleSharePDF = useCallback(async () => {
-    const blob = generateLedgerPDFBlob();
-    if (!blob || !customer) return;
-    const filename = `${customer.name}_Ledger_${new Date().toISOString().split("T")[0]}.pdf`;
-
-    const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
-    if (isWebView) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = base64;
-        document.body.appendChild(iframe);
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-          window.location.href = base64;
-        }, 1000);
-      };
-      reader.readAsDataURL(blob);
-      return;
-    }
-
+    if (!customer) return;
+    setExporting(true);
     try {
-      const file = new File([blob], filename, { type: "application/pdf" });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: `${customer.name} – Ledger` });
-        return;
+      const blob = generateLedgerPDFBlob();
+      if (!blob) return;
+      const filename = `${customer.name}_Ledger_${new Date().toISOString().split("T")[0]}.pdf`;
+
+      const shared = await sharePDFFile(blob, filename, `${customer.name} – Ledger`);
+      if (!shared) {
+        downloadPDF(blob, filename);
       }
     } catch (e) {
-      if ((e as DOMException)?.name === "AbortError") return;
+      console.error("PDF share failed:", e);
+    } finally {
+      setExporting(false);
     }
-
-    downloadPDF(blob, filename);
   }, [generateLedgerPDFBlob, customer]);
 
   
@@ -264,15 +249,9 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               </Button>
             )}
             <div className="ml-auto">
-              {isMobile ? (
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
-                  <Share2 className="h-3 w-3" /> Share
-                </Button>
-              ) : (
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
-                  <Download className="h-3 w-3" /> PDF
-                </Button>
-              )}
+              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF} disabled={exporting}>
+                {exporting ? <><Loader2 className="h-3 w-3 animate-spin" /> Sharing…</> : isMobile ? <><Share2 className="h-3 w-3" /> Share</> : <><Download className="h-3 w-3" /> PDF</>}
+              </Button>
             </div>
           </div>
         </SheetHeader>

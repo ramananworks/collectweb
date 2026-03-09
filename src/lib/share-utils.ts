@@ -107,6 +107,20 @@ export function generateSummaryPDF(data: ShareSummaryData): Blob {
   return doc.output("blob");
 }
 
+export async function sharePDFFile(blob: Blob, filename: string, title: string): Promise<boolean> {
+  try {
+    const file = new File([blob], filename, { type: "application/pdf" });
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title });
+      return true;
+    }
+  } catch (e) {
+    if ((e as DOMException)?.name === "AbortError") return true; // user cancelled, not an error
+    console.warn("navigator.share failed:", e);
+  }
+  return false;
+}
+
 export function downloadPDF(blob: Blob, filename: string) {
   const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
 
