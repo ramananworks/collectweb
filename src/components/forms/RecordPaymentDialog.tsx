@@ -211,8 +211,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             )} />
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={recordPayment.isPending}>
-                {recordPayment.isPending ? "Recording..." : "Record Collection"}
+              <Button type="submit" className="gradient-primary text-primary-foreground" disabled={isSubmitting || recordPayment.isPending}>
+                {isSubmitting || recordPayment.isPending ? "Recording..." : "Record Collection"}
               </Button>
             </div>
           </form>
