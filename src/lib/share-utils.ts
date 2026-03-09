@@ -115,5 +115,13 @@ export function downloadPDF(blob: Blob, filename: string) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+
+  // In Android WebView, anchor downloads often fail silently.
+  // Open blob URL directly as fallback — triggers system viewer/download.
+  const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
+  if (isWebView) {
+    window.open(url, "_blank");
+  } else {
+    URL.revokeObjectURL(url);
+  }
 }
