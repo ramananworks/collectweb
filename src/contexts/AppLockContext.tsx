@@ -106,7 +106,7 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
           challenge: generateChallenge(),
           rp: { name: "CollectWeb", id: window.location.hostname },
           user: {
-            id: new TextEncoder().encode(user.id),
+            id: new TextEncoder().encode(user.id).buffer as ArrayBuffer,
             name: user.email || "user",
             displayName: user.email || "User",
           },
