@@ -16,7 +16,6 @@ import {
   Key,
   Sun,
   Moon,
-  Monitor,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -298,18 +297,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Key className="mr-2 h-4 w-4" />
                 Change Password
               </DropdownMenuItem>
-              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal pt-1 pb-0.5">Display</DropdownMenuLabel>
-              <div className="flex items-center gap-1 px-2 pb-1.5">
-                {([["light", Sun], ["dark", Moon], ["system", Monitor]] as const).map(([t, Icon]) => (
-                  <button
-                    key={t}
-                    onClick={() => { hapticLight(); setTheme(t); }}
-                    className={`flex items-center justify-center h-8 w-8 rounded-md transition-colors ${theme === t ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </button>
-                ))}
-              </div>
+              <DropdownMenuItem
+                onClick={() => {
+                  hapticLight();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
+              >
+                {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
                   hapticLight();
