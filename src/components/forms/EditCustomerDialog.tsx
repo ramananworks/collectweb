@@ -136,7 +136,18 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
               <FormField control={form.control} name="credit_limit" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Credit Limit (₹)</FormLabel>
-                  <FormControl><Input type="number" inputMode="numeric" {...field} /></FormControl>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="500000"
+                      value={field.value ?? ""}
+                      onFocus={() => {
+                        if (field.value === 0) field.onChange(undefined);
+                      }}
+                      onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

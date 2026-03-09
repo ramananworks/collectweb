@@ -207,7 +207,19 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
                   <FormField control={form.control} name="credit_limit" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Credit Limit (₹)</FormLabel>
-                      <FormControl><Input type="number" inputMode="numeric" placeholder="500000" {...field} onFocus={scrollInputIntoView} /></FormControl>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          inputMode="numeric"
+                          placeholder="500000"
+                          value={field.value ?? ""}
+                          onFocus={(e) => {
+                            scrollInputIntoView(e);
+                            if (field.value === 0) field.onChange(undefined);
+                          }}
+                          onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />

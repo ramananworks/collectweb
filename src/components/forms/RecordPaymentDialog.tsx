@@ -148,7 +148,17 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="amount" render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount (₹)</FormLabel>
-                <FormControl><Input type="number" placeholder="25000" {...field} /></FormControl>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="25000"
+                    value={field.value ?? ""}
+                    onFocus={() => {
+                      if (field.value === 0) field.onChange(undefined);
+                    }}
+                    onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
