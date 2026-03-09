@@ -85,17 +85,6 @@ export default function Customers() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={userFilter} onValueChange={setUserFilter}>
-            <SelectTrigger className="w-full sm:w-[160px]">
-              <SelectValue placeholder="Filter by user" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Users</SelectItem>
-              {profiles.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
