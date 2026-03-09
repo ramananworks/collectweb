@@ -156,7 +156,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
                     placeholder="25000"
                     value={field.value ?? ""}
                     onFocus={() => {
-                      if (field.value === 0) field.onChange(undefined);
+                      if (amountAutoFilled) { field.onChange(undefined); setAmountAutoFilled(false); }
+                      else if (field.value === 0) field.onChange(undefined);
                     }}
                     onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
                   />
