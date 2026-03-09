@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCustomers, useInvoices, useAreas, useCompany, formatCurrency } from "@/hooks/use-data";
+import { formatDisplayDate } from "@/lib/utils";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import { StatusBadge } from "@/components/shared/StatusBadges";
@@ -148,7 +149,7 @@ export default function Outstanding() {
         checkPage(7);
         doc.setFontSize(7.5);
         doc.text(inv.invoice_number, 20, y);
-        doc.text(inv.invoice_date, 55, y);
+        doc.text(formatDisplayDate(inv.invoice_date), 55, y);
         doc.text(formatCurrency(Number(inv.amount)), 90, y, { align: "right" });
         doc.text(formatCurrency(Number(inv.paid_amount)), 120, y, { align: "right" });
         doc.setFont("helvetica", "bold");
@@ -297,7 +298,7 @@ export default function Outstanding() {
                         {custInvoices.map((inv) => (
                           <tr key={inv.id} className="border-b last:border-0">
                             <td className="px-4 py-2 font-medium">{inv.invoice_number}</td>
-                            <td className="px-2 py-2 text-muted-foreground">{inv.invoice_date}</td>
+                            <td className="px-2 py-2 text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</td>
                             <td className="px-2 py-2 text-right">{formatCurrency(Number(inv.amount))}</td>
                             <td className="px-2 py-2 text-right">{formatCurrency(Number(inv.paid_amount))}</td>
                             <td className="px-2 py-2 text-right font-medium text-destructive">

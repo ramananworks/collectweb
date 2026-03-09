@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
+import { formatDisplayDate } from "@/lib/utils";
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
@@ -138,11 +139,11 @@ export default function Invoices() {
                   <td className="px-4 py-3 font-mono text-xs">{inv.invoice_number}</td>
                   <td className="px-4 py-3 font-medium">{inv.customer_name}</td>
                   <td className="px-4 py-3 hidden lg:table-cell text-xs text-muted-foreground">{getCustomerArea(inv.customer_id)}</td>
-                  <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{inv.invoice_date}</td>
+                  <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</td>
                   <td className="px-4 py-3">{formatCurrency(inv.amount)}</td>
                   <td className="px-4 py-3 hidden sm:table-cell text-success">{formatCurrency(inv.paid_amount)}</td>
                   <td className="px-4 py-3 hidden md:table-cell font-semibold">{formatCurrency(inv.amount - inv.paid_amount)}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{inv.due_date}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{formatDisplayDate(inv.due_date)}</td>
                   <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
                   {canConfirmDelivery && (
                     <td className="px-4 py-3">

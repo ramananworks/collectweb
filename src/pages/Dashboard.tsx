@@ -10,6 +10,7 @@ import DashboardQuickActions from "@/components/dashboard/DashboardQuickActions"
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { useCustomers, useInvoices, usePayments, useAreas, formatCurrency } from "@/hooks/use-data";
 import { differenceInDays } from "date-fns";
+import { formatDisplayDate } from "@/lib/utils";
 
 
 const barColors = ["hsl(160, 84%, 39%)", "hsl(38, 92%, 50%)", "hsl(25, 85%, 55%)", "hsl(0, 72%, 51%)"];
@@ -216,7 +217,7 @@ export default function Dashboard() {
               <div key={inv.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                 <div>
                   <p className="text-sm font-medium">{inv.customer_name}</p>
-                  <p className="text-xs text-muted-foreground">Due {inv.due_date} · {getCustomerArea(inv.customer_id)}</p>
+                  <p className="text-xs text-muted-foreground">Due {formatDisplayDate(inv.due_date)} · {getCustomerArea(inv.customer_id)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold">{formatCurrency(inv.amount)}</span>
