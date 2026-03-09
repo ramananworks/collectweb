@@ -147,23 +147,6 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
                   <FormMessage />
                 </FormItem>
               )} />
-              <FormField control={form.control} name="assigned_to" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assigned To</FormLabel>
-                  <Select onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)} value={field.value || "__none__"}>
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="__none__">Unassigned</SelectItem>
-                      {profiles.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
               <div className="flex justify-end gap-2 pt-3 pb-6">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                 <Button type="submit" className="gradient-primary text-primary-foreground" disabled={updateCustomer.isPending}>
