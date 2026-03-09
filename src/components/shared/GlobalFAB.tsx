@@ -70,12 +70,19 @@ export default function GlobalFAB() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.8 }}
               transition={{ duration: 0.15, delay: i * 0.04 }}
+              whileHover={{ scale: 1.05, boxShadow: action.key === "customer"
+                ? "0 6px 28px -2px hsl(217 91% 60% / 0.5), 0 3px 12px -1px hsl(236 72% 79% / 0.3)"
+                : action.key === "invoice"
+                ? "0 6px 28px -2px hsl(263 70% 50% / 0.5), 0 3px 12px -1px hsl(280 100% 70% / 0.3)"
+                : "0 6px 28px -2px hsl(142 71% 45% / 0.5), 0 3px 12px -1px hsl(160 84% 39% / 0.3)"
+              }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => {
                 hapticLight();
                 setExpanded(false);
                 setOpenDialog(action.key);
               }}
-              className="flex items-center gap-3 rounded-full bg-card pl-4 pr-2 py-2 shadow-lg border border-border/50 active:scale-95 transition-transform"
+              className="flex items-center gap-3 rounded-full bg-card pl-4 pr-2 py-2 shadow-lg border border-border/50 transition-shadow"
             >
               <span className="text-sm font-medium text-foreground whitespace-nowrap">{action.label}</span>
               <div className={`flex h-10 w-10 items-center justify-center rounded-full ${action.gradientClass}`}>
