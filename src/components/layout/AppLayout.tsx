@@ -71,6 +71,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: company } = useCompany();
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStatus();
+  const { theme, setTheme } = useTheme();
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
