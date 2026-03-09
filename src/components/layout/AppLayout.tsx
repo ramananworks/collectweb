@@ -232,7 +232,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </p>
               <p className="text-xs text-sidebar-foreground truncate">{displayEmail}</p>
             </div>
-            <button onClick={() => setLogoutOpen(true)} className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors">
+            <button 
+              onClick={() => {
+                hapticLight();
+                setLogoutOpen(true);
+              }} 
+              className="text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors"
+            >
               <LogOut className="h-4 w-4" />
             </button>
           </div>
