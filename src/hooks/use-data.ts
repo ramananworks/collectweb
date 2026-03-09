@@ -234,11 +234,13 @@ export function useRecordPayment() {
       mode: string;
       collected_by: string;
       notes?: string;
+      local_id?: string;
     }) => {
       const row = {
         ...values,
         company_id: profile!.company_id!,
         notes: values.notes || null,
+        local_id: values.local_id || crypto.randomUUID(),
       };
       if (!navigator.onLine) {
         enqueueMutation({ table: "payments", type: "insert", payload: row });
