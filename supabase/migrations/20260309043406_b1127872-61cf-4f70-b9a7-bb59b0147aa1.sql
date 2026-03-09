@@ -1,0 +1,1 @@
+ALTER TABLE public.customers DROP COLUMN assigned_to;
