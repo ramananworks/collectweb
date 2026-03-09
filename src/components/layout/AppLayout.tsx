@@ -298,14 +298,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Key className="mr-2 h-4 w-4" />
                 Change Password
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  hapticLight();
-                  setTheme(theme === "dark" ? "light" : "dark");
-                }}
-              >
-                {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              <DropdownMenuItem onClick={() => { hapticLight(); setTheme("light"); }} className={theme === "light" ? "font-semibold" : ""}>
+                <Sun className="mr-2 h-4 w-4" /> Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { hapticLight(); setTheme("dark"); }} className={theme === "dark" ? "font-semibold" : ""}>
+                <Moon className="mr-2 h-4 w-4" /> Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { hapticLight(); setTheme("system"); }} className={theme === "system" ? "font-semibold" : ""}>
+                <Monitor className="mr-2 h-4 w-4" /> System
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
