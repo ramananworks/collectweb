@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { StatusBadge } from "@/components/shared/StatusBadges";
 import { formatCurrency, useCompany } from "@/hooks/use-data";
 import { downloadPDF } from "@/lib/share-utils";
+import { formatDisplayDate } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import jsPDF from "jspdf";
