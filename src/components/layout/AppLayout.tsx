@@ -269,6 +269,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <img src={logoImg} alt="CollectWeb" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
             <span className="text-base font-bold truncate">{companyName}</span>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity">
+                {displayName.split(" ").map((n) => n[0]).join("")}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="font-normal">
+                <p className="text-sm font-medium truncate">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate">{displayRole}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  hapticLight();
+                  setLogoutOpen(true);
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
 
         {!isOnline && (
