@@ -7,12 +7,13 @@ import SelectDeliveryInvoiceDialog from "@/components/forms/SelectDeliveryInvoic
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight } from "@/lib/haptics";
 
-type ActionKey = "customer" | "invoice" | "payment";
+type ActionKey = "customer" | "invoice" | "payment" | "delivery";
 
 const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
   { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
   { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
   { key: "payment", label: "Record Collection", icon: IndianRupee, gradientClass: "action-payment" },
+  { key: "delivery", label: "Confirm Delivery", icon: Truck, gradientClass: "action-delivery" },
 ];
 
 export default function DashboardQuickActions() {
