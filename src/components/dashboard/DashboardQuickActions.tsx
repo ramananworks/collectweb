@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { UserPlus, Receipt, IndianRupee } from "lucide-react";
+import { UserPlus, Receipt, IndianRupee, Truck } from "lucide-react";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
