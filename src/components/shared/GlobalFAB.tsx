@@ -9,10 +9,10 @@ import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
 
 type ActionKey = "customer" | "invoice" | "payment";
 
-const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; colorClass: string; bgClass: string }[] = [
-  { key: "payment", label: "Record Payment", icon: IndianRupee, colorClass: "text-emerald-600", bgClass: "bg-emerald-100" },
-  { key: "invoice", label: "Create Invoice", icon: Receipt, colorClass: "text-indigo-600", bgClass: "bg-indigo-100" },
-  { key: "customer", label: "Add Customer", icon: UserPlus, colorClass: "text-blue-600", bgClass: "bg-blue-100" },
+const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
+  { key: "payment", label: "Record Payment", icon: IndianRupee, gradientClass: "action-payment" },
+  { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
+  { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
 ];
 
 export default function GlobalFAB() {
