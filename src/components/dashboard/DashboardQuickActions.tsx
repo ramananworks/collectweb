@@ -11,7 +11,7 @@ type ActionKey = "customer" | "invoice" | "payment";
 const allActions: { key: ActionKey; label: string; icon: typeof UserPlus; gradientClass: string }[] = [
   { key: "customer", label: "Add Customer", icon: UserPlus, gradientClass: "action-customer" },
   { key: "invoice", label: "Create Invoice", icon: Receipt, gradientClass: "action-invoice" },
-  { key: "payment", label: "Record Payment", icon: IndianRupee, gradientClass: "action-payment" },
+  { key: "payment", label: "Record Collection", icon: IndianRupee, gradientClass: "action-payment" },
 ];
 
 export default function DashboardQuickActions() {
