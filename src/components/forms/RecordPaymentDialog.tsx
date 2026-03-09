@@ -35,6 +35,7 @@ interface RecordPaymentDialogProps {
 
 export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange, prefillCustomerId, prefillInvoiceId }: RecordPaymentDialogProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const [amountAutoFilled, setAmountAutoFilled] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const { data: invoices = [] } = useInvoices();
@@ -55,6 +56,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     }
     if (!open) {
       form.reset();
+      setAmountAutoFilled(false);
     }
   }, [open, prefillCustomerId, prefillInvoiceId]);
 
@@ -110,7 +112,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
-                <Select onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); }} value={field.value}>
+                <Select onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); form.setValue("amount", undefined); setAmountAutoFilled(false); }} value={field.value}>
                   <FormControl>
                     <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
                   </FormControl>
@@ -127,7 +129,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="invoice_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Invoice</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCustomerId}>
+                <Select onValueChange={(val) => { field.onChange(val); const inv = invoices.find(i => i.id === val); if (inv) { const balance = inv.amount - (inv.paid_amount || 0); form.setValue("amount", balance); setAmountAutoFilled(true); } }} value={field.value} disabled={!selectedCustomerId}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={selectedCustomerId ? "Select invoice" : "Select customer first"} />
@@ -154,7 +156,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
                     placeholder="25000"
                     value={field.value ?? ""}
                     onFocus={() => {
-                      if (field.value === 0) field.onChange(undefined);
+                      if (amountAutoFilled) { field.onChange(undefined); setAmountAutoFilled(false); }
+                      else if (field.value === 0) field.onChange(undefined);
                     }}
                     onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
                   />
