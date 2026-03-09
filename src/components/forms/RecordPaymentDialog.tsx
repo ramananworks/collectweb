@@ -45,7 +45,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
 
   const form = useForm<CollectionFormValues>({
     resolver: zodResolver(collectionSchema),
-    defaultValues: { customer_id: prefillCustomerId || "", invoice_id: prefillInvoiceId || "", amount: 0, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: authProfile?.name || "", notes: "" },
+    defaultValues: { customer_id: prefillCustomerId || "", invoice_id: prefillInvoiceId || "", amount: undefined, date: new Date().toISOString().split("T")[0], mode: undefined, collected_by: authProfile?.name || "", notes: "" },
   });
 
   useEffect(() => {
