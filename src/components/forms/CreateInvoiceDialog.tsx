@@ -19,7 +19,7 @@ const invoiceSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
   invoice_number: z.string().trim().min(1, "Invoice number is required").max(50, "Invoice number is too long"),
   invoice_date: z.string().min(1, "Invoice date is required"),
-  amount: z.coerce.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"),
+  amount: z.union([z.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"), z.undefined()]).refine((v) => v !== undefined && v >= 1, { message: "Amount must be greater than 0" }),
   due_date: z.string().optional(),
   description: z.string().trim().max(500, "Description is too long").optional(),
 });
@@ -65,7 +65,7 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
       customer_id: "",
       invoice_number: defaultValues?.invoice_number || "",
       invoice_date: defaultValues?.invoice_date || "",
-      amount: defaultValues?.amount || 0,
+      amount: defaultValues?.amount ?? undefined,
       due_date: defaultValues?.due_date || "",
       description: defaultValues?.description || "",
     },
@@ -78,12 +78,12 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
         customer_id: "",
         invoice_number: defaultValues.invoice_number || "",
         invoice_date: defaultValues.invoice_date || "",
-        amount: defaultValues.amount || 0,
+        amount: defaultValues.amount ?? undefined,
         due_date: defaultValues.due_date || "",
         description: defaultValues.description || "",
       });
     } else if (!open) {
-      form.reset({ customer_id: "", invoice_number: "", invoice_date: "", amount: 0, due_date: "", description: "" });
+      form.reset({ customer_id: "", invoice_number: "", invoice_date: "", amount: undefined, due_date: "", description: "" });
     }
   }, [open, defaultValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -111,7 +111,7 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
       customer_name: cust?.name || "",
       invoice_number: values.invoice_number,
       invoice_date: values.invoice_date,
-      amount: values.amount,
+      amount: values.amount ?? 0,
       due_date: finalDueDate,
       due_date_source: resolved?.source || "company",
       description: values.description,
@@ -173,7 +173,17 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="amount" render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount (₹)</FormLabel>
-                <FormControl><Input type="number" placeholder="75000" {...field} /></FormControl>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="75000"
+                    value={field.value ?? ""}
+                    onFocus={() => {
+                      if (field.value === 0) field.onChange(undefined);
+                    }}
+                    onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
