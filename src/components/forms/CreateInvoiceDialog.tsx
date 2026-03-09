@@ -173,7 +173,17 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="amount" render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount (₹)</FormLabel>
-                <FormControl><Input type="number" placeholder="75000" {...field} /></FormControl>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="75000"
+                    value={field.value ?? ""}
+                    onFocus={() => {
+                      if (field.value === 0) field.onChange(undefined);
+                    }}
+                    onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
