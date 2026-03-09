@@ -249,15 +249,9 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
               </Button>
             )}
             <div className="ml-auto">
-              {isMobile ? (
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
-                  <Share2 className="h-3 w-3" /> Share
-                </Button>
-              ) : (
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF}>
-                  <Download className="h-3 w-3" /> PDF
-                </Button>
-              )}
+              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF} disabled={exporting}>
+                {exporting ? <><Loader2 className="h-3 w-3 animate-spin" /> Sharing…</> : isMobile ? <><Share2 className="h-3 w-3" /> Share</> : <><Download className="h-3 w-3" /> PDF</>}
+              </Button>
             </div>
           </div>
         </SheetHeader>
