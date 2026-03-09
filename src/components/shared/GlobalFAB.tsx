@@ -21,7 +21,7 @@ export default function GlobalFAB() {
   const [expanded, setExpanded] = useState(false);
   const [openDialog, setOpenDialog] = useState<ActionKey | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { canManageCustomers, canCreateInvoices, canRecordPayments } = usePermissions();
+  const { canManageCustomers, canCreateInvoices, canRecordPayments, canConfirmDelivery } = usePermissions();
 
   const actions = useMemo(() => allActions.filter((a) => {
     if (a.key === "customer") return canManageCustomers;
