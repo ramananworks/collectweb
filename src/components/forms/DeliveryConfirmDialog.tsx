@@ -57,6 +57,7 @@ export function DeliveryConfirmDialog({
         setTestOtp(data.otp);
       }
       setStep("verify");
+      hapticMedium();
       toast.success(data.message || "OTP sent successfully");
     } catch (err: any) {
       toast.error(err.message || "Failed to send OTP");
