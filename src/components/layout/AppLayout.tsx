@@ -45,6 +45,7 @@ import { toast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
+import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
