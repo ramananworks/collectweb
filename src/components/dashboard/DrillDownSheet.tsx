@@ -91,7 +91,7 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
     doc.setFontSize(13); doc.setFont("helvetica", "bold");
     doc.text(title, pw / 2, y, { align: "center" }); y += 7;
     doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(120, 120, 120);
-    doc.text(`Generated on ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, pw / 2, y, { align: "center" }); y += 8;
+    doc.text(`Generated on ${formatDisplayDate(new Date())}`, pw / 2, y, { align: "center" }); y += 8;
     doc.setDrawColor(200, 200, 200); doc.line(15, y, pw - 15, y); y += 8;
     doc.setTextColor(30, 30, 30);
 

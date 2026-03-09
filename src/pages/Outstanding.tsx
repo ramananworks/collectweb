@@ -114,7 +114,7 @@ export default function Outstanding() {
     doc.setFontSize(13); doc.setFont("helvetica", "bold");
     doc.text("Outstanding Summary", pw / 2, y, { align: "center" }); y += 7;
     doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(120, 120, 120);
-    doc.text(`Generated on ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`, pw / 2, y, { align: "center" }); y += 5;
+    doc.text(`Generated on ${formatDisplayDate(new Date())}`, pw / 2, y, { align: "center" }); y += 5;
     if (areaFilter !== "all") {
       doc.text(`Area: ${areaFilter}`, pw / 2, y, { align: "center" }); y += 5;
     }
