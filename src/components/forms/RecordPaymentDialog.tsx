@@ -17,7 +17,7 @@ import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 const collectionSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
   invoice_id: z.string().min(1, "Select an invoice"),
-  amount: z.coerce.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"),
+  amount: z.union([z.number().min(1, "Amount must be greater than 0").max(100000000, "Amount is too high"), z.undefined()]).refine((v) => v !== undefined && v >= 1, { message: "Amount must be greater than 0" }),
   date: z.string().min(1, "Collection date is required"),
   mode: z.enum(["cash", "upi", "bank_transfer"], { required_error: "Select collection mode" }),
   collected_by: z.string().min(1, "Select collector"),
