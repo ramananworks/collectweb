@@ -156,4 +156,16 @@
   .stat-card-shadow-hover {
     box-shadow: 0 4px 12px 0 hsl(220 25% 10% / 0.1), 0 2px 4px -2px hsl(220 25% 10% / 0.08);
   }
+  .action-customer {
+    background: linear-gradient(135deg, hsl(217 91% 60%), hsl(236 72% 79%));
+    box-shadow: 0 3px 15px -2px hsl(217 91% 60% / 0.3), 0 2px 6px -1px hsl(0 0% 0% / 0.1);
+  }
+  .action-invoice {
+    background: linear-gradient(135deg, hsl(263 70% 50%), hsl(280 100% 70%));
+    box-shadow: 0 3px 15px -2px hsl(263 70% 50% / 0.3), 0 2px 6px -1px hsl(0 0% 0% / 0.1);
+  }
+  .action-payment {
+    background: linear-gradient(135deg, hsl(142 71% 45%), hsl(160 84% 39%));
+    box-shadow: 0 3px 15px -2px hsl(142 71% 45% / 0.3), 0 2px 6px -1px hsl(0 0% 0% / 0.1);
+  }
 }

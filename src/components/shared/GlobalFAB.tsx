@@ -65,8 +65,8 @@ export default function GlobalFAB() {
               className="flex items-center gap-3 rounded-full bg-card pl-4 pr-2 py-2 shadow-lg border border-border/50 active:scale-95 transition-transform"
             >
               <span className="text-sm font-medium text-foreground whitespace-nowrap">{action.label}</span>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${action.bgClass}`}>
-                <action.icon className={`h-5 w-5 ${action.colorClass}`} strokeWidth={1.8} />
+              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${action.gradientClass}`}>
+                <action.icon className="h-5 w-5 text-white" strokeWidth={1.8} />
               </div>
             </motion.button>
           ))}
