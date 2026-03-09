@@ -60,6 +60,7 @@ const App = () => (
             <Route path="/outstanding" element={<ProtectedLayout><Outstanding /></ProtectedLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </AppLockProvider>
         </AuthProvider>
       </BrowserRouter>
       </TooltipProvider>
