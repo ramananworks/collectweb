@@ -148,7 +148,7 @@ export default function Outstanding() {
         checkPage(7);
         doc.setFontSize(7.5);
         doc.text(inv.invoice_number, 20, y);
-        doc.text(inv.invoice_date, 55, y);
+        doc.text(formatDisplayDate(inv.invoice_date), 55, y);
         doc.text(formatCurrency(Number(inv.amount)), 90, y, { align: "right" });
         doc.text(formatCurrency(Number(inv.paid_amount)), 120, y, { align: "right" });
         doc.setFont("helvetica", "bold");
