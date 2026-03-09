@@ -98,6 +98,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
             form.setValue("address", contact.address);
             setOptionalOpen(true);
           }
+          hapticLight();
           toast({ title: "Contact imported", description: `${contact.name || "Contact"} details filled in.` });
           return;
         }
