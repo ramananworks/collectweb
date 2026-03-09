@@ -300,6 +300,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuItem
                 onClick={() => {
                   hapticLight();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
+              >
+                {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  hapticLight();
                   setLogoutOpen(true);
                 }}
                 className="text-destructive focus:text-destructive"
