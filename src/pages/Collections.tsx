@@ -95,6 +95,17 @@ export default function Collections() {
             <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={userFilter} onValueChange={setUserFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Staff" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Staff</SelectItem>
+            {profiles.map((p) => (
+              <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Date range filter */}

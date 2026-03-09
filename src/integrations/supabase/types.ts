@@ -51,6 +51,7 @@ export type Database = {
           gstin: string | null
           id: string
           name: string
+          onboarding_completed: boolean
           phone: string
           plan: string
           status: string
@@ -62,6 +63,7 @@ export type Database = {
           gstin?: string | null
           id?: string
           name: string
+          onboarding_completed?: boolean
           phone?: string
           plan?: string
           status?: string
@@ -73,6 +75,7 @@ export type Database = {
           gstin?: string | null
           id?: string
           name?: string
+          onboarding_completed?: boolean
           phone?: string
           plan?: string
           status?: string
