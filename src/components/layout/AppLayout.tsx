@@ -44,6 +44,7 @@ import { useSyncStatus } from "@/hooks/use-sync-status";
 import { WifiOff, Wifi, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
+import { useTheme } from "next-themes";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
