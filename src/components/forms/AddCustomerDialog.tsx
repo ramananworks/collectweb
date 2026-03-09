@@ -44,7 +44,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
   const setOpen = onOpenChange ?? setInternalOpen;
   const [optionalOpen, setOptionalOpen] = useState(false);
   const { data: areas = [] } = useAreas();
-  const { data: profiles = [] } = useProfiles();
   const addCustomer = useAddCustomer();
 
   const form = useForm<CustomerFormValues>({
