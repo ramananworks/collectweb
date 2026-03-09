@@ -90,8 +90,14 @@ export default function GlobalFAB() {
             hapticLight();
             setExpanded((prev) => !prev);
           }}
-          animate={{ rotate: expanded ? 135 : 0 }}
-          transition={{ duration: 0.2 }}
+          animate={{ 
+            rotate: expanded ? 135 : 0,
+            scale: expanded ? 1 : [1, 1.05, 1]
+          }}
+          transition={{ 
+            rotate: { duration: 0.2 },
+            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+          }}
           className="flex h-14 w-14 items-center justify-center rounded-full gradient-primary text-primary-foreground shadow-lg active:scale-95 transition-transform"
         >
           <Plus className="h-7 w-7" strokeWidth={2.5} />
