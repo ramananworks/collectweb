@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Search, Phone, MapPin, MapPinned, User, Pencil } from "lucide-react";
+import { Search, Phone, MapPin, MapPinned, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCustomers, useAreas, useProfiles, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
+import { useCustomers, useAreas, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import EditCustomerDialog from "@/components/forms/EditCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
@@ -15,32 +15,23 @@ import { usePermissions } from "@/hooks/usePermissions";
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
-  const [userFilter, setUserFilter] = useState("all");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
-  const { data: profiles = [] } = useProfiles();
   const { data: company } = useCompany();
   const { canManageCustomers, canBulkImport } = usePermissions();
 
-  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"], ["profiles"]] });
+  const ptr = usePullToRefresh({ queryKeys: [["customers"], ["areas"]] });
 
   const areaNames = areas.map((a) => a.name);
-
-  const getProfileName = (userId: string | null) => {
-    if (!userId) return null;
-    const p = profiles.find((p) => p.id === userId);
-    return p ? (p.name || p.email) : null;
-  };
 
   const filtered = customers.filter((c) => {
     const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search);
     const matchesArea = areaFilter === "all" || c.area === areaFilter;
-    const matchesUser = userFilter === "all" || c.assigned_to === userFilter;
-    return matchesSearch && matchesArea && matchesUser;
+    return matchesSearch && matchesArea;
   });
 
   const groupedAreas = [...new Set(filtered.map((c) => c.area))].sort();
@@ -91,17 +82,6 @@ export default function Customers() {
               <SelectItem value="all">All Areas</SelectItem>
               {areaNames.map((a) => (
                 <SelectItem key={a} value={a}>{a}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={userFilter} onValueChange={setUserFilter}>
-            <SelectTrigger className="w-full sm:w-[160px]">
-              <SelectValue placeholder="Filter by user" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Users</SelectItem>
-              {profiles.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name || p.email}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -162,12 +142,7 @@ export default function Customers() {
                     <p className="text-xs text-muted-foreground mb-3">GSTIN: <span className="font-medium text-foreground">{c.gstin}</span></p>
                   )}
                   {!c.gstin && <div className="mb-1" />}
-                  {c.assigned_to && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-                      <User className="h-3 w-3 shrink-0" /> Assigned: <span className="font-medium text-foreground">{getProfileName(c.assigned_to)}</span>
-                    </div>
-                  )}
-                  {!c.assigned_to && !c.gstin && <div className="mb-2" />}
+                  {!c.gstin && <div className="mb-2" />}
                   <div className="flex items-center justify-between pt-3 border-t border-border">
                     <span className="text-xs text-muted-foreground">
                       Credit: <span className="font-medium text-foreground">{formatCurrency(c.credit_limit)}</span>
