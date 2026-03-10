@@ -38,7 +38,7 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
   const form = useForm<EditCustomerFormValues>({
     resolver: zodResolver(editCustomerSchema),
     defaultValues: {
-      name: "", phone: "", address: "", area: "", gstin: "", credit_limit: 0, default_due_days: undefined,
+      name: "", phone: "", address: "", area: "", gstin: "", default_due_days: undefined,
     },
   });
 
