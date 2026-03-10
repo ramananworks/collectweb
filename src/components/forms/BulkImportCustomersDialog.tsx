@@ -10,7 +10,6 @@ interface ParsedCustomer {
   phone: string;
   address: string;
   gstin: string;
-  credit_limit: number;
 }
 
 interface ImportResult {
