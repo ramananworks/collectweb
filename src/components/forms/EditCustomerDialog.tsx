@@ -50,7 +50,6 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
         address: customer.address || "",
         area: customer.area,
         gstin: customer.gstin || "",
-        credit_limit: customer.credit_limit,
         default_due_days: customer.default_due_days ?? undefined,
       });
     }
