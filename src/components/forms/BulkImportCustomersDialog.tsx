@@ -118,7 +118,7 @@ export default function BulkImportCustomersDialog() {
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Upload a CSV file with columns: <span className="font-mono text-xs text-foreground">name, phone, address, gstin, credit_limit</span>
+            Upload a CSV file with columns: <span className="font-mono text-xs text-foreground">name, phone, address, gstin</span>
           </p>
           <Button variant="link" className="h-auto p-0 text-xs" onClick={downloadSample}>
             <Download className="h-3 w-3 mr-1" /> Download sample CSV
