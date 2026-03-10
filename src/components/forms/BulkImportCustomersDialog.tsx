@@ -23,7 +23,7 @@ function parseCSV(text: string): ImportResult {
   if (lines.length < 2) return { total: 0, valid: [], errors: [{ row: 0, message: "File must have a header row and at least one data row" }] };
 
   const header = lines[0].toLowerCase().replace(/\r/g, "");
-  const expectedCols = ["name", "phone", "address", "gstin", "credit_limit"];
+  const expectedCols = ["name", "phone", "address", "gstin"];
   const cols = header.split(",").map((h) => h.trim());
 
   const missingCols = expectedCols.filter((c) => !cols.includes(c));
@@ -44,14 +44,12 @@ function parseCSV(text: string): ImportResult {
     const phone = values[colIndex.phone] || "";
     const address = values[colIndex.address] || "";
     const gstin = values[colIndex.gstin] || "";
-    const creditLimit = Number(values[colIndex.credit_limit]) || 0;
 
     if (!name || name.length < 2) { errors.push({ row: i + 1, message: `Row ${i + 1}: Name is required (min 2 chars)` }); continue; }
     if (!phone || phone.length < 10) { errors.push({ row: i + 1, message: `Row ${i + 1}: Valid phone is required (min 10 chars)` }); continue; }
     if (!address || address.length < 5) { errors.push({ row: i + 1, message: `Row ${i + 1}: Address is required (min 5 chars)` }); continue; }
-    if (creditLimit < 1000) { errors.push({ row: i + 1, message: `Row ${i + 1}: Credit limit must be at least ₹1,000` }); continue; }
 
-    valid.push({ name, phone, address, gstin, credit_limit: creditLimit });
+    valid.push({ name, phone, address, gstin });
   }
 
   return { total: lines.length - 1, valid, errors };
