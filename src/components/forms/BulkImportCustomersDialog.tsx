@@ -55,9 +55,9 @@ function parseCSV(text: string): ImportResult {
   return { total: lines.length - 1, valid, errors };
 }
 
-const SAMPLE_CSV = `name,phone,address,gstin,credit_limit
-Amit Patel,+91 99887 11234,15 MG Road Pune,27AABCP1234A1Z5,500000
-Priya Electronics,+91 98123 45678,22 Station Rd Mumbai,,1000000`;
+const SAMPLE_CSV = `name,phone,address,gstin
+Amit Patel,+91 99887 11234,15 MG Road Pune,27AABCP1234A1Z5
+Priya Electronics,+91 98123 45678,22 Station Rd Mumbai,`;
 
 export default function BulkImportCustomersDialog() {
   const [open, setOpen] = useState(false);
