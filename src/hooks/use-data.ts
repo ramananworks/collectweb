@@ -164,7 +164,6 @@ export function useAddCustomer() {
       address: string;
       area: string;
       gstin?: string;
-      credit_limit: number;
       default_due_days?: number;
       assigned_to?: string;
     }) => {
@@ -295,7 +294,6 @@ export function useUpdateCustomer() {
       address: string;
       area: string;
       gstin?: string | null;
-      credit_limit: number;
       default_due_days?: number | null;
       assigned_to?: string | null;
     }) => {
@@ -360,13 +358,12 @@ export function useBulkImportCustomers() {
   const qc = useQueryClient();
   const { profile } = useAuth();
   return useMutation({
-    mutationFn: async (customers: { name: string; phone: string; address: string; gstin: string; credit_limit: number }[]) => {
+    mutationFn: async (customers: { name: string; phone: string; address: string; gstin: string }[]) => {
       const rows = customers.map((c) => ({
         name: c.name,
         phone: c.phone,
         address: c.address,
         gstin: c.gstin || null,
-        credit_limit: c.credit_limit,
         company_id: profile!.company_id!,
         outstanding: 0,
         area: "",

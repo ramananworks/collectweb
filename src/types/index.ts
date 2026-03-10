@@ -30,7 +30,7 @@ export interface Customer {
   address: string;
   area: string;
   gstin?: string;
-  credit_limit: number;
+  
   outstanding: number;
   default_due_days?: number;
   created_at: string;

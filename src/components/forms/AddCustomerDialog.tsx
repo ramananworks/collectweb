@@ -27,7 +27,7 @@ const customerSchema = z.object({
   address: z.string().trim().min(5, "Address must be at least 5 characters").max(200, "Address is too long"),
   area: z.string().min(1, "Select an area"),
   gstin: z.string().trim().regex(gstinRegex, "Enter a valid 15-digit GSTIN").or(z.literal("")).optional(),
-  credit_limit: z.union([z.number().min(1000, "Minimum credit limit is ₹1,000").max(100000000, "Credit limit is too high"), z.undefined()]).refine((v) => v !== undefined && v >= 1000, { message: "Minimum credit limit is ₹1,000" }),
+  
   default_due_days: z.coerce.number().min(0).max(365).optional(),
 });
 
@@ -48,7 +48,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
-    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", credit_limit: undefined, default_due_days: undefined },
+    defaultValues: { name: "", phone: "", address: "", area: "", gstin: "", default_due_days: undefined },
   });
 
   function onSubmit(values: CustomerFormValues) {
@@ -58,7 +58,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
       address: values.address,
       area: values.area,
       gstin: values.gstin,
-      credit_limit: values.credit_limit ?? 0,
       default_due_days: values.default_due_days,
     }, {
       onSuccess: () => {
@@ -201,25 +200,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
                     <FormItem>
                       <FormLabel>GSTIN</FormLabel>
                       <FormControl><Input placeholder="27AABCP1234A1Z5" maxLength={15} {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} onFocus={scrollInputIntoView} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="credit_limit" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Credit Limit (₹)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          inputMode="numeric"
-                          placeholder="500000"
-                          value={field.value ?? ""}
-                          onFocus={(e) => {
-                            scrollInputIntoView(e);
-                            if (field.value === 0) field.onChange(undefined);
-                          }}
-                          onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
-                        />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
