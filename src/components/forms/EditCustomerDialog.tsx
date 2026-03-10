@@ -64,7 +64,6 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
       address: values.address || "",
       area: values.area,
       gstin: values.gstin || null,
-      credit_limit: values.credit_limit ?? 0,
       default_due_days: values.default_due_days ?? null,
     }, {
       onSuccess: () => {
