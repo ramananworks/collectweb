@@ -294,7 +294,6 @@ export function useUpdateCustomer() {
       address: string;
       area: string;
       gstin?: string | null;
-      credit_limit: number;
       default_due_days?: number | null;
       assigned_to?: string | null;
     }) => {
