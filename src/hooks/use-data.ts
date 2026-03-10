@@ -164,7 +164,6 @@ export function useAddCustomer() {
       address: string;
       area: string;
       gstin?: string;
-      credit_limit: number;
       default_due_days?: number;
       assigned_to?: string;
     }) => {
