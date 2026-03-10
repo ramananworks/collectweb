@@ -145,17 +145,17 @@ export default function BulkImportCustomersDialog() {
                 <div className="max-h-40 overflow-y-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-border text-left text-muted-foreground">
-                        <th className="pb-1">Name</th><th className="pb-1">Phone</th><th className="pb-1">Credit Limit</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {result.valid.slice(0, 10).map((c, i) => (
-                        <tr key={i} className="border-b border-border last:border-0">
-                          <td className="py-1">{c.name}</td><td className="py-1">{c.phone}</td><td className="py-1">₹{c.credit_limit.toLocaleString("en-IN")}</td>
-                        </tr>
-                      ))}
-                      {result.valid.length > 10 && <tr><td colSpan={3} className="py-1 text-muted-foreground">...and {result.valid.length - 10} more</td></tr>}
+                       <tr className="border-b border-border text-left text-muted-foreground">
+                         <th className="pb-1">Name</th><th className="pb-1">Phone</th><th className="pb-1">Address</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {result.valid.slice(0, 10).map((c, i) => (
+                         <tr key={i} className="border-b border-border last:border-0">
+                           <td className="py-1">{c.name}</td><td className="py-1">{c.phone}</td><td className="py-1">{c.address}</td>
+                         </tr>
+                       ))}
+                       {result.valid.length > 10 && <tr><td colSpan={3} className="py-1 text-muted-foreground">...and {result.valid.length - 10} more</td></tr>}
                     </tbody>
                   </table>
                 </div>
