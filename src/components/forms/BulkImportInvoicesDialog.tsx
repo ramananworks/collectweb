@@ -132,7 +132,7 @@ export default function BulkImportInvoicesDialog() {
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Upload a CSV with columns: <span className="font-mono text-xs text-foreground">customer_name, invoice_number, invoice_date, amount, due_date, description</span>
+            Upload a CSV with columns: <span className="font-mono text-xs text-foreground">customer_name, customer_phone, customer_area, invoice_number, invoice_date, amount, due_date, description</span>
           </p>
           <Button variant="link" className="h-auto p-0 text-xs" onClick={downloadSample}>
             <Download className="h-3 w-3 mr-1" /> Download sample CSV
