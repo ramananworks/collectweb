@@ -140,19 +140,14 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {customers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                        {c.default_due_days ? ` (${c.default_due_days}d terms)` : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <CustomerCombobox
+                    customers={customers}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    showTerms
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />

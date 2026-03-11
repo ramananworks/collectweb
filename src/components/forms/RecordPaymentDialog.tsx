@@ -129,16 +129,13 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
-                <Select onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); form.setValue("amount", undefined); setAmountAutoFilled(false); }} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {customersWithDues.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <CustomerCombobox
+                    customers={customersWithDues}
+                    value={field.value}
+                    onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); form.setValue("amount", undefined); setAmountAutoFilled(false); }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
