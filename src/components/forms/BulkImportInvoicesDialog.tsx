@@ -48,7 +48,7 @@ export default function BulkImportInvoicesDialog() {
       return { total: 0, valid: [], errors: [{ row: 0, message: `Missing columns: ${missingCols.join(", ")}` }] };
     }
 
-    const colIndex = Object.fromEntries([...expectedCols, "description"].map((c) => [c, cols.indexOf(c)]));
+    const colIndex = Object.fromEntries([...expectedCols, "description", "customer_phone", "customer_area"].map((c) => [c, cols.indexOf(c)]));
     const valid: ParsedInvoice[] = [];
     const errors: { row: number; message: string }[] = [];
 
