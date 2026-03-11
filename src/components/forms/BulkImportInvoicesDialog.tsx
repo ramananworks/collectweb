@@ -9,6 +9,8 @@ interface ParsedInvoice {
   customer_name: string;
   customer_id: string;
   is_new_customer: boolean;
+  customer_phone: string;
+  customer_area: string;
   invoice_number: string;
   invoice_date: string;
   amount: number;
@@ -22,9 +24,9 @@ interface ImportResult {
   errors: { row: number; message: string }[];
 }
 
-const SAMPLE_CSV = `customer_name,invoice_number,invoice_date,amount,due_date,description
-Amit Patel,INV-2025-010,2025-02-15,75000,2025-03-15,Steel rods delivery
-Priya Electronics,INV-2025-011,2025-02-16,200000,2025-03-30,LED panels bulk order`;
+const SAMPLE_CSV = `customer_name,customer_phone,customer_area,invoice_number,invoice_date,amount,due_date,description
+Amit Patel,9876543210,Andheri,INV-2025-010,2025-02-15,75000,2025-03-15,Steel rods delivery
+Priya Electronics,9123456789,Bandra,INV-2025-011,2025-02-16,200000,2025-03-30,LED panels bulk order`;
 
 export default function BulkImportInvoicesDialog() {
   const [open, setOpen] = useState(false);
@@ -46,7 +48,7 @@ export default function BulkImportInvoicesDialog() {
       return { total: 0, valid: [], errors: [{ row: 0, message: `Missing columns: ${missingCols.join(", ")}` }] };
     }
 
-    const colIndex = Object.fromEntries([...expectedCols, "description"].map((c) => [c, cols.indexOf(c)]));
+    const colIndex = Object.fromEntries([...expectedCols, "description", "customer_phone", "customer_area"].map((c) => [c, cols.indexOf(c)]));
     const valid: ParsedInvoice[] = [];
     const errors: { row: number; message: string }[] = [];
 
@@ -61,6 +63,8 @@ export default function BulkImportInvoicesDialog() {
       const amount = Number(values[colIndex.amount]) || 0;
       const due_date = values[colIndex.due_date] || "";
       const description = colIndex.description >= 0 ? (values[colIndex.description] || "") : "";
+      const customer_phone = colIndex.customer_phone >= 0 ? (values[colIndex.customer_phone] || "") : "";
+      const customer_area = colIndex.customer_area >= 0 ? (values[colIndex.customer_area] || "") : "";
 
       if (!customer_name) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer name is required` }); continue; }
       const cust = customers.find((c) => c.name.toLowerCase() === customer_name.toLowerCase());
@@ -69,7 +73,7 @@ export default function BulkImportInvoicesDialog() {
       if (amount < 1) { errors.push({ row: i + 1, message: `Row ${i + 1}: Amount must be greater than 0` }); continue; }
       if (!due_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Due date is required` }); continue; }
 
-      valid.push({ customer_name: cust?.name || customer_name, customer_id: cust?.id || "", is_new_customer: !cust, invoice_number, invoice_date, amount, due_date, description });
+      valid.push({ customer_name: cust?.name || customer_name, customer_id: cust?.id || "", is_new_customer: !cust, customer_phone, customer_area, invoice_number, invoice_date, amount, due_date, description });
     }
 
     return { total: lines.length - 1, valid, errors };
@@ -128,7 +132,7 @@ export default function BulkImportInvoicesDialog() {
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Upload a CSV with columns: <span className="font-mono text-xs text-foreground">customer_name, invoice_number, invoice_date, amount, due_date, description</span>
+            Upload a CSV with columns: <span className="font-mono text-xs text-foreground">customer_name, customer_phone, customer_area, invoice_number, invoice_date, amount, due_date, description</span>
           </p>
           <Button variant="link" className="h-auto p-0 text-xs" onClick={downloadSample}>
             <Download className="h-3 w-3 mr-1" /> Download sample CSV

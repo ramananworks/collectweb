@@ -379,20 +379,29 @@ export function useBulkImportInvoices() {
   const qc = useQueryClient();
   const { profile } = useAuth();
   return useMutation({
-    mutationFn: async (invoices: { customer_name: string; customer_id: string; is_new_customer?: boolean; invoice_number: string; invoice_date: string; amount: number; due_date: string; description: string }[]) => {
+    mutationFn: async (invoices: { customer_name: string; customer_id: string; is_new_customer?: boolean; customer_phone?: string; customer_area?: string; invoice_number: string; invoice_date: string; amount: number; due_date: string; description: string }[]) => {
       const companyId = profile!.company_id!;
 
-      // Create new customers first
-      const newCustomerNames = [...new Set(invoices.filter(inv => inv.is_new_customer && !inv.customer_id).map(inv => inv.customer_name))];
+      // Create new customers first, deduplicating by name
+      const newCustomerInvoices = invoices.filter(inv => inv.is_new_customer && !inv.customer_id);
+      const seen = new Set<string>();
+      const uniqueNewCustomers: { name: string; phone: string; area: string }[] = [];
+      for (const inv of newCustomerInvoices) {
+        const key = inv.customer_name.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueNewCustomers.push({ name: inv.customer_name, phone: inv.customer_phone || "", area: inv.customer_area || "" });
+        }
+      }
       const customerIdMap: Record<string, string> = {};
 
-      if (newCustomerNames.length > 0) {
-        const newCustomers = newCustomerNames.map(name => ({
-          name,
+      if (uniqueNewCustomers.length > 0) {
+        const newCustomers = uniqueNewCustomers.map(c => ({
+          name: c.name,
           company_id: companyId,
-          phone: "",
+          phone: c.phone,
           address: "",
-          area: "",
+          area: c.area,
           outstanding: 0,
         }));
         const { data: created, error: custError } = await supabase.from("customers").insert(newCustomers).select("id, name");
