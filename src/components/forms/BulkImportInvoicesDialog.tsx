@@ -141,7 +141,7 @@ export default function BulkImportInvoicesDialog() {
               <div className="flex items-center gap-4 text-sm">
               <span className="flex items-center gap-1 text-success"><CheckCircle2 className="h-4 w-4" /> {result.valid.length} valid</span>
                 {result.valid.filter(v => v.is_new_customer).length > 0 && (
-                  <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs">
+                  <span className="flex items-center gap-1 text-warning text-xs">
                     + {result.valid.filter(v => v.is_new_customer).length} new customer(s) will be created
                   </span>
                 )}
