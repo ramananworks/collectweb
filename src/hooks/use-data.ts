@@ -411,19 +411,51 @@ export function useBulkImportInvoices() {
         }
       }
 
-      const rows = invoices.map((inv) => ({
-        customer_id: inv.customer_id || customerIdMap[inv.customer_name.toLowerCase()],
-        customer_name: inv.customer_name,
-        invoice_number: inv.invoice_number,
-        invoice_date: inv.invoice_date,
-        amount: inv.amount,
-        due_date: inv.due_date,
-        description: inv.description || null,
-        company_id: companyId,
-        paid_amount: 0,
-        status: "pending",
-        due_date_source: "invoice" as const,
-      }));
+      // Fetch company for due date resolution
+      const { data: companyData } = await supabase.from("companies").select("default_due_days").eq("id", companyId).single();
+      const companyDueDays = companyData?.default_due_days ?? 30;
+
+      // Fetch existing + newly created customers for due date resolution
+      const { data: allCustomers } = await supabase.from("customers").select("id, default_due_days").eq("company_id", companyId);
+      const customerDueDaysMap: Record<string, number | null> = {};
+      for (const c of allCustomers || []) {
+        customerDueDaysMap[c.id] = c.default_due_days;
+      }
+
+      const rows = invoices.map((inv) => {
+        const custId = inv.customer_id || customerIdMap[inv.customer_name.toLowerCase()];
+        const hasDueDate = !!inv.due_date;
+        let resolvedDueDate: string;
+        let dueDateSource: string;
+
+        if (hasDueDate) {
+          resolvedDueDate = inv.due_date!;
+          dueDateSource = "invoice";
+        } else {
+          const custDueDays = customerDueDaysMap[custId];
+          const resolved = resolveDueDate(
+            { invoice_date: inv.invoice_date },
+            { default_due_days: custDueDays },
+            { default_due_days: companyDueDays }
+          );
+          resolvedDueDate = resolved.due_date;
+          dueDateSource = resolved.source;
+        }
+
+        return {
+          customer_id: custId,
+          customer_name: inv.customer_name,
+          invoice_number: inv.invoice_number,
+          invoice_date: inv.invoice_date,
+          amount: inv.amount,
+          due_date: resolvedDueDate,
+          description: inv.description || null,
+          company_id: companyId,
+          paid_amount: 0,
+          status: "pending",
+          due_date_source: dueDateSource,
+        };
+      });
       const { error } = await supabase.from("invoices").insert(rows);
       if (error) throw error;
     },
