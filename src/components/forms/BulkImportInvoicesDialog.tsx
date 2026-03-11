@@ -62,7 +62,7 @@ export default function BulkImportInvoicesDialog() {
       const invoice_number = values[colIndex.invoice_number] || "";
       const invoice_date = values[colIndex.invoice_date] || "";
       const amount = Number(values[colIndex.amount]) || 0;
-      const due_date = values[colIndex.due_date] || "";
+      const due_date = colIndex.due_date >= 0 ? (values[colIndex.due_date] || "") : "";
       const description = colIndex.description >= 0 ? (values[colIndex.description] || "") : "";
       const customer_phone = colIndex.customer_phone >= 0 ? (values[colIndex.customer_phone] || "") : "";
       const customer_area = colIndex.customer_area >= 0 ? (values[colIndex.customer_area] || "") : "";
