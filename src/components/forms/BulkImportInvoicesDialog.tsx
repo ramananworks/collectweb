@@ -24,9 +24,9 @@ interface ImportResult {
   errors: { row: number; message: string }[];
 }
 
-const SAMPLE_CSV = `customer_name,invoice_number,invoice_date,amount,due_date,description
-Amit Patel,INV-2025-010,2025-02-15,75000,2025-03-15,Steel rods delivery
-Priya Electronics,INV-2025-011,2025-02-16,200000,2025-03-30,LED panels bulk order`;
+const SAMPLE_CSV = `customer_name,customer_phone,customer_area,invoice_number,invoice_date,amount,due_date,description
+Amit Patel,9876543210,Andheri,INV-2025-010,2025-02-15,75000,2025-03-15,Steel rods delivery
+Priya Electronics,9123456789,Bandra,INV-2025-011,2025-02-16,200000,2025-03-30,LED panels bulk order`;
 
 export default function BulkImportInvoicesDialog() {
   const [open, setOpen] = useState(false);
