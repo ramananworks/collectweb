@@ -63,6 +63,8 @@ export default function BulkImportInvoicesDialog() {
       const amount = Number(values[colIndex.amount]) || 0;
       const due_date = values[colIndex.due_date] || "";
       const description = colIndex.description >= 0 ? (values[colIndex.description] || "") : "";
+      const customer_phone = colIndex.customer_phone >= 0 ? (values[colIndex.customer_phone] || "") : "";
+      const customer_area = colIndex.customer_area >= 0 ? (values[colIndex.customer_area] || "") : "";
 
       if (!customer_name) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer name is required` }); continue; }
       const cust = customers.find((c) => c.name.toLowerCase() === customer_name.toLowerCase());
