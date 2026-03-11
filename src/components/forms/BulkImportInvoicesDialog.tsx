@@ -33,6 +33,7 @@ export default function BulkImportInvoicesDialog() {
   const [result, setResult] = useState<ImportResult | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { data: customers = [] } = useCustomers();
+  const { data: company } = useCompany();
   const bulkImport = useBulkImportInvoices();
 
   function parseCSV(text: string): ImportResult {
