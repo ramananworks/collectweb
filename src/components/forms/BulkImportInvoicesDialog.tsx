@@ -41,7 +41,7 @@ export default function BulkImportInvoicesDialog() {
     if (lines.length < 2) return { total: 0, valid: [], errors: [{ row: 0, message: "File must have a header row and at least one data row" }] };
 
     const header = lines[0].toLowerCase().replace(/\r/g, "");
-    const expectedCols = ["customer_name", "invoice_number", "invoice_date", "amount", "due_date"];
+    const expectedCols = ["customer_name", "invoice_number", "invoice_date", "amount"];
     const cols = header.split(",").map((h) => h.trim());
 
     const missingCols = expectedCols.filter((c) => !cols.includes(c));
