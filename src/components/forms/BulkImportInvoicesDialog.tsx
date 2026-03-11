@@ -8,6 +8,7 @@ import { useCustomers, useBulkImportInvoices } from "@/hooks/use-data";
 interface ParsedInvoice {
   customer_name: string;
   customer_id: string;
+  is_new_customer: boolean;
   invoice_number: string;
   invoice_date: string;
   amount: number;
@@ -63,13 +64,12 @@ export default function BulkImportInvoicesDialog() {
 
       if (!customer_name) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer name is required` }); continue; }
       const cust = customers.find((c) => c.name.toLowerCase() === customer_name.toLowerCase());
-      if (!cust) { errors.push({ row: i + 1, message: `Row ${i + 1}: Customer "${customer_name}" not found` }); continue; }
       if (!invoice_number) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice number is required` }); continue; }
       if (!invoice_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice date is required` }); continue; }
       if (amount < 1) { errors.push({ row: i + 1, message: `Row ${i + 1}: Amount must be greater than 0` }); continue; }
       if (!due_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Due date is required` }); continue; }
 
-      valid.push({ customer_name: cust.name, customer_id: cust.id, invoice_number, invoice_date, amount, due_date, description });
+      valid.push({ customer_name: cust?.name || customer_name, customer_id: cust?.id || "", is_new_customer: !cust, invoice_number, invoice_date, amount, due_date, description });
     }
 
     return { total: lines.length - 1, valid, errors };
@@ -139,7 +139,12 @@ export default function BulkImportInvoicesDialog() {
           {result && (
             <div className="space-y-3 rounded-lg border border-border p-4">
               <div className="flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1 text-success"><CheckCircle2 className="h-4 w-4" /> {result.valid.length} valid</span>
+              <span className="flex items-center gap-1 text-success"><CheckCircle2 className="h-4 w-4" /> {result.valid.length} valid</span>
+                {result.valid.filter(v => v.is_new_customer).length > 0 && (
+                  <span className="flex items-center gap-1 text-warning text-xs">
+                    + {result.valid.filter(v => v.is_new_customer).length} new customer(s) will be created
+                  </span>
+                )}
                 {result.errors.length > 0 && (
                   <span className="flex items-center gap-1 text-destructive"><AlertCircle className="h-4 w-4" /> {result.errors.length} errors</span>
                 )}

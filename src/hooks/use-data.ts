@@ -379,16 +379,38 @@ export function useBulkImportInvoices() {
   const qc = useQueryClient();
   const { profile } = useAuth();
   return useMutation({
-    mutationFn: async (invoices: { customer_name: string; customer_id: string; invoice_number: string; invoice_date: string; amount: number; due_date: string; description: string }[]) => {
+    mutationFn: async (invoices: { customer_name: string; customer_id: string; is_new_customer?: boolean; invoice_number: string; invoice_date: string; amount: number; due_date: string; description: string }[]) => {
+      const companyId = profile!.company_id!;
+
+      // Create new customers first
+      const newCustomerNames = [...new Set(invoices.filter(inv => inv.is_new_customer && !inv.customer_id).map(inv => inv.customer_name))];
+      const customerIdMap: Record<string, string> = {};
+
+      if (newCustomerNames.length > 0) {
+        const newCustomers = newCustomerNames.map(name => ({
+          name,
+          company_id: companyId,
+          phone: "",
+          address: "",
+          area: "",
+          outstanding: 0,
+        }));
+        const { data: created, error: custError } = await supabase.from("customers").insert(newCustomers).select("id, name");
+        if (custError) throw custError;
+        for (const c of created || []) {
+          customerIdMap[c.name.toLowerCase()] = c.id;
+        }
+      }
+
       const rows = invoices.map((inv) => ({
-        customer_id: inv.customer_id,
+        customer_id: inv.customer_id || customerIdMap[inv.customer_name.toLowerCase()],
         customer_name: inv.customer_name,
         invoice_number: inv.invoice_number,
         invoice_date: inv.invoice_date,
         amount: inv.amount,
         due_date: inv.due_date,
         description: inv.description || null,
-        company_id: profile!.company_id!,
+        company_id: companyId,
         paid_amount: 0,
         status: "pending",
         due_date_source: "invoice" as const,
@@ -396,6 +418,9 @@ export function useBulkImportInvoices() {
       const { error } = await supabase.from("invoices").insert(rows);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      qc.invalidateQueries({ queryKey: ["customers"] });
+    },
   });
 }
