@@ -72,7 +72,6 @@ export default function BulkImportInvoicesDialog() {
       if (!invoice_number) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice number is required` }); continue; }
       if (!invoice_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Invoice date is required` }); continue; }
       if (amount < 1) { errors.push({ row: i + 1, message: `Row ${i + 1}: Amount must be greater than 0` }); continue; }
-      if (!due_date) { errors.push({ row: i + 1, message: `Row ${i + 1}: Due date is required` }); continue; }
 
       valid.push({ customer_name: cust?.name || customer_name, customer_id: cust?.id || "", is_new_customer: !cust, customer_phone, customer_area, invoice_number, invoice_date, amount, due_date, description });
     }
