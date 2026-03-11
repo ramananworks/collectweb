@@ -9,6 +9,8 @@ interface ParsedInvoice {
   customer_name: string;
   customer_id: string;
   is_new_customer: boolean;
+  customer_phone: string;
+  customer_area: string;
   invoice_number: string;
   invoice_date: string;
   amount: number;
