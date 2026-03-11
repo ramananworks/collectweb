@@ -379,7 +379,7 @@ export function useBulkImportInvoices() {
   const qc = useQueryClient();
   const { profile } = useAuth();
   return useMutation({
-    mutationFn: async (invoices: { customer_name: string; customer_id: string; is_new_customer?: boolean; customer_phone?: string; customer_area?: string; invoice_number: string; invoice_date: string; amount: number; due_date: string; description: string }[]) => {
+    mutationFn: async (invoices: { customer_name: string; customer_id: string; is_new_customer?: boolean; customer_phone?: string; customer_area?: string; invoice_number: string; invoice_date: string; amount: number; due_date?: string; description: string }[]) => {
       const companyId = profile!.company_id!;
 
       // Create new customers first, deduplicating by name
