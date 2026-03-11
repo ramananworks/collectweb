@@ -8,6 +8,7 @@ import { useCustomers, useBulkImportInvoices } from "@/hooks/use-data";
 interface ParsedInvoice {
   customer_name: string;
   customer_id: string;
+  is_new_customer: boolean;
   invoice_number: string;
   invoice_date: string;
   amount: number;
