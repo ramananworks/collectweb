@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Upload, Download, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useCustomers, useBulkImportInvoices } from "@/hooks/use-data";
+import { useCustomers, useBulkImportInvoices, useCompany } from "@/hooks/use-data";
 
 interface ParsedInvoice {
   customer_name: string;
