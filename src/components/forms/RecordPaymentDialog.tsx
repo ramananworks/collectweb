@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CustomerCombobox from "@/components/shared/CustomerCombobox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -129,16 +130,13 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
-                <Select onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); form.setValue("amount", undefined); setAmountAutoFilled(false); }} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {customersWithDues.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <CustomerCombobox
+                    customers={customersWithDues}
+                    value={field.value}
+                    onValueChange={(val) => { field.onChange(val); form.setValue("invoice_id", ""); form.setValue("amount", undefined); setAmountAutoFilled(false); }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />

@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CustomerCombobox from "@/components/shared/CustomerCombobox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Info } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -140,19 +140,14 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {customers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                        {c.default_due_days ? ` (${c.default_due_days}d terms)` : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <CustomerCombobox
+                    customers={customers}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    showTerms
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
