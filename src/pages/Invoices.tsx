@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Search, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,9 @@ import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use
 import { formatDisplayDate } from "@/lib/utils";
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
+
+const PAGE_SIZE = 20;
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
 import ScanInvoiceDialog, { ExtractedInvoiceData } from "@/components/forms/ScanInvoiceDialog";
 import { DeliveryConfirmDialog } from "@/components/forms/DeliveryConfirmDialog";
