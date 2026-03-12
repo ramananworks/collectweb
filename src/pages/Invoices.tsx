@@ -144,8 +144,9 @@ export default function Invoices() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50 text-left">
-                <th className="px-4 py-3 font-medium text-muted-foreground">Invoice #</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Customer</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground sm:hidden">Customer / Invoice</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Invoice #</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Customer</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Area</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Invoice Date</th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
