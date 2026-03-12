@@ -159,7 +159,7 @@ export default function Invoices() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((inv) => (
+              {paginatedInvoices.map((inv) => (
                 <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs">{inv.invoice_number}</td>
                   <td className="px-4 py-3 font-medium">{inv.customer_name}</td>
