@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Search, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,9 @@ import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use
 import { formatDisplayDate } from "@/lib/utils";
 import { InvoiceStatus } from "@/types";
 import CreateInvoiceDialog from "@/components/forms/CreateInvoiceDialog";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
+
+const PAGE_SIZE = 20;
 import BulkImportInvoicesDialog from "@/components/forms/BulkImportInvoicesDialog";
 import ScanInvoiceDialog, { ExtractedInvoiceData } from "@/components/forms/ScanInvoiceDialog";
 import { DeliveryConfirmDialog } from "@/components/forms/DeliveryConfirmDialog";
@@ -21,6 +24,7 @@ export default function Invoices() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [scanDefaults, setScanDefaults] = useState<ExtractedInvoiceData | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [deliveryInvoice, setDeliveryInvoice] = useState<{ id: string; customerName: string } | null>(null);
@@ -39,12 +43,33 @@ export default function Invoices() {
   const areaNames = areas.map((a) => a.name);
   const getCustomerArea = (customerId: string) => customers.find((c) => c.id === customerId)?.area || "Unknown";
 
-  const filtered = invoices.filter((inv) => {
-    const matchesSearch = inv.customer_name.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
-    const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
-    return matchesSearch && matchesStatus && matchesArea;
-  });
+  const filtered = useMemo(() => {
+    setCurrentPage(1);
+    return invoices.filter((inv) => {
+      const matchesSearch = inv.customer_name.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
+      const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
+      return matchesSearch && matchesStatus && matchesArea;
+    });
+  }, [invoices, search, statusFilter, areaFilter]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const startIdx = (currentPage - 1) * PAGE_SIZE;
+  const paginatedInvoices = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push("ellipsis");
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push("ellipsis");
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   return (
     <div
@@ -134,7 +159,7 @@ export default function Invoices() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((inv) => (
+              {paginatedInvoices.map((inv) => (
                 <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs">{inv.invoice_number}</td>
                   <td className="px-4 py-3 font-medium">{inv.customer_name}</td>
@@ -169,7 +194,48 @@ export default function Invoices() {
               ))}
             </tbody>
           </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Showing {startIdx + 1}–{Math.min(startIdx + PAGE_SIZE, filtered.length)} of {filtered.length}
+          </p>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              {getPageNumbers().map((page, i) =>
+                page === "ellipsis" ? (
+                  <PaginationItem key={`e-${i}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      isActive={currentPage === page}
+                      onClick={() => setCurrentPage(page)}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
+      )}
         {filtered.length === 0 && (
           <div className="p-8 text-center text-muted-foreground">No invoices found</div>
         )}
