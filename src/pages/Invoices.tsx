@@ -24,6 +24,8 @@ export default function Invoices() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [areaFilter, setAreaFilter] = useState("all");
   const [scanDefaults, setScanDefaults] = useState<ExtractedInvoiceData | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [deliveryInvoice, setDeliveryInvoice] = useState<{ id: string; customerName: string } | null>(null);
