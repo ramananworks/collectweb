@@ -162,7 +162,7 @@ export default function Invoices() {
             <tbody>
               {paginatedInvoices.map((inv) => (
                 <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 sm:hidden">
+                  <td className="px-4 py-3 sm:hidden min-w-[180px]">
                     <div className="font-medium">{inv.customer_name}</div>
                     <div className="text-xs text-muted-foreground font-mono">{inv.invoice_number} · {formatDisplayDate(inv.invoice_date)}</div>
                   </td>
