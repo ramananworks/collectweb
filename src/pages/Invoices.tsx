@@ -164,7 +164,8 @@ export default function Invoices() {
                 <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3 sm:hidden min-w-[180px]">
                     <div className="font-medium">{inv.customer_name}</div>
-                    <div className="text-xs text-muted-foreground font-mono">{inv.invoice_number} · {formatDisplayDate(inv.invoice_date)}</div>
+                    <div className="text-xs text-muted-foreground font-mono">{inv.invoice_number}</div>
+                    <div className="text-xs text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</div>
                   </td>
                   <td className="px-4 py-3 font-mono text-xs hidden sm:table-cell">{inv.invoice_number}</td>
                   <td className="px-4 py-3 font-medium hidden sm:table-cell">{inv.customer_name}</td>
