@@ -43,12 +43,33 @@ export default function Invoices() {
   const areaNames = areas.map((a) => a.name);
   const getCustomerArea = (customerId: string) => customers.find((c) => c.id === customerId)?.area || "Unknown";
 
-  const filtered = invoices.filter((inv) => {
-    const matchesSearch = inv.customer_name.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
-    const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
-    return matchesSearch && matchesStatus && matchesArea;
-  });
+  const filtered = useMemo(() => {
+    setCurrentPage(1);
+    return invoices.filter((inv) => {
+      const matchesSearch = inv.customer_name.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
+      const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
+      return matchesSearch && matchesStatus && matchesArea;
+    });
+  }, [invoices, search, statusFilter, areaFilter]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const startIdx = (currentPage - 1) * PAGE_SIZE;
+  const paginatedInvoices = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push("ellipsis");
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push("ellipsis");
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   return (
     <div
