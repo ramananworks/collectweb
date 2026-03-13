@@ -237,7 +237,7 @@ export default function Outstanding() {
             className="pl-9"
           />
         </div>
-        <Select value={areaFilter} onValueChange={setAreaFilter}>
+        <Select value={areaFilter} onValueChange={handleAreaFilter}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Area" />
           </SelectTrigger>
