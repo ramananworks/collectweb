@@ -258,7 +258,7 @@ export default function Outstanding() {
           <p className="text-center py-12 text-muted-foreground">No outstanding amounts found</p>
         )}
 
-        {outstandingData.map(({ customer, invoices: custInvoices, total }) => {
+        {paginatedData.map(({ customer, invoices: custInvoices, total }) => {
           const isOpen = expanded.has(customer.id);
           return (
             <div key={customer.id} className="rounded-xl border bg-card overflow-hidden">
