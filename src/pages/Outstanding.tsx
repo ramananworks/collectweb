@@ -86,7 +86,17 @@ export default function Outstanding() {
     return result;
   }, [customers, invoices, search, areaFilter]);
 
+  const PAGE_SIZE = 20;
   const grandTotal = outstandingData.reduce((s, r) => s + r.total, 0);
+  const totalPages = Math.max(1, Math.ceil(outstandingData.length / PAGE_SIZE));
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return outstandingData.slice(start, start + PAGE_SIZE);
+  }, [outstandingData, currentPage]);
+
+  // Reset page on filter change
+  const handleSearch = (v: string) => { setSearch(v); setCurrentPage(1); };
+  const handleAreaFilter = (v: string) => { setAreaFilter(v); setCurrentPage(1); };
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => {
