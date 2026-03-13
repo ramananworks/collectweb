@@ -305,23 +305,32 @@ export default function Outstanding() {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="border-b text-muted-foreground">
-                          <th className="text-left px-4 py-2 font-medium">Invoice</th>
-                          <th className="text-left px-2 py-2 font-medium">Date</th>
-                          <th className="text-right px-2 py-2 font-medium">Amount</th>
+                          {/* Mobile: merged Invoice+Date */}
+                          <th className="sm:hidden text-left px-4 py-2 font-medium">Invoice</th>
+                          {/* Desktop columns */}
+                          <th className="hidden sm:table-cell text-left px-4 py-2 font-medium">Invoice</th>
+                          <th className="hidden sm:table-cell text-left px-2 py-2 font-medium">Date</th>
+                          <th className="hidden sm:table-cell text-right px-2 py-2 font-medium">Amount</th>
                           <th className="text-right px-2 py-2 font-medium">Balance</th>
-                          <th className="text-center px-4 py-2 font-medium">Status</th>
+                          <th className="hidden sm:table-cell text-center px-4 py-2 font-medium">Status</th>
                         </tr>
                       </thead>
                       <tbody>
                         {custInvoices.map((inv) => (
                           <tr key={inv.id} className="border-b last:border-0">
-                            <td className="px-4 py-2 font-medium">{inv.invoice_number}</td>
-                            <td className="px-2 py-2 text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</td>
-                            <td className="px-2 py-2 text-right">{formatCurrency(Number(inv.amount))}</td>
+                            {/* Mobile: merged invoice + date */}
+                            <td className="sm:hidden px-4 py-2">
+                              <div className="font-medium">{inv.invoice_number}</div>
+                              <div className="text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</div>
+                            </td>
+                            {/* Desktop columns */}
+                            <td className="hidden sm:table-cell px-4 py-2 font-medium">{inv.invoice_number}</td>
+                            <td className="hidden sm:table-cell px-2 py-2 text-muted-foreground">{formatDisplayDate(inv.invoice_date)}</td>
+                            <td className="hidden sm:table-cell px-2 py-2 text-right">{formatCurrency(Number(inv.amount))}</td>
                             <td className="px-2 py-2 text-right font-medium text-destructive">
                               {formatCurrency(Number(inv.amount) - Number(inv.paid_amount))}
                             </td>
-                            <td className="px-4 py-2 text-center">
+                            <td className="hidden sm:table-cell px-4 py-2 text-center">
                               <StatusBadge status={inv.status as any} />
                             </td>
                           </tr>
