@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Search, ChevronDown, ChevronRight, Download, Share2, Loader2 } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Download, Share2, Loader2, ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,7 @@ import jsPDF from "jspdf";
 export default function Outstanding() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [collectTarget, setCollectTarget] = useState<{ customerId: string; invoiceId: string } | null>(null);
   const { canRecordPayments } = usePermissions();
@@ -85,7 +86,17 @@ export default function Outstanding() {
     return result;
   }, [customers, invoices, search, areaFilter]);
 
+  const PAGE_SIZE = 20;
   const grandTotal = outstandingData.reduce((s, r) => s + r.total, 0);
+  const totalPages = Math.max(1, Math.ceil(outstandingData.length / PAGE_SIZE));
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return outstandingData.slice(start, start + PAGE_SIZE);
+  }, [outstandingData, currentPage]);
+
+  // Reset page on filter change
+  const handleSearch = (v: string) => { setSearch(v); setCurrentPage(1); };
+  const handleAreaFilter = (v: string) => { setAreaFilter(v); setCurrentPage(1); };
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => {
@@ -222,11 +233,11 @@ export default function Outstanding() {
           <Input
             placeholder="Search customer..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             className="pl-9"
           />
         </div>
-        <Select value={areaFilter} onValueChange={setAreaFilter}>
+        <Select value={areaFilter} onValueChange={handleAreaFilter}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Area" />
           </SelectTrigger>
@@ -247,7 +258,7 @@ export default function Outstanding() {
           <p className="text-center py-12 text-muted-foreground">No outstanding amounts found</p>
         )}
 
-        {outstandingData.map(({ customer, invoices: custInvoices, total }) => {
+        {paginatedData.map(({ customer, invoices: custInvoices, total }) => {
           const isOpen = expanded.has(customer.id);
           return (
             <div key={customer.id} className="rounded-xl border bg-card overflow-hidden">
@@ -344,6 +355,24 @@ export default function Outstanding() {
           );
         })}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2 pb-4">
+          <p className="text-xs text-muted-foreground">
+            {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, outstandingData.length)} of {outstandingData.length}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage <= 1} onClick={() => setCurrentPage((p) => p - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm px-2">{currentPage} / {totalPages}</span>
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <RecordPaymentDialog
         open={!!collectTarget}
