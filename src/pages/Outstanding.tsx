@@ -252,35 +252,51 @@ export default function Outstanding() {
           return (
             <div key={customer.id} className="rounded-xl border bg-card overflow-hidden">
               {/* Customer row */}
-              <div className="flex items-center gap-2 px-4 py-3">
-                <button
-                  onClick={() => toggleExpand(customer.id)}
-                  className="flex-1 flex items-center gap-3 text-left hover:bg-accent/50 transition-colors rounded-lg -mx-2 px-2 py-0.5"
-                >
+              <button
+                onClick={() => toggleExpand(customer.id)}
+                className="w-full text-left px-4 py-3 sm:py-3 hover:bg-accent/50 transition-colors"
+              >
+                {/* Line 1: Chevron + Name */}
+                <div className="flex items-center gap-2">
                   {isOpen ? (
                     <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
                   ) : (
                     <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{customer.name}</p>
-                    <p className="text-xs text-muted-foreground">{customer.area || "No area"} · {custInvoices.length} invoices</p>
-                  </div>
-                  <span className="text-sm font-semibold text-destructive whitespace-nowrap">
+                  <p className="font-medium truncate flex-1 min-w-0">{customer.name}</p>
+                  {/* Desktop: amount inline */}
+                  <span className="hidden sm:inline text-sm font-semibold text-destructive whitespace-nowrap">
                     {formatCurrency(total)}
                   </span>
-                </button>
-                {canRecordPayments && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 text-xs shrink-0"
-                    onClick={() => setCollectTarget({ customerId: customer.id, invoiceId: "" })}
-                  >
-                    Collect
-                  </Button>
-                )}
-              </div>
+                  {canRecordPayments && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="hidden sm:inline-flex h-8 text-xs shrink-0 ml-2"
+                      onClick={(e) => { e.stopPropagation(); setCollectTarget({ customerId: customer.id, invoiceId: "" }); }}
+                    >
+                      Collect
+                    </Button>
+                  )}
+                </div>
+                {/* Line 2: Area + count + amount (mobile) + Collect (mobile) */}
+                <div className="flex items-center gap-2 mt-1 ml-6">
+                  <p className="text-xs text-muted-foreground flex-1">{customer.area || "No area"} · {custInvoices.length} invoices</p>
+                  <span className="sm:hidden text-sm font-semibold text-destructive whitespace-nowrap">
+                    {formatCurrency(total)}
+                  </span>
+                  {canRecordPayments && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="sm:hidden h-7 text-xs shrink-0"
+                      onClick={(e) => { e.stopPropagation(); setCollectTarget({ customerId: customer.id, invoiceId: "" }); }}
+                    >
+                      Collect
+                    </Button>
+                  )}
+                </div>
+              </button>
 
               {/* Invoice breakdown */}
               {isOpen && (
