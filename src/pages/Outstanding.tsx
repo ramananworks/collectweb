@@ -314,7 +314,7 @@ export default function Outstanding() {
                     {formatCurrency(total)}
                   </span>
                   {todayCollectedSet.has(customer.id) && (
-                    <CheckCircle2 className="sm:hidden h-5 w-5 text-emerald-500 opacity-40 shrink-0" />
+                    <CheckCircle2 className="sm:hidden h-5 w-5 text-success opacity-40 shrink-0" />
                   )}
                   {canRecordPayments && (
                     <Button
