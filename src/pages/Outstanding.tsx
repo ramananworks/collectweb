@@ -23,6 +23,7 @@ import jsPDF from "jspdf";
 export default function Outstanding() {
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [collectTarget, setCollectTarget] = useState<{ customerId: string; invoiceId: string } | null>(null);
   const { canRecordPayments } = usePermissions();
