@@ -37,8 +37,21 @@ export default function Outstanding() {
   const { data: company } = useCompany();
 
   const ptr = usePullToRefresh({
-    queryKeys: [["customers"], ["invoices"], ["areas"]],
+    queryKeys: [["customers"], ["invoices"], ["payments"], ["areas"]],
   });
+
+  const todayCollectedSet = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const invoiceToCustomer = new Map(invoices.map((inv) => [inv.id, inv.customer_id]));
+    const set = new Set<string>();
+    for (const p of payments) {
+      if (p.date === today) {
+        const custId = invoiceToCustomer.get(p.invoice_id);
+        if (custId) set.add(custId);
+      }
+    }
+    return set;
+  }, [payments, invoices]);
 
   const outstandingData = useMemo(() => {
     const unpaidInvoices = invoices.filter(
