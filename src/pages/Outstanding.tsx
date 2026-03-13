@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Search, ChevronDown, ChevronRight, Download, Share2, Loader2, ChevronLeft } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Download, Share2, Loader2, ChevronLeft, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCustomers, useInvoices, useAreas, useCompany, formatCurrency } from "@/hooks/use-data";
+import { useCustomers, useInvoices, usePayments, useAreas, useCompany, formatCurrency } from "@/hooks/use-data";
 import { formatDisplayDate } from "@/lib/utils";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
@@ -32,12 +32,26 @@ export default function Outstanding() {
 
   const { data: customers = [] } = useCustomers();
   const { data: invoices = [] } = useInvoices();
+  const { data: payments = [] } = usePayments();
   const { data: areas = [] } = useAreas();
   const { data: company } = useCompany();
 
   const ptr = usePullToRefresh({
-    queryKeys: [["customers"], ["invoices"], ["areas"]],
+    queryKeys: [["customers"], ["invoices"], ["payments"], ["areas"]],
   });
+
+  const todayCollectedSet = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const invoiceToCustomer = new Map(invoices.map((inv) => [inv.id, inv.customer_id]));
+    const set = new Set<string>();
+    for (const p of payments) {
+      if (p.date === today) {
+        const custId = invoiceToCustomer.get(p.invoice_id);
+        if (custId) set.add(custId);
+      }
+    }
+    return set;
+  }, [payments, invoices]);
 
   const outstandingData = useMemo(() => {
     const unpaidInvoices = invoices.filter(
@@ -279,6 +293,9 @@ export default function Outstanding() {
                   <span className="hidden sm:inline text-sm font-semibold text-destructive whitespace-nowrap">
                     {formatCurrency(total)}
                   </span>
+                  {todayCollectedSet.has(customer.id) && (
+                    <CheckCircle2 className="hidden sm:block h-5 w-5 text-success opacity-40 shrink-0" />
+                  )}
                   {canRecordPayments && (
                     <Button
                       size="sm"
@@ -296,6 +313,9 @@ export default function Outstanding() {
                   <span className="sm:hidden text-sm font-semibold text-destructive whitespace-nowrap">
                     {formatCurrency(total)}
                   </span>
+                  {todayCollectedSet.has(customer.id) && (
+                    <CheckCircle2 className="sm:hidden h-5 w-5 text-success opacity-40 shrink-0" />
+                  )}
                   {canRecordPayments && (
                     <Button
                       size="sm"
