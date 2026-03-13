@@ -233,7 +233,7 @@ export default function Outstanding() {
           <Input
             placeholder="Search customer..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             className="pl-9"
           />
         </div>
