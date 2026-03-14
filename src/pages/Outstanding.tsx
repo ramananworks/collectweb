@@ -296,9 +296,6 @@ export default function Outstanding() {
                   <span className="hidden sm:inline text-sm font-semibold text-destructive whitespace-nowrap">
                     {formatCurrency(total)}
                   </span>
-                  {todayCollectedSet.has(customer.id) && (
-                    <CheckCircle2 className="hidden sm:block h-5 w-5 text-success opacity-40 shrink-0" />
-                  )}
                   {canRecordPayments && (
                     <Button
                       size="sm"
