@@ -121,7 +121,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Record Collection</DialogTitle>
         </DialogHeader>
