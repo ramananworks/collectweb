@@ -7,9 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Contact } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAreas, useUpdateCustomer, type Customer } from "@/hooks/use-data";
-import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
+import { hapticLight, hapticSuccess, hapticHeavy } from "@/lib/haptics";
+
+function supportsContacts() {
+  const hasAndroid = typeof window !== "undefined" && !!(window as any).Android?.pickContact;
+  const hasWebPicker = typeof navigator !== "undefined" && "contacts" in navigator && "ContactsManager" in window;
+  return hasAndroid || hasWebPicker;
+}
 
 const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
@@ -55,6 +62,48 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
     }
   }, [customer, open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const pickFromContacts = async () => {
+    try {
+      const android = (window as any).Android;
+      if (android && typeof android.pickContact === "function") {
+        const result = android.pickContact();
+        if (result) {
+          const contact = typeof result === "string" ? JSON.parse(result) : result;
+          if (contact.name) form.setValue("name", contact.name);
+          if (contact.phone) form.setValue("phone", contact.phone.replace(/[\s\-()]/g, ""));
+          if (contact.address) form.setValue("address", contact.address);
+          hapticLight();
+          toast({ title: "Contact imported", description: `${contact.name || "Contact"} details filled in.` });
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Android bridge pickContact failed:", e);
+    }
+    try {
+      const nav = navigator as any;
+      if (nav.contacts?.select) {
+        const contacts = await nav.contacts.select(["name", "tel", "address"], { multiple: false });
+        if (contacts?.length > 0) {
+          const c = contacts[0];
+          if (c.name?.[0]) form.setValue("name", c.name[0]);
+          if (c.tel?.[0]) form.setValue("phone", c.tel[0].replace(/[\s\-()]/g, ""));
+          if (c.address?.[0]) {
+            const addr = c.address[0];
+            const parts = [addr.streetAddress, addr.locality, addr.region, addr.postalCode].filter(Boolean);
+            if (parts.length > 0) form.setValue("address", parts.join(", "));
+          }
+          hapticLight();
+          toast({ title: "Contact imported", description: `${c.name?.[0] || "Contact"} details filled in.` });
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Web Contact Picker failed:", e);
+    }
+    toast({ title: "Not supported", description: "Contact picker is not available on this device.", variant: "destructive" });
+  };
+
   function onSubmit(values: EditCustomerFormValues) {
     if (!customer) return;
     updateCustomer.mutate({
@@ -97,7 +146,18 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
               <FormField control={form.control} name="phone" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
-                  <FormControl><Input type="tel" inputMode="tel" {...field} /></FormControl>
+                  <FormControl>
+                    <div className="relative">
+                      <Input type="tel" inputMode="tel" {...field} className={supportsContacts() ? "pr-10" : ""} />
+                      {supportsContacts() && (
+                        <Button type="button" variant="ghost" size="icon"
+                          className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:text-foreground"
+                          onClick={pickFromContacts}>
+                          <Contact className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
