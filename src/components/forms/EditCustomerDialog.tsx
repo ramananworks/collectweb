@@ -62,6 +62,48 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
     }
   }, [customer, open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const pickFromContacts = async () => {
+    try {
+      const android = (window as any).Android;
+      if (android && typeof android.pickContact === "function") {
+        const result = android.pickContact();
+        if (result) {
+          const contact = typeof result === "string" ? JSON.parse(result) : result;
+          if (contact.name) form.setValue("name", contact.name);
+          if (contact.phone) form.setValue("phone", contact.phone.replace(/[\s\-()]/g, ""));
+          if (contact.address) form.setValue("address", contact.address);
+          hapticLight();
+          toast({ title: "Contact imported", description: `${contact.name || "Contact"} details filled in.` });
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Android bridge pickContact failed:", e);
+    }
+    try {
+      const nav = navigator as any;
+      if (nav.contacts?.select) {
+        const contacts = await nav.contacts.select(["name", "tel", "address"], { multiple: false });
+        if (contacts?.length > 0) {
+          const c = contacts[0];
+          if (c.name?.[0]) form.setValue("name", c.name[0]);
+          if (c.tel?.[0]) form.setValue("phone", c.tel[0].replace(/[\s\-()]/g, ""));
+          if (c.address?.[0]) {
+            const addr = c.address[0];
+            const parts = [addr.streetAddress, addr.locality, addr.region, addr.postalCode].filter(Boolean);
+            if (parts.length > 0) form.setValue("address", parts.join(", "));
+          }
+          hapticLight();
+          toast({ title: "Contact imported", description: `${c.name?.[0] || "Contact"} details filled in.` });
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Web Contact Picker failed:", e);
+    }
+    toast({ title: "Not supported", description: "Contact picker is not available on this device.", variant: "destructive" });
+  };
+
   function onSubmit(values: EditCustomerFormValues) {
     if (!customer) return;
     updateCustomer.mutate({
