@@ -127,7 +127,9 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
           <DialogTitle>Record Collection</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto pr-1 max-h-[calc(85vh-8rem)]">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <ScrollArea className="max-h-[calc(85vh-8rem)] pr-2">
+              <div className="space-y-4 py-1">
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
