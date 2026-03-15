@@ -225,7 +225,9 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
                 <FormMessage />
               </FormItem>
             )} />
-            <div className="flex justify-end gap-2 pt-2">
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 px-6 py-4 flex-shrink-0 border-t">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" className="gradient-primary text-primary-foreground" disabled={createInvoice.isPending}>
                 {createInvoice.isPending ? "Creating..." : "Create Invoice"}
