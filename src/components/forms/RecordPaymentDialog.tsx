@@ -221,8 +221,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
               </FormItem>
             )} />
               </div>
-            </ScrollArea>
-            <div className="flex justify-end gap-2 pt-2">
+            </div>
+            <div className="flex justify-end gap-2 px-6 py-4 flex-shrink-0 border-t">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" className="gradient-primary text-primary-foreground gap-2" disabled={isSubmitting || recordPayment.isPending}>
                 {isSubmitting || recordPayment.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Recording...</> : "Record Collection"}
