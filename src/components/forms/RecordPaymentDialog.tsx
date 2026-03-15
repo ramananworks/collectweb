@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CustomerCombobox from "@/components/shared/CustomerCombobox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -126,7 +127,9 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
           <DialogTitle>Record Collection</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto pr-1 max-h-[calc(85vh-8rem)]">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <ScrollArea className="max-h-[calc(85vh-8rem)] pr-2">
+              <div className="space-y-4 py-1">
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
@@ -217,6 +220,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
                 <FormMessage />
               </FormItem>
             )} />
+              </div>
+            </ScrollArea>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" className="gradient-primary text-primary-foreground gap-2" disabled={isSubmitting || recordPayment.isPending}>
