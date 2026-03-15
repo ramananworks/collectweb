@@ -277,7 +277,7 @@ export default function Outstanding() {
           return (
              <div key={customer.id} className="rounded-xl border bg-card overflow-hidden relative">
               {todayCollectedSet.has(customer.id) && (
-                <CheckCircle2 className="absolute top-2 right-2 h-16 w-16 text-success opacity-15 pointer-events-none" />
+                <CheckCircle2 className="absolute top-2 right-2 h-16 w-16 text-success opacity-25 pointer-events-none" />
               )}
               {/* Customer row */}
               <button
