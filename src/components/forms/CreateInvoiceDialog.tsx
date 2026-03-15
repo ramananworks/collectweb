@@ -131,12 +131,14 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-2">
           <DialogTitle>Create New Invoice</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6">
+              <div className="space-y-4 py-1 pr-1">
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
@@ -223,7 +225,9 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
                 <FormMessage />
               </FormItem>
             )} />
-            <div className="flex justify-end gap-2 pt-2">
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 px-6 py-4 flex-shrink-0 border-t">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" className="gradient-primary text-primary-foreground" disabled={createInvoice.isPending}>
                 {createInvoice.isPending ? "Creating..." : "Create Invoice"}
