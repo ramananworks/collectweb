@@ -220,6 +220,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
                 <FormMessage />
               </FormItem>
             )} />
+              </div>
+            </ScrollArea>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" className="gradient-primary text-primary-foreground gap-2" disabled={isSubmitting || recordPayment.isPending}>
