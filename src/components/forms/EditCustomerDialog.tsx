@@ -146,7 +146,18 @@ export default function EditCustomerDialog({ customer, open, onOpenChange }: Edi
               <FormField control={form.control} name="phone" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
-                  <FormControl><Input type="tel" inputMode="tel" {...field} /></FormControl>
+                  <FormControl>
+                    <div className="relative">
+                      <Input type="tel" inputMode="tel" {...field} className={supportsContacts() ? "pr-10" : ""} />
+                      {supportsContacts() && (
+                        <Button type="button" variant="ghost" size="icon"
+                          className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:text-foreground"
+                          onClick={pickFromContacts}>
+                          <Contact className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
