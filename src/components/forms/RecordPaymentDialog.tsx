@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CustomerCombobox from "@/components/shared/CustomerCombobox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -122,14 +121,14 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-2">
           <DialogTitle>Record Collection</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <ScrollArea className="max-h-[calc(85vh-8rem)] pr-2">
-              <div className="space-y-4 py-1">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+              <div className="space-y-4 py-1 pr-1">
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
@@ -221,8 +220,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
               </FormItem>
             )} />
               </div>
-            </ScrollArea>
-            <div className="flex justify-end gap-2 pt-2">
+            </div>
+            <div className="flex justify-end gap-2 px-6 py-4 flex-shrink-0 border-t">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" className="gradient-primary text-primary-foreground gap-2" disabled={isSubmitting || recordPayment.isPending}>
                 {isSubmitting || recordPayment.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Recording...</> : "Record Collection"}
