@@ -121,12 +121,12 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Record Collection</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto pr-1 max-h-[calc(85vh-8rem)]">
             <FormField control={form.control} name="customer_id" render={({ field }) => (
               <FormItem>
                 <FormLabel>Customer</FormLabel>
