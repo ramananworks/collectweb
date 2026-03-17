@@ -483,11 +483,11 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4 shrink-0 text-primary" />
-                  <a href="tel:+919876543210" className="hover:text-foreground transition-colors">+91 98765 43210</a>
+                  <a href="tel:+919976294532" className="hover:text-foreground transition-colors">+91 99762 94532</a>
                 </li>
                 <li className="flex items-center gap-2">
                   <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
-                  <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">WhatsApp Support</a>
+                  <a href="https://wa.me/919976294532" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">WhatsApp Support</a>
                 </li>
               </ul>
             </div>
