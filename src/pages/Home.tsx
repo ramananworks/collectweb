@@ -352,6 +352,50 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section id="faq" className="bg-card/50 px-6 py-20 md:py-28">
+        <div className="mx-auto max-w-3xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={stagger}
+            className="mb-12 text-center"
+          >
+            <motion.h2 variants={fadeUp} className="text-3xl font-bold tracking-tight md:text-4xl">
+              Frequently Asked <span className="text-primary">Questions</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-lg text-muted-foreground">
+              Everything you need to know about CollectWeb.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={fadeUp}
+          >
+            <Accordion type="single" collapsible className="w-full space-y-3">
+              {faqs.map((faq, i) => (
+                <AccordionItem
+                  key={i}
+                  value={`faq-${i}`}
+                  className="rounded-xl border border-border/60 bg-card px-5 data-[state=open]:border-primary/30 data-[state=open]:shadow-sm"
+                >
+                  <AccordionTrigger className="text-left text-base font-medium hover:no-underline">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="px-6 py-20 md:py-28">
         <motion.div
