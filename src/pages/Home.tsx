@@ -17,6 +17,9 @@ import {
   TrendingUp,
   MapPin,
   Clock,
+  Mail,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 
 const fadeUp = {
