@@ -249,6 +249,109 @@ export default function Home() {
         </motion.div>
       </section>
 
+      {/* Pricing */}
+      <section id="pricing" className="px-6 py-20 md:py-28">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={stagger}
+            className="mx-auto mb-16 max-w-2xl text-center"
+          >
+            <motion.h2 variants={fadeUp} className="text-3xl font-bold tracking-tight md:text-4xl">
+              Simple, Transparent <span className="text-primary">Pricing</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-lg text-muted-foreground">
+              Start free and scale as your business grows. No hidden fees, no surprises.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={stagger}
+            className="grid gap-8 md:grid-cols-3"
+          >
+            {/* Free Plan */}
+            <motion.div
+              variants={fadeUp}
+              className="flex flex-col rounded-2xl border border-border/60 bg-card p-8"
+            >
+              <h3 className="text-lg font-semibold">Starter</h3>
+              <p className="mt-1 text-sm text-muted-foreground">For small distributors getting started</p>
+              <div className="mt-6">
+                <span className="text-4xl font-extrabold">₹0</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <ul className="mt-8 flex-1 space-y-3 text-sm">
+                {["Up to 50 customers", "100 invoices/month", "1 team member", "Basic reports", "Mobile app access"].map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Button variant="outline" asChild className="mt-8 rounded-full">
+                <Link to="/signup">Get Started Free</Link>
+              </Button>
+            </motion.div>
+
+            {/* Pro Plan */}
+            <motion.div
+              variants={fadeUp}
+              className="relative flex flex-col rounded-2xl border-2 border-primary bg-card p-8 shadow-lg"
+            >
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground">
+                Most Popular
+              </div>
+              <h3 className="text-lg font-semibold">Professional</h3>
+              <p className="mt-1 text-sm text-muted-foreground">For growing distribution businesses</p>
+              <div className="mt-6">
+                <span className="text-4xl font-extrabold">₹999</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <ul className="mt-8 flex-1 space-y-3 text-sm">
+                {["Unlimited customers", "Unlimited invoices", "Up to 10 team members", "Advanced reports & analytics", "AI invoice scanning", "Area-wise collection routes", "Priority support"].map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Button asChild className="mt-8 rounded-full">
+                <Link to="/signup">Start 14-Day Trial <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              </Button>
+            </motion.div>
+
+            {/* Enterprise Plan */}
+            <motion.div
+              variants={fadeUp}
+              className="flex flex-col rounded-2xl border border-border/60 bg-card p-8"
+            >
+              <h3 className="text-lg font-semibold">Enterprise</h3>
+              <p className="mt-1 text-sm text-muted-foreground">For large-scale distributor networks</p>
+              <div className="mt-6">
+                <span className="text-4xl font-extrabold">₹2,499</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <ul className="mt-8 flex-1 space-y-3 text-sm">
+                {["Everything in Professional", "Unlimited team members", "Custom roles & permissions", "Dedicated account manager", "API access & integrations", "Custom branding", "SLA guarantee"].map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Button variant="outline" asChild className="mt-8 rounded-full">
+                <Link to="/signup">Contact Sales</Link>
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="px-6 py-20 md:py-28">
         <motion.div
