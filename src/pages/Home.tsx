@@ -17,6 +17,9 @@ import {
   TrendingUp,
   MapPin,
   Clock,
+  Mail,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 
 const fadeUp = {
@@ -444,14 +447,56 @@ export default function Home() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="border-t border-border/50 px-6 py-10"
+        className="border-t border-border/50 px-6 py-12"
       >
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
-          <div className="flex items-center gap-2">
-            <img src={logoImg} alt="CollectWeb" className="h-5 w-5 rounded object-cover" />
-            <span className="font-medium">CollectWeb</span> · Distributor Collection App
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-10 md:grid-cols-3">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <img src={logoImg} alt="CollectWeb" className="h-7 w-7 rounded-lg object-cover" />
+                <span className="text-lg font-bold">CollectWeb</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                The smartest distributor collection app to track invoices, manage credit, and get paid faster.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="mb-3 text-sm font-semibold">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
+                <li><a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
+                <li><a href="#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
+                <li><Link to="/login" className="hover:text-foreground transition-colors">Sign In</Link></li>
+              </ul>
+            </div>
+
+            {/* Contact & Support */}
+            <div>
+              <h4 className="mb-3 text-sm font-semibold">Contact & Support</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 shrink-0 text-primary" />
+                  <a href="mailto:support@collectweb.in" className="hover:text-foreground transition-colors">support@collectweb.in</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 shrink-0 text-primary" />
+                  <a href="tel:+919876543210" className="hover:text-foreground transition-colors">+91 98765 43210</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
+                  <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">WhatsApp Support</a>
+                </li>
+              </ul>
+            </div>
           </div>
-          <p>© {new Date().getFullYear()} CollectWeb. All rights reserved.</p>
+
+          <div className="mt-10 border-t border-border/50 pt-6 flex flex-col items-center justify-between gap-2 text-xs text-muted-foreground md:flex-row">
+            <p>© {new Date().getFullYear()} CollectWeb. All rights reserved.</p>
+            <p>Made with ❤️ for Indian distributors</p>
+          </div>
         </div>
       </motion.footer>
     </div>
