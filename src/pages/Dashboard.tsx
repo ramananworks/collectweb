@@ -166,30 +166,13 @@ export default function Dashboard() {
 
       <DashboardQuickActions />
 
-      {overdueInvoices.length > 0 && (
-        <button
-          onClick={() => setDrillDown("overdue")}
-          className="w-full rounded-xl border border-destructive/30 bg-destructive/5 p-4 flex items-start gap-3 text-left hover:bg-destructive/10 transition-colors"
-        >
-          <div className="rounded-full bg-destructive/10 p-2 mt-0.5">
-            <Bell className="h-4 w-4 text-destructive" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-destructive">
-              {overdueInvoices.length} overdue invoice{overdueInvoices.length > 1 ? "s" : ""}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {formatCurrency(overdueAmount)} outstanding from {new Set(overdueInvoices.map((i) => i.customer_id)).size} customer{new Set(overdueInvoices.map((i) => i.customer_id)).size > 1 ? "s" : ""} — tap to view details
-            </p>
-          </div>
-          <AlertTriangle className="h-4 w-4 text-destructive/60 mt-1 shrink-0" />
-        </button>
-      )}
+
+
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Total Outstanding" value={totalOutstanding} icon={IndianRupee} variant="default" onClick={() => setDrillDown("outstanding")} />
         <StatCard title="Today's Collection" value={todayCollection} icon={TrendingUp} variant="success" onClick={() => setDrillDown("todayCollection")} />
-        <StatCard title="Overdue Amount" value={overdueAmount} icon={AlertTriangle} variant="destructive" onClick={() => setDrillDown("overdue")} />
+        
         <StatCard title="Active Customers" value={customerCount} icon={Users} isCurrency={false} variant="default" />
       </div>
 
