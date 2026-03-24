@@ -292,14 +292,14 @@ export default function Home() {
               variants={fadeUp}
               className="flex flex-col rounded-2xl border border-border/60 bg-card p-8"
             >
-              <h3 className="text-lg font-semibold">Starter</h3>
-              <p className="mt-1 text-sm text-muted-foreground">For small distributors getting started</p>
+              <h3 className="text-lg font-semibold">Free</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Best for small shops</p>
               <div className="mt-6">
                 <span className="text-4xl font-extrabold">₹0</span>
-                <span className="text-muted-foreground">/month</span>
+                <span className="text-muted-foreground">/forever</span>
               </div>
               <ul className="mt-8 flex-1 space-y-3 text-sm">
-                {["Up to 50 customers", "100 invoices/month", "1 team member", "Basic reports", "Mobile app access"].map((item) => (
+                {["1 user (Owner only)", "Core invoices & payments", "Customer management", "Basic reports", "Mobile app access"].map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                     {item}
@@ -311,7 +311,7 @@ export default function Home() {
               </Button>
             </motion.div>
 
-            {/* Pro Plan */}
+            {/* Pro Monthly */}
             <motion.div
               variants={fadeUp}
               className="relative flex flex-col rounded-2xl border-2 border-primary bg-card p-8 shadow-lg"
@@ -319,14 +319,14 @@ export default function Home() {
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground">
                 Most Popular
               </div>
-              <h3 className="text-lg font-semibold">Professional</h3>
-              <p className="mt-1 text-sm text-muted-foreground">For growing distribution businesses</p>
+              <h3 className="text-lg font-semibold">Pro Monthly</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Best for growing distributors</p>
               <div className="mt-6">
-                <span className="text-4xl font-extrabold">₹999</span>
+                <span className="text-4xl font-extrabold">₹299</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
               <ul className="mt-8 flex-1 space-y-3 text-sm">
-                {["Unlimited customers", "Unlimited invoices", "Up to 10 team members", "Advanced reports & analytics", "AI invoice scanning", "Area-wise collection routes", "Priority support"].map((item) => (
+                {["3 users included (1 Owner + 2)", "All features unlocked", "AI invoice scanning", "Area-wise collection routes", "Advanced reports & analytics", "Priority support", "Extra users: ₹99/user/month"].map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                     {item}
@@ -338,30 +338,43 @@ export default function Home() {
               </Button>
             </motion.div>
 
-            {/* Enterprise Plan */}
+            {/* Pro Yearly */}
             <motion.div
               variants={fadeUp}
-              className="flex flex-col rounded-2xl border border-border/60 bg-card p-8"
+              className="relative flex flex-col rounded-2xl border border-border/60 bg-card p-8"
             >
-              <h3 className="text-lg font-semibold">Enterprise</h3>
-              <p className="mt-1 text-sm text-muted-foreground">For large-scale distributor networks</p>
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 text-xs font-semibold text-accent-foreground">
+                Save ₹600
+              </div>
+              <h3 className="text-lg font-semibold">Pro Yearly</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Best for serious businesses</p>
               <div className="mt-6">
-                <span className="text-4xl font-extrabold">₹2,499</span>
-                <span className="text-muted-foreground">/month</span>
+                <span className="text-4xl font-extrabold">₹2,999</span>
+                <span className="text-muted-foreground">/year</span>
               </div>
               <ul className="mt-8 flex-1 space-y-3 text-sm">
-                {["Everything in Professional", "Unlimited team members", "Custom roles & permissions", "Dedicated account manager", "API access & integrations", "Custom branding", "SLA guarantee"].map((item) => (
+                {["3 users included (1 Owner + 2)", "Everything in Pro Monthly", "AI invoice scanning", "Area-wise collection routes", "Advanced reports & analytics", "Priority support", "Extra users: ₹999/user/year"].map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <Button variant="outline" asChild className="mt-8 rounded-full">
-                <Link to="/signup">Contact Sales</Link>
+              <Button asChild className="mt-8 rounded-full">
+                <Link to="/signup">Start 14-Day Trial <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               </Button>
             </motion.div>
           </motion.div>
+
+          <motion.p
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="mt-8 text-center text-sm text-muted-foreground"
+          >
+            Need more users? Add extra team members at <strong>₹99/user/month</strong> or <strong>₹999/user/year</strong>.
+          </motion.p>
         </div>
       </section>
 
