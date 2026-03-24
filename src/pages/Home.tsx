@@ -84,12 +84,12 @@ const benefits = [
 ];
 
 const faqs = [
-  { q: "Is CollectWeb really free to start?", a: "Yes! The Starter plan is completely free with up to 50 customers and 100 invoices per month. No credit card required — you can upgrade anytime as your business grows." },
+  { q: "Is CollectWeb really free to start?", a: "Yes! The Free plan is completely free forever for the business owner — no credit card required. It includes core features like invoices, payments, and customer management. When you're ready to add team members, upgrade to Pro Monthly at ₹299/month or Pro Yearly at ₹2,999/year." },
   { q: "How does offline mode work?", a: "CollectWeb stores data locally on your device so you can create invoices, record payments, and view customer details even without internet. Everything syncs automatically when you're back online." },
-  { q: "Can I import my existing customer and invoice data?", a: "Absolutely. You can bulk import customers and invoices via CSV files. We also support AI-powered invoice scanning — just snap a photo and CollectWeb digitizes it for you." },
-  { q: "How do role-based permissions work?", a: "You can invite team members as owners, managers, staff, collection staff, or delivery staff. Each role has specific permissions so everyone sees exactly what they need — nothing more." },
+  { q: "Can I import my existing customer and invoice data?", a: "Absolutely. You can bulk import customers and invoices via CSV files. Pro plan users also get AI-powered invoice scanning — just snap a photo and CollectWeb digitizes it for you." },
+  { q: "How do role-based permissions work?", a: "You can invite team members as owners, managers, staff, collection staff, or delivery staff. Each role has specific permissions so everyone sees exactly what they need — nothing more. The Free plan supports 1 user, while Pro plans include 3 users with the option to add more at ₹99/user/month or ₹999/user/year." },
   { q: "Is my data secure?", a: "Yes. CollectWeb uses bank-grade encryption and row-level security policies. Your data is isolated per company, and only authorized team members can access it." },
-  { q: "Can I switch plans later?", a: "Of course. You can upgrade or downgrade your plan at any time. Changes take effect immediately and billing is prorated." },
+  { q: "Can I switch plans later?", a: "Of course. You can switch between Free, Pro Monthly (₹299/month), and Pro Yearly (₹2,999/year) at any time. Changes take effect immediately and billing is prorated." },
 ];
 
 export default function Home() {
