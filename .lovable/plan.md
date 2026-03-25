@@ -1,22 +1,44 @@
 
 
-## Fix: Ledger Not Scrolling to End
+## Fix: Share Buttons Not Working in Mobile App (WebView)
 
-### Root Cause
-The `ScrollArea` (line 255) has `className="flex-1"` inside a flex column container, but it lacks `min-h-0`. In CSS flexbox, flex children default to `min-height: auto`, which prevents them from shrinking below their content size — so the ScrollArea expands to fit all content instead of constraining and scrolling.
+### Problem
 
-### Fix
-**File: `src/components/customers/CustomerLedgerSheet.tsx`** — Line 255
+There are two issues causing share buttons to fail in the Android WebView:
 
-Add `min-h-0` to the ScrollArea so it properly constrains within the flex layout and enables scrolling:
+1. **ShareOptionsModal hijacks all buttons**: When `navigator.share` is available (always true in WebView), clicking WhatsApp, Email, or SMS all trigger the same generic OS share sheet instead of opening the specific app. The channel-specific fallback code (`shareViaWhatsApp`, etc.) is never reached.
 
-```tsx
-// Before
-<ScrollArea className="flex-1">
+2. **`window.open` is blocked in WebView**: Even if the fallback code ran, `window.open("https://wa.me/...")` is blocked by WebView. URL schemes need `window.location.href` instead.
 
-// After
-<ScrollArea className="flex-1 min-h-0">
+3. **Dashboard share buttons**: Fire-and-forget `navigator.share()` calls with no error handling — silently fails.
+
+### Fix Plan
+
+**File: `src/lib/share-utils.ts`**
+- Change `shareViaWhatsApp`, `shareViaEmail`, `shareViaSMS` to use `window.location.href` instead of `window.open` for URL schemes, which works reliably in WebView
+- For WhatsApp, use `whatsapp://send?text=...` intent URI (works in WebView) with `https://wa.me/` as fallback
+
+**File: `src/components/shared/ShareOptionsModal.tsx`**
+- Remove the blanket `navigator.share` call that intercepts all channel buttons
+- Only use `navigator.share` for a dedicated "Share" action, not for specific channels
+- WhatsApp/Email/SMS buttons should directly invoke their respective share functions
+- PDF button remains unchanged
+
+**File: `src/pages/Dashboard.tsx`**
+- Wrap `navigator.share()` calls in try/catch
+- Add clipboard fallback with toast feedback when share fails
+
+### Technical Detail
+
+```text
+Current flow (broken):
+  User taps "WhatsApp" → navigator.share() fires → generic OS picker opens
+                          (never reaches shareViaWhatsApp)
+
+Fixed flow:
+  User taps "WhatsApp" → shareViaWhatsApp() → window.location.href = "whatsapp://..."
+  User taps "Email"    → shareViaEmail()    → window.location.href = "mailto:..."
+  User taps "SMS"      → shareViaSMS()      → window.location.href = "sms:..."
+  User taps "PDF"      → generateSummaryPDF → downloadPDF (WebView-aware)
 ```
-
-This single change fixes both the mobile Drawer and desktop Sheet since both use the same `bodyContent` variable.
 
