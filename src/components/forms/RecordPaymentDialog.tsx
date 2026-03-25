@@ -11,7 +11,8 @@ import CustomerCombobox from "@/components/shared/CustomerCombobox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useInvoices, useCustomers, useProfiles, useRecordPayment, formatCurrency } from "@/hooks/use-data";
+import { useInvoices, useCustomers, useProfiles, useRecordPayment, useCompany, formatCurrency } from "@/hooks/use-data";
+import UpiQrDialog from "@/components/shared/UpiQrDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
@@ -43,6 +44,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
   const { data: invoices = [] } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
+  const { data: company } = useCompany();
   const recordPayment = useRecordPayment();
   const { profile: authProfile } = useAuth();
 
@@ -64,6 +66,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
   }, [open, prefillCustomerId, prefillInvoiceId]);
 
   const selectedCustomerId = form.watch("customer_id");
+  const selectedMode = form.watch("mode");
+  const watchedAmount = form.watch("amount");
 
   const customersWithDues = customers.filter((c) =>
     invoices.some((inv) => inv.customer_id === c.id && inv.status !== "paid")
@@ -182,6 +186,14 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
                 <FormMessage />
               </FormItem>
             )} />
+
+            {selectedMode === "upi" && (
+              <UpiQrDialog
+                amount={watchedAmount ?? 0}
+                upiId={(company as any)?.upi_id || ""}
+                businessName={company?.name || ""}
+              />
+            )}
             <FormField control={form.control} name="date" render={({ field }) => (
               <FormItem>
                 <FormLabel>Collection Date</FormLabel>
