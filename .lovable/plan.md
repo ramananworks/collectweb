@@ -1,44 +1,32 @@
 
 
-## Fix: Share Buttons Not Working in Mobile App (WebView)
+## Fix: Share/Download PDF Buttons in Customer Ledger and Outstanding Page (WebView)
 
 ### Problem
 
-There are two issues causing share buttons to fail in the Android WebView:
+The share buttons in the Customer Ledger and Outstanding page fail in the Android WebView because the `downloadPDF` fallback (when `navigator.share` doesn't support files) navigates the entire page away using `window.location.href = base64DataURI`, which breaks the app.
 
-1. **ShareOptionsModal hijacks all buttons**: When `navigator.share` is available (always true in WebView), clicking WhatsApp, Email, or SMS all trigger the same generic OS share sheet instead of opening the specific app. The channel-specific fallback code (`shareViaWhatsApp`, etc.) is never reached.
+### Fix
 
-2. **`window.open` is blocked in WebView**: Even if the fallback code ran, `window.open("https://wa.me/...")` is blocked by WebView. URL schemes need `window.location.href` instead.
+**File: `src/lib/share-utils.ts`** — `downloadPDF` function
 
-3. **Dashboard share buttons**: Fire-and-forget `navigator.share()` calls with no error handling — silently fails.
-
-### Fix Plan
-
-**File: `src/lib/share-utils.ts`**
-- Change `shareViaWhatsApp`, `shareViaEmail`, `shareViaSMS` to use `window.location.href` instead of `window.open` for URL schemes, which works reliably in WebView
-- For WhatsApp, use `whatsapp://send?text=...` intent URI (works in WebView) with `https://wa.me/` as fallback
-
-**File: `src/components/shared/ShareOptionsModal.tsx`**
-- Remove the blanket `navigator.share` call that intercepts all channel buttons
-- Only use `navigator.share` for a dedicated "Share" action, not for specific channels
-- WhatsApp/Email/SMS buttons should directly invoke their respective share functions
-- PDF button remains unchanged
-
-**File: `src/pages/Dashboard.tsx`**
-- Wrap `navigator.share()` calls in try/catch
-- Add clipboard fallback with toast feedback when share fails
-
-### Technical Detail
+Replace the WebView fallback strategy. Instead of navigating the page to a base64 data URI (which exits the app), use an anchor element with `download` attribute and the data URI as `href`. This triggers the browser/WebView download manager without navigating away:
 
 ```text
-Current flow (broken):
-  User taps "WhatsApp" → navigator.share() fires → generic OS picker opens
-                          (never reaches shareViaWhatsApp)
+Current (broken):
+  WebView → FileReader → base64 → iframe → window.location.href = base64 → PAGE NAVIGATES AWAY
 
-Fixed flow:
-  User taps "WhatsApp" → shareViaWhatsApp() → window.location.href = "whatsapp://..."
-  User taps "Email"    → shareViaEmail()    → window.location.href = "mailto:..."
-  User taps "SMS"      → shareViaSMS()      → window.location.href = "sms:..."
-  User taps "PDF"      → generateSummaryPDF → downloadPDF (WebView-aware)
+Fixed:
+  WebView → FileReader → base64 → <a href="data:..." download="file.pdf">.click() → DOWNLOAD DIALOG
 ```
+
+**File: `src/components/customers/CustomerLedgerSheet.tsx`** — `handleSharePDF`
+
+Add toast feedback when PDF export fails so the user gets visible error feedback instead of silent failure.
+
+**File: `src/pages/Outstanding.tsx`** — already has toast error handling, no changes needed.
+
+### Files Changed
+1. `src/lib/share-utils.ts` — Fix WebView download to use anchor+download instead of location.href
+2. `src/components/customers/CustomerLedgerSheet.tsx` — Add toast on share failure
 
