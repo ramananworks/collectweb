@@ -23,7 +23,7 @@ export default function SelectDeliveryInvoiceDialog({
   onOpenChange,
 }: SelectDeliveryInvoiceDialogProps) {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<{ id: string; customerName: string } | null>(null);
+  const [selected, setSelected] = useState<{ id: string; customerName: string; customerId: string } | null>(null);
   const { data: invoices = [] } = useInvoices();
 
   const pending = invoices.filter(
@@ -55,6 +55,7 @@ export default function SelectDeliveryInvoiceDialog({
         }}
         invoiceId={selected.id}
         customerName={selected.customerName}
+        customerId={selected.customerId}
       />
     );
   }
@@ -93,7 +94,7 @@ export default function SelectDeliveryInvoiceDialog({
               {filtered.map((inv) => (
                 <button
                   key={inv.id}
-                  onClick={() => setSelected({ id: inv.id, customerName: inv.customer_name })}
+                  onClick={() => setSelected({ id: inv.id, customerName: inv.customer_name, customerId: inv.customer_id })}
                   className="w-full flex items-center justify-between rounded-lg px-3 py-3 text-left hover:bg-accent/50 transition-colors"
                 >
                   <div className="min-w-0">
