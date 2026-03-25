@@ -131,19 +131,17 @@ export function downloadPDF(blob: Blob, filename: string) {
   const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
 
   if (isWebView) {
-    // WebView blocks blob URLs and window.open from async callbacks.
-    // Convert to base64 data URI which WebView hands off to system PDF viewer.
+    // WebView blocks blob URLs and window.open. Use anchor with data URI + download attribute
+    // to trigger download manager without navigating away from the app.
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result as string;
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = base64;
-      document.body.appendChild(iframe);
-      setTimeout(() => {
-        document.body.removeChild(iframe);
-        window.location.href = base64;
-      }, 1000);
+      const a = document.createElement("a");
+      a.href = base64;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     };
     reader.readAsDataURL(blob);
     return;

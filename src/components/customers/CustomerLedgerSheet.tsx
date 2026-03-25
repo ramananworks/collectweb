@@ -190,6 +190,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
       }
     } catch (e) {
       console.error("PDF share failed:", e);
+      toast.error("Failed to share PDF. Please try again.");
     } finally {
       setExporting(false);
     }
