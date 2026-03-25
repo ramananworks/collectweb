@@ -55,6 +55,7 @@ export type Database = {
           phone: string
           plan: string
           status: string
+          upi_id: string | null
         }
         Insert: {
           address?: string
@@ -67,6 +68,7 @@ export type Database = {
           phone?: string
           plan?: string
           status?: string
+          upi_id?: string | null
         }
         Update: {
           address?: string
@@ -79,6 +81,7 @@ export type Database = {
           phone?: string
           plan?: string
           status?: string
+          upi_id?: string | null
         }
         Relationships: []
       }

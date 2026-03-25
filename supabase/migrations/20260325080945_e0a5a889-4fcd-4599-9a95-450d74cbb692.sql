@@ -1,0 +1,1 @@
+ALTER TABLE public.companies ADD COLUMN upi_id text DEFAULT '';
