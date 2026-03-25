@@ -44,6 +44,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
   const { data: invoices = [] } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
+  const { data: company } = useCompany();
   const recordPayment = useRecordPayment();
   const { profile: authProfile } = useAuth();
 
@@ -65,6 +66,8 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
   }, [open, prefillCustomerId, prefillInvoiceId]);
 
   const selectedCustomerId = form.watch("customer_id");
+  const selectedMode = form.watch("mode");
+  const watchedAmount = form.watch("amount");
 
   const customersWithDues = customers.filter((c) =>
     invoices.some((inv) => inv.customer_id === c.id && inv.status !== "paid")
