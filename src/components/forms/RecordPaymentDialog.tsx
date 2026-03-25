@@ -186,6 +186,14 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
                 <FormMessage />
               </FormItem>
             )} />
+
+            {selectedMode === "upi" && (
+              <UpiQrDialog
+                amount={watchedAmount ?? 0}
+                upiId={(company as any)?.upi_id || ""}
+                businessName={company?.name || ""}
+              />
+            )}
             <FormField control={form.control} name="date" render={({ field }) => (
               <FormItem>
                 <FormLabel>Collection Date</FormLabel>
