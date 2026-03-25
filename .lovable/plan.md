@@ -1,32 +1,49 @@
 
 
-## Fix: Share/Download PDF Buttons in Customer Ledger and Outstanding Page (WebView)
+## Fix: Share/PDF Button Does Nothing in Android WebView
 
-### Problem
+### Root Cause
 
-The share buttons in the Customer Ledger and Outstanding page fail in the Android WebView because the `downloadPDF` fallback (when `navigator.share` doesn't support files) navigates the entire page away using `window.location.href = base64DataURI`, which breaks the app.
+The current flow calls `sharePDFFile()` first, which checks `navigator.share` + `navigator.canShare`. In Android WebView, `navigator.share` exists but **silently fails** or throws — and when it throws, the function returns `false`, falling through to `downloadPDF()`. However, `downloadPDF()` uses an anchor click with a **data URI**, which many Android WebViews also silently ignore (the `download` attribute is not honored on data URIs in WebView).
+
+Result: the button shows its loading/active state (color change) but nothing actually happens.
 
 ### Fix
 
-**File: `src/lib/share-utils.ts`** — `downloadPDF` function
+**File: `src/lib/share-utils.ts`**
 
-Replace the WebView fallback strategy. Instead of navigating the page to a base64 data URI (which exits the app), use an anchor element with `download` attribute and the data URI as `href`. This triggers the browser/WebView download manager without navigating away:
+1. **`sharePDFFile`** — Skip `navigator.share` entirely in WebView environments. It's unreliable and blocks the fallback path. Add the WebView detection check at the top.
+
+2. **`downloadPDF`** — The anchor+data-URI approach doesn't work in WebView either. Replace with a strategy that works:
+   - Use `URL.createObjectURL(blob)` (not data URI) with an anchor click
+   - If that doesn't trigger a download, fall back to opening the blob URL in a new window/tab via `window.open`, which Android WebView can handle for PDF blobs
+   - As a last resort, use the Android bridge if available
+
+**File: `src/components/customers/CustomerLedgerSheet.tsx`** — No changes needed (already has error handling).
+
+**File: `src/pages/Outstanding.tsx`** — No changes needed (already has error handling).
+
+### Updated `downloadPDF` logic
 
 ```text
-Current (broken):
-  WebView → FileReader → base64 → iframe → window.location.href = base64 → PAGE NAVIGATES AWAY
-
-Fixed:
-  WebView → FileReader → base64 → <a href="data:..." download="file.pdf">.click() → DOWNLOAD DIALOG
+downloadPDF(blob, filename):
+  1. Create blob URL via URL.createObjectURL
+  2. Create anchor with href=blobURL, download=filename, click it
+  3. If WebView detected, ALSO open blobURL via window.open as fallback
+     (WebView often ignores anchor download but opens blob URLs in external viewer)
+  4. Revoke blob URL after short delay
 ```
 
-**File: `src/components/customers/CustomerLedgerSheet.tsx`** — `handleSharePDF`
+### Updated `sharePDFFile` logic
 
-Add toast feedback when PDF export fails so the user gets visible error feedback instead of silent failure.
+```text
+sharePDFFile(blob, filename, title):
+  If WebView → return false immediately (skip navigator.share)
+  Otherwise → try navigator.share as before
+```
 
-**File: `src/pages/Outstanding.tsx`** — already has toast error handling, no changes needed.
+This ensures WebView always goes straight to `downloadPDF` with a working blob URL strategy instead of getting stuck on the broken `navigator.share` → data URI path.
 
 ### Files Changed
-1. `src/lib/share-utils.ts` — Fix WebView download to use anchor+download instead of location.href
-2. `src/components/customers/CustomerLedgerSheet.tsx` — Add toast on share failure
+1. `src/lib/share-utils.ts` — Fix both `sharePDFFile` and `downloadPDF` for WebView
 
