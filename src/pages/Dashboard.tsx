@@ -122,12 +122,18 @@ export default function Dashboard() {
                 <button
                   key={item.label}
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm hover:bg-accent transition-colors text-left"
-                  onClick={() => {
+                  onClick={async () => {
                     const text = `${item.label}: ${item.value}`;
-                    if (navigator.share) {
-                      navigator.share({ text });
-                    } else {
-                      navigator.clipboard.writeText(text);
+                    try {
+                      if (navigator.share) {
+                        await navigator.share({ text });
+                      } else {
+                        await navigator.clipboard.writeText(text);
+                        toast({ title: "Copied", description: "Summary copied to clipboard" });
+                      }
+                    } catch {
+                      await navigator.clipboard.writeText(text).catch(() => {});
+                      toast({ title: "Copied", description: "Summary copied to clipboard" });
                     }
                   }}
                 >
@@ -137,12 +143,18 @@ export default function Dashboard() {
               ))}
               <button
                 className="flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mt-1"
-                onClick={() => {
+                onClick={async () => {
                   const text = `Total Outstanding: ${formatCurrency(totalOutstanding)}\nToday's Collection: ${formatCurrency(todayCollection)}\nOverdue Amount: ${formatCurrency(overdueAmount)}`;
-                  if (navigator.share) {
-                    navigator.share({ text });
-                  } else {
-                    navigator.clipboard.writeText(text);
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({ text });
+                    } else {
+                      await navigator.clipboard.writeText(text);
+                      toast({ title: "Copied", description: "Summary copied to clipboard" });
+                    }
+                  } catch {
+                    await navigator.clipboard.writeText(text).catch(() => {});
+                    toast({ title: "Copied", description: "Summary copied to clipboard" });
                   }
                 }}
               >
