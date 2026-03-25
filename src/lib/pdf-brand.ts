@@ -114,7 +114,7 @@ export function drawAreaSectionHeader(
  * Call AFTER all content is added.
  */
 export function addBrandedFooters(doc: jsPDF, companyName?: string) {
-  const totalPages = doc.internal.getNumberOfPages();
+  const totalPages = (doc as any).internal.getNumberOfPages();
   const pw = doc.internal.pageSize.getWidth();
 
   for (let i = 1; i <= totalPages; i++) {
