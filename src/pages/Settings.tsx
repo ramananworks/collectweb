@@ -28,12 +28,13 @@ export default function Settings() {
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyGstin, setCompanyGstin] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
-
+  const [companyUpiId, setCompanyUpiId] = useState("");
   useEffect(() => {
     if (company) {
       setCompanyAddress((company as any).address ?? "");
       setCompanyGstin((company as any).gstin ?? "");
       setCompanyPhone((company as any).phone ?? "");
+      setCompanyUpiId((company as any).upi_id ?? "");
     }
   }, [company]);
 
@@ -127,10 +128,14 @@ export default function Settings() {
             <Label htmlFor="company_gstin">GSTIN</Label>
             <Input id="company_gstin" placeholder="e.g. 22AAAAA0000A1Z5" value={companyGstin} disabled={!isEditingDetails} onChange={(e) => setCompanyGstin(e.target.value)} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="company_address">Address</Label>
-            <Textarea id="company_address" placeholder="Company address" className="resize-none" rows={3} value={companyAddress} disabled={!isEditingDetails} onChange={(e) => setCompanyAddress(e.target.value)} />
-          </div>
+           <div className="space-y-2">
+             <Label htmlFor="company_address">Address</Label>
+             <Textarea id="company_address" placeholder="Company address" className="resize-none" rows={3} value={companyAddress} disabled={!isEditingDetails} onChange={(e) => setCompanyAddress(e.target.value)} />
+           </div>
+           <div className="space-y-2">
+             <Label htmlFor="company_upi_id">UPI ID</Label>
+             <Input id="company_upi_id" placeholder="e.g. yourname@upi" value={companyUpiId} disabled={!isEditingDetails} onChange={(e) => setCompanyUpiId(e.target.value)} />
+           </div>
           {isEditingDetails ? (
             <div className="flex gap-2">
               <Button
@@ -138,7 +143,7 @@ export default function Settings() {
                 disabled={updateCompany.isPending}
                 onClick={() => {
                   if (!company) return;
-                  updateCompany.mutate({ id: company.id, address: companyAddress, gstin: companyGstin || null, phone: companyPhone }, {
+                  updateCompany.mutate({ id: company.id, address: companyAddress, gstin: companyGstin || null, phone: companyPhone, upi_id: companyUpiId }, {
                     onSuccess: () => {
                       setIsEditingDetails(false);
                       toast({ title: "Details saved", description: "Company details updated successfully." });
@@ -148,12 +153,13 @@ export default function Settings() {
               >
                 <Save className="h-4 w-4" /> Save
               </Button>
-              <Button variant="outline" onClick={() => {
-                setCompanyAddress((company as any)?.address ?? "");
-                setCompanyGstin((company as any)?.gstin ?? "");
-                setCompanyPhone((company as any)?.phone ?? "");
-                setIsEditingDetails(false);
-              }}>Cancel</Button>
+               <Button variant="outline" onClick={() => {
+                 setCompanyAddress((company as any)?.address ?? "");
+                 setCompanyGstin((company as any)?.gstin ?? "");
+                 setCompanyPhone((company as any)?.phone ?? "");
+                 setCompanyUpiId((company as any)?.upi_id ?? "");
+                 setIsEditingDetails(false);
+               }}>Cancel</Button>
             </div>
           ) : (
             <Button variant="outline" onClick={() => setIsEditingDetails(true)}>Edit</Button>
