@@ -2,10 +2,10 @@ import jsPDF from "jspdf";
 import { formatDisplayDate } from "@/lib/utils";
 
 // Brand colors (RGB) for jsPDF
-export const PDF_PRIMARY = [101, 143, 64] as const;   // olive green
-export const PDF_ACCENT = [217, 175, 47] as const;     // golden amber
-export const PDF_DARK = [30, 41, 21] as const;          // dark sidebar green
-export const PDF_LIGHT_BG = [243, 240, 233] as const;   // warm off-white
+export const PDF_PRIMARY: [number, number, number] = [101, 143, 64];   // olive green
+export const PDF_ACCENT: [number, number, number] = [217, 175, 47];     // golden amber
+export const PDF_DARK: [number, number, number] = [30, 41, 21];          // dark sidebar green
+export const PDF_LIGHT_BG: [number, number, number] = [243, 240, 233];   // warm off-white
 
 /**
  * Draw branded header bar with company name + title on olive green background.
