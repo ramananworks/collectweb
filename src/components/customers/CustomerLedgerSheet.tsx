@@ -199,22 +199,22 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
     <>
     <Sheet open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
-        <SheetHeader className="p-5 pb-3 border-b border-border">
+        <SheetHeader className={cn("border-b border-border", isMobile ? "p-4 pb-3" : "p-5 pb-3")}>
           <SheetTitle className="text-lg">{customer?.name} – Ledger</SheetTitle>
           <SheetDescription className="text-xs">
             {customer?.phone} · {customer?.area || "No Area"}
           </SheetDescription>
-          <div className="flex gap-4 pt-2 flex-wrap">
+          <div className="grid grid-cols-3 gap-2 pt-2">
             <div className="text-xs">
-              <span className="text-muted-foreground">Total Debit: </span>
+              <span className="text-muted-foreground">Debit: </span>
               <span className="font-semibold text-destructive">{formatCurrency(totalDebit)}</span>
             </div>
             <div className="text-xs">
-              <span className="text-muted-foreground">Total Credit: </span>
+              <span className="text-muted-foreground">Credit: </span>
               <span className="font-semibold text-success">{formatCurrency(totalCredit)}</span>
             </div>
             <div className="text-xs">
-              <span className="text-muted-foreground">Balance: </span>
+              <span className="text-muted-foreground">Bal: </span>
               <Badge variant={closingBalance > 0 ? "destructive" : "default"} className="text-xs px-1.5 py-0">
                 {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
               </Badge>
@@ -259,6 +259,28 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
         <ScrollArea className="flex-1">
           {ledgerEntries.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground text-sm">No transactions found</div>
+          ) : isMobile ? (
+            <div className="divide-y divide-border">
+              {ledgerEntries.map((entry, idx) => (
+                <div key={idx} className="py-3 px-4 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-muted-foreground">{format(parseISO(entry.date), "dd-MMM-yy")}</span>
+                    <span className={cn("text-xs font-semibold", entry.balance > 0 ? "text-destructive" : "text-success")}>
+                      {formatCurrency(Math.abs(entry.balance))} {entry.balance > 0 ? "Dr" : entry.balance < 0 ? "Cr" : ""}
+                    </span>
+                  </div>
+                  <p className="text-xs truncate text-foreground">{entry.particular}</p>
+                  <div className="flex items-center justify-between">
+                    {entry.debit > 0 ? (
+                      <span className="text-[11px] font-medium text-destructive">↑ {formatCurrency(entry.debit)}</span>
+                    ) : <span />}
+                    {entry.credit > 0 ? (
+                      <span className="text-[11px] font-medium text-success">↓ {formatCurrency(entry.credit)}</span>
+                    ) : <span />}
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -302,6 +324,21 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
             </Table>
           )}
         </ScrollArea>
+
+        {isMobile && ledgerEntries.length > 0 && (
+          <div className="sticky bottom-0 border-t border-border bg-card px-4 py-3">
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <span className="text-muted-foreground">Closing</span>
+              <div className="flex gap-3">
+                <span className="text-destructive">{formatCurrency(totalDebit)}</span>
+                <span className="text-success">{formatCurrency(totalCredit)}</span>
+                <span className={closingBalance > 0 ? "text-destructive" : "text-success"}>
+                  {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   </>
