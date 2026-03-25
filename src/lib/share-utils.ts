@@ -113,7 +113,12 @@ export function generateSummaryPDF(data: ShareSummaryData): Blob {
   return doc.output("blob");
 }
 
+const isWebView = () => !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
+
 export async function sharePDFFile(blob: Blob, filename: string, title: string): Promise<boolean> {
+  // Skip navigator.share in WebView — it exists but silently fails
+  if (isWebView()) return false;
+
   try {
     const file = new File([blob], filename, { type: "application/pdf" });
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -121,33 +126,13 @@ export async function sharePDFFile(blob: Blob, filename: string, title: string):
       return true;
     }
   } catch (e) {
-    if ((e as DOMException)?.name === "AbortError") return true; // user cancelled, not an error
+    if ((e as DOMException)?.name === "AbortError") return true;
     console.warn("navigator.share failed:", e);
   }
   return false;
 }
 
 export function downloadPDF(blob: Blob, filename: string) {
-  const isWebView = !!(window as any).Android || /wv|WebView/i.test(navigator.userAgent);
-
-  if (isWebView) {
-    // WebView blocks blob URLs and window.open. Use anchor with data URI + download attribute
-    // to trigger download manager without navigating away from the app.
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      const a = document.createElement("a");
-      a.href = base64;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
-    reader.readAsDataURL(blob);
-    return;
-  }
-
-  // Standard browser: anchor download
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -155,5 +140,13 @@ export function downloadPDF(blob: Blob, filename: string) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+
+  if (isWebView()) {
+    // WebView often ignores anchor download — open blob URL as fallback
+    window.open(url, "_blank");
+    // Delay revoke so the external viewer can load
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } else {
+    URL.revokeObjectURL(url);
+  }
 }
