@@ -87,8 +87,8 @@ Deno.serve(async (req) => {
         .eq("id", invoice.customer_id)
         .single();
 
-      if (!customer?.phone) {
-        return new Response(JSON.stringify({ error: "Customer has no phone number registered" }), {
+      if (!customer?.phone || customer.phone.trim() === "") {
+        return new Response(JSON.stringify({ error: `Customer "${customer?.name || invoice.customer_name}" has no phone number. Please update their profile first.` }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
