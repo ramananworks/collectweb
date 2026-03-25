@@ -1,49 +1,44 @@
 
 
-## Fix: Share/PDF Button Does Nothing in Android WebView
+## Dynamic UPI QR Code in Record Collection Form (Popup)
 
-### Root Cause
+### Overview
+When UPI mode is selected and a valid amount is entered, a "Show QR" button appears. Tapping it opens a dedicated popup dialog showing a large, scannable UPI QR code with a close button. Fully mobile responsive.
 
-The current flow calls `sharePDFFile()` first, which checks `navigator.share` + `navigator.canShare`. In Android WebView, `navigator.share` exists but **silently fails** or throws — and when it throws, the function returns `false`, falling through to `downloadPDF()`. However, `downloadPDF()` uses an anchor click with a **data URI**, which many Android WebViews also silently ignore (the `download` attribute is not honored on data URIs in WebView).
+### Changes
 
-Result: the button shows its loading/active state (color change) but nothing actually happens.
+#### 1. Database Migration
+- `ALTER TABLE public.companies ADD COLUMN upi_id text DEFAULT '';`
 
-### Fix
+#### 2. New Component: `src/components/shared/UpiQrDialog.tsx`
+- A Dialog component triggered by a "Show QR Code" button.
+- Props: `amount`, `upiId`, `businessName`.
+- Builds URI: `upi://pay?pa={upiId}&pn={businessName}&am={amount}&cu=INR`
+- QR rendered via `qrcode.react` library at ~250px on mobile, ~280px on desktop.
+- Shows "Scan & Pay via UPI" label, amount displayed prominently, business name subtitle.
+- Validation: disabled/hidden button if amount is 0 or UPI ID missing; inline helper text for each case.
+- Debounces QR URI regeneration by 400ms.
+- Dialog has a visible close button (X) and "Done" footer button.
+- Clean card-style layout, centered QR, padded for mobile scanning.
 
-**File: `src/lib/share-utils.ts`**
+#### 3. `src/components/forms/RecordPaymentDialog.tsx`
+- Import `useCompany()` to get UPI ID and business name.
+- Watch `mode` and `amount` fields.
+- When `mode === "upi"`, render a "Show QR Code" button (or disabled state with helper text) below the amount field.
+- Button opens `UpiQrDialog` with current amount, company UPI ID, and company name.
 
-1. **`sharePDFFile`** — Skip `navigator.share` entirely in WebView environments. It's unreliable and blocks the fallback path. Add the WebView detection check at the top.
+#### 4. `src/pages/Settings.tsx`
+- Add "UPI ID" input in Company Details section (owner-only), saved via `useUpdateCompany`.
 
-2. **`downloadPDF`** — The anchor+data-URI approach doesn't work in WebView either. Replace with a strategy that works:
-   - Use `URL.createObjectURL(blob)` (not data URI) with an anchor click
-   - If that doesn't trigger a download, fall back to opening the blob URL in a new window/tab via `window.open`, which Android WebView can handle for PDF blobs
-   - As a last resort, use the Android bridge if available
+#### 5. `src/hooks/use-data.ts`
+- Include `upi_id` in `useUpdateCompany` mutation payload.
 
-**File: `src/components/customers/CustomerLedgerSheet.tsx`** — No changes needed (already has error handling).
-
-**File: `src/pages/Outstanding.tsx`** — No changes needed (already has error handling).
-
-### Updated `downloadPDF` logic
-
-```text
-downloadPDF(blob, filename):
-  1. Create blob URL via URL.createObjectURL
-  2. Create anchor with href=blobURL, download=filename, click it
-  3. If WebView detected, ALSO open blobURL via window.open as fallback
-     (WebView often ignores anchor download but opens blob URLs in external viewer)
-  4. Revoke blob URL after short delay
-```
-
-### Updated `sharePDFFile` logic
-
-```text
-sharePDFFile(blob, filename, title):
-  If WebView → return false immediately (skip navigator.share)
-  Otherwise → try navigator.share as before
-```
-
-This ensures WebView always goes straight to `downloadPDF` with a working blob URL strategy instead of getting stuck on the broken `navigator.share` → data URI path.
+#### 6. Install `qrcode.react` package.
 
 ### Files Changed
-1. `src/lib/share-utils.ts` — Fix both `sharePDFFile` and `downloadPDF` for WebView
+1. Migration — add `upi_id` to `companies`
+2. `src/components/shared/UpiQrDialog.tsx` — new popup QR component
+3. `src/components/forms/RecordPaymentDialog.tsx` — add QR trigger button
+4. `src/pages/Settings.tsx` — UPI ID config field
+5. `src/hooks/use-data.ts` — update company mutation
 
