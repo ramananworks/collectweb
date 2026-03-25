@@ -196,152 +196,177 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
 
   
 
+  const headerContent = (
+    <div className={cn("border-b border-border", isMobile ? "p-4 pb-3" : "p-5 pb-3")}>
+      <div className="grid grid-cols-3 gap-2 pt-2">
+        <div className="text-xs">
+          <span className="text-muted-foreground">Debit: </span>
+          <span className="font-semibold text-destructive">{formatCurrency(totalDebit)}</span>
+        </div>
+        <div className="text-xs">
+          <span className="text-muted-foreground">Credit: </span>
+          <span className="font-semibold text-success">{formatCurrency(totalCredit)}</span>
+        </div>
+        <div className="text-xs">
+          <span className="text-muted-foreground">Bal: </span>
+          <Badge variant={closingBalance > 0 ? "destructive" : "default"} className="text-xs px-1.5 py-0">
+            {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
+          </Badge>
+        </div>
+      </div>
+      <div className="flex gap-2 pt-2 items-center flex-wrap">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !fromDate && "text-muted-foreground")}>
+              <CalendarIcon className="h-3 w-3" />
+              {fromDate ? format(fromDate, "dd-MMM-yy") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !toDate && "text-muted-foreground")}>
+              <CalendarIcon className="h-3 w-3" />
+              {toDate ? format(toDate, "dd-MMM-yy") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+        {(fromDate || toDate) && (
+          <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => { setFromDate(undefined); setToDate(undefined); }}>
+            <X className="h-3 w-3 mr-1" /> Clear
+          </Button>
+        )}
+        <div className="ml-auto">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF} disabled={exporting}>
+            {exporting ? <><Loader2 className="h-3 w-3 animate-spin" /> Sharing…</> : isMobile ? <><Share2 className="h-3 w-3" /> Share</> : <><Download className="h-3 w-3" /> PDF</>}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const bodyContent = (
+    <ScrollArea className="flex-1">
+      {ledgerEntries.length === 0 ? (
+        <div className="p-8 text-center text-muted-foreground text-sm">No transactions found</div>
+      ) : isMobile ? (
+        <div className="divide-y divide-border">
+          {ledgerEntries.map((entry, idx) => (
+            <div key={idx} className="py-3 px-4 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-muted-foreground">{format(parseISO(entry.date), "dd-MMM-yy")}</span>
+                <span className={cn("text-xs font-semibold", entry.balance > 0 ? "text-destructive" : "text-success")}>
+                  {formatCurrency(Math.abs(entry.balance))} {entry.balance > 0 ? "Dr" : entry.balance < 0 ? "Cr" : ""}
+                </span>
+              </div>
+              <p className="text-xs truncate text-foreground">{entry.particular}</p>
+              <div className="flex items-center justify-between">
+                {entry.debit > 0 ? (
+                  <span className="text-[11px] font-medium text-destructive">↑ {formatCurrency(entry.debit)}</span>
+                ) : <span />}
+                {entry.credit > 0 ? (
+                  <span className="text-[11px] font-medium text-success">↓ {formatCurrency(entry.credit)}</span>
+                ) : <span />}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow className="text-xs">
+              <TableHead className="w-[90px]">Date</TableHead>
+              <TableHead>Particulars</TableHead>
+              <TableHead className="text-right w-[100px]">Debit</TableHead>
+              <TableHead className="text-right w-[100px]">Credit</TableHead>
+              <TableHead className="text-right w-[110px]">Balance</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {ledgerEntries.map((entry, idx) => (
+              <TableRow key={idx} className="text-xs">
+                <TableCell className="py-2.5 text-muted-foreground">
+                  {format(parseISO(entry.date), "dd-MMM-yy")}
+                </TableCell>
+                <TableCell className="py-2.5 max-w-[200px] truncate">{entry.particular}</TableCell>
+                <TableCell className={`py-2.5 text-right font-medium ${entry.debit > 0 ? "text-destructive" : ""}`}>
+                  {entry.debit > 0 ? formatCurrency(entry.debit) : "–"}
+                </TableCell>
+                <TableCell className={`py-2.5 text-right font-medium ${entry.credit > 0 ? "text-success" : ""}`}>
+                  {entry.credit > 0 ? formatCurrency(entry.credit) : "–"}
+                </TableCell>
+                <TableCell className={`py-2.5 text-right font-semibold ${entry.balance > 0 ? "text-destructive" : "text-success"}`}>
+                  {formatCurrency(Math.abs(entry.balance))} {entry.balance > 0 ? "Dr" : entry.balance < 0 ? "Cr" : ""}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow className="text-xs font-semibold">
+              <TableCell colSpan={2} className="py-2.5">Closing Balance</TableCell>
+              <TableCell className="py-2.5 text-right text-destructive">{formatCurrency(totalDebit)}</TableCell>
+              <TableCell className="py-2.5 text-right text-success">{formatCurrency(totalCredit)}</TableCell>
+              <TableCell className={`py-2.5 text-right ${closingBalance > 0 ? "text-destructive" : "text-success"}`}>
+                {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      )}
+    </ScrollArea>
+  );
+
+  const mobileFooter = isMobile && ledgerEntries.length > 0 ? (
+    <div className="sticky bottom-0 border-t border-border bg-card px-4 py-3">
+      <div className="flex items-center justify-between text-xs font-semibold">
+        <span className="text-muted-foreground">Closing</span>
+        <div className="flex gap-3">
+          <span className="text-destructive">{formatCurrency(totalDebit)}</span>
+          <span className="text-success">{formatCurrency(totalCredit)}</span>
+          <span className={closingBalance > 0 ? "text-destructive" : "text-success"}>
+            {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
+          </span>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  if (isMobile) {
+    return (
+      <Drawer open={!!customer} onOpenChange={(open) => !open && onClose()}>
+        <DrawerContent className="max-h-[90vh] flex flex-col">
+          <DrawerHeader className="p-4 pb-1">
+            <DrawerTitle className="text-lg">{customer?.name} – Ledger</DrawerTitle>
+            <DrawerDescription className="text-xs">
+              {customer?.phone} · {customer?.area || "No Area"}
+            </DrawerDescription>
+          </DrawerHeader>
+          {headerContent}
+          {bodyContent}
+          {mobileFooter}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
-    <>
     <Sheet open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
-        <SheetHeader className={cn("border-b border-border", isMobile ? "p-4 pb-3" : "p-5 pb-3")}>
+        <SheetHeader className="p-5 pb-3 border-b border-border">
           <SheetTitle className="text-lg">{customer?.name} – Ledger</SheetTitle>
           <SheetDescription className="text-xs">
             {customer?.phone} · {customer?.area || "No Area"}
           </SheetDescription>
-          <div className="grid grid-cols-3 gap-2 pt-2">
-            <div className="text-xs">
-              <span className="text-muted-foreground">Debit: </span>
-              <span className="font-semibold text-destructive">{formatCurrency(totalDebit)}</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-muted-foreground">Credit: </span>
-              <span className="font-semibold text-success">{formatCurrency(totalCredit)}</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-muted-foreground">Bal: </span>
-              <Badge variant={closingBalance > 0 ? "destructive" : "default"} className="text-xs px-1.5 py-0">
-                {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
-              </Badge>
-            </div>
-          </div>
-          <div className="flex gap-2 pt-2 items-center flex-wrap">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !fromDate && "text-muted-foreground")}>
-                  <CalendarIcon className="h-3 w-3" />
-                  {fromDate ? format(fromDate, "dd-MMM-yy") : "From"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={fromDate} onSelect={setFromDate} initialFocus className="p-3 pointer-events-auto" />
-              </PopoverContent>
-            </Popover>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("h-7 text-xs gap-1", !toDate && "text-muted-foreground")}>
-                  <CalendarIcon className="h-3 w-3" />
-                  {toDate ? format(toDate, "dd-MMM-yy") : "To"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={toDate} onSelect={setToDate} initialFocus className="p-3 pointer-events-auto" />
-              </PopoverContent>
-            </Popover>
-            {(fromDate || toDate) && (
-              <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => { setFromDate(undefined); setToDate(undefined); }}>
-                <X className="h-3 w-3 mr-1" /> Clear
-              </Button>
-            )}
-            <div className="ml-auto">
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleSharePDF} disabled={exporting}>
-                {exporting ? <><Loader2 className="h-3 w-3 animate-spin" /> Sharing…</> : isMobile ? <><Share2 className="h-3 w-3" /> Share</> : <><Download className="h-3 w-3" /> PDF</>}
-              </Button>
-            </div>
-          </div>
         </SheetHeader>
-
-        <ScrollArea className="flex-1">
-          {ledgerEntries.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground text-sm">No transactions found</div>
-          ) : isMobile ? (
-            <div className="divide-y divide-border">
-              {ledgerEntries.map((entry, idx) => (
-                <div key={idx} className="py-3 px-4 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-muted-foreground">{format(parseISO(entry.date), "dd-MMM-yy")}</span>
-                    <span className={cn("text-xs font-semibold", entry.balance > 0 ? "text-destructive" : "text-success")}>
-                      {formatCurrency(Math.abs(entry.balance))} {entry.balance > 0 ? "Dr" : entry.balance < 0 ? "Cr" : ""}
-                    </span>
-                  </div>
-                  <p className="text-xs truncate text-foreground">{entry.particular}</p>
-                  <div className="flex items-center justify-between">
-                    {entry.debit > 0 ? (
-                      <span className="text-[11px] font-medium text-destructive">↑ {formatCurrency(entry.debit)}</span>
-                    ) : <span />}
-                    {entry.credit > 0 ? (
-                      <span className="text-[11px] font-medium text-success">↓ {formatCurrency(entry.credit)}</span>
-                    ) : <span />}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="text-xs">
-                  <TableHead className="w-[90px]">Date</TableHead>
-                  <TableHead>Particulars</TableHead>
-                  <TableHead className="text-right w-[100px]">Debit</TableHead>
-                  <TableHead className="text-right w-[100px]">Credit</TableHead>
-                  <TableHead className="text-right w-[110px]">Balance</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ledgerEntries.map((entry, idx) => (
-                  <TableRow key={idx} className="text-xs">
-                    <TableCell className="py-2.5 text-muted-foreground">
-                      {format(parseISO(entry.date), "dd-MMM-yy")}
-                    </TableCell>
-                    <TableCell className="py-2.5 max-w-[200px] truncate">{entry.particular}</TableCell>
-                    <TableCell className={`py-2.5 text-right font-medium ${entry.debit > 0 ? "text-destructive" : ""}`}>
-                      {entry.debit > 0 ? formatCurrency(entry.debit) : "–"}
-                    </TableCell>
-                    <TableCell className={`py-2.5 text-right font-medium ${entry.credit > 0 ? "text-success" : ""}`}>
-                      {entry.credit > 0 ? formatCurrency(entry.credit) : "–"}
-                    </TableCell>
-                    <TableCell className={`py-2.5 text-right font-semibold ${entry.balance > 0 ? "text-destructive" : "text-success"}`}>
-                      {formatCurrency(Math.abs(entry.balance))} {entry.balance > 0 ? "Dr" : entry.balance < 0 ? "Cr" : ""}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow className="text-xs font-semibold">
-                  <TableCell colSpan={2} className="py-2.5">Closing Balance</TableCell>
-                  <TableCell className="py-2.5 text-right text-destructive">{formatCurrency(totalDebit)}</TableCell>
-                  <TableCell className="py-2.5 text-right text-success">{formatCurrency(totalCredit)}</TableCell>
-                  <TableCell className={`py-2.5 text-right ${closingBalance > 0 ? "text-destructive" : "text-success"}`}>
-                    {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          )}
-        </ScrollArea>
-
-        {isMobile && ledgerEntries.length > 0 && (
-          <div className="sticky bottom-0 border-t border-border bg-card px-4 py-3">
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="text-muted-foreground">Closing</span>
-              <div className="flex gap-3">
-                <span className="text-destructive">{formatCurrency(totalDebit)}</span>
-                <span className="text-success">{formatCurrency(totalCredit)}</span>
-                <span className={closingBalance > 0 ? "text-destructive" : "text-success"}>
-                  {formatCurrency(Math.abs(closingBalance))} {closingBalance > 0 ? "Dr" : closingBalance < 0 ? "Cr" : ""}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+        {headerContent}
+        {bodyContent}
       </SheetContent>
     </Sheet>
-  </>
   );
 }
