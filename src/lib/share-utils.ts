@@ -19,15 +19,21 @@ export function generateShareText(data: ShareSummaryData): string {
 }
 
 export function shareViaWhatsApp(text: string) {
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  const encoded = encodeURIComponent(text);
+  // Try intent URI first (works in Android WebView), fall back to wa.me
+  try {
+    window.location.href = `whatsapp://send?text=${encoded}`;
+  } catch {
+    window.location.href = `https://wa.me/?text=${encoded}`;
+  }
 }
 
 export function shareViaEmail(subject: string, text: string) {
-  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`, "_blank");
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
 }
 
 export function shareViaSMS(text: string) {
-  window.open(`sms:?&body=${encodeURIComponent(text)}`, "_blank");
+  window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
 }
 
 export function generateSummaryPDF(data: ShareSummaryData): Blob {

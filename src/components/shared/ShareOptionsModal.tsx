@@ -38,23 +38,7 @@ export default function ShareOptionsModal({ open, onClose, data }: ShareOptionsM
       return;
     }
 
-    // Try native Web Share API first
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: data.title,
-          text,
-          url: "https://money-mate-co.lovable.app",
-        });
-        onClose();
-        return;
-      } catch (e) {
-        // User cancelled or API failed — fall through to direct links
-        if ((e as DOMException)?.name === "AbortError") { onClose(); return; }
-      }
-    }
-
-    // Fallback to direct links
+    // Directly invoke the channel-specific handler (no blanket navigator.share)
     switch (key) {
       case "whatsapp":
         shareViaWhatsApp(text);
