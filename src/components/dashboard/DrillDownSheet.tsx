@@ -9,6 +9,7 @@ import { formatDisplayDate } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import jsPDF from "jspdf";
+import { drawBrandedHeader, drawTableHeader, drawAmberDivider, drawAreaSectionHeader, addBrandedFooters, PDF_PRIMARY, PDF_DARK } from "@/lib/pdf-brand";
 
 type DrillDownType = "outstanding" | "todayCollection" | "overdue" | null;
 
@@ -77,44 +78,40 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pw = doc.internal.pageSize.getWidth();
     const ph = doc.internal.pageSize.getHeight();
-    let y = 20;
 
     const checkPage = (needed: number) => {
       if (y + needed > ph - 20) { doc.addPage(); y = 20; }
     };
 
-    if (company?.name) {
-      doc.setFontSize(16); doc.setFont("helvetica", "bold");
-      doc.text(company.name, pw / 2, y, { align: "center" }); y += 10;
-    }
-
     const title = titles[type] || "Details";
-    doc.setFontSize(13); doc.setFont("helvetica", "bold");
-    doc.text(title, pw / 2, y, { align: "center" }); y += 7;
-    doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(120, 120, 120);
-    doc.text(`Generated on ${formatDisplayDate(new Date())}`, pw / 2, y, { align: "center" }); y += 8;
-    doc.setDrawColor(200, 200, 200); doc.line(15, y, pw - 15, y); y += 8;
-    doc.setTextColor(30, 30, 30);
+    let y = drawBrandedHeader(doc, {
+      companyName: company?.name,
+      title,
+      date: new Date(),
+    });
 
     // --- Area-wise summary table helper ---
     const drawAreaTable = (areas: string[], getCount: (area: string) => number, getTotal: (area: string) => number, grandTotal: number) => {
       checkPage(14 + areas.length * 6);
-      doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 30, 30);
+      doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(...PDF_PRIMARY);
       doc.text("Area-wise Summary", 18, y); y += 6;
 
       // Table header
-      doc.setFillColor(235, 235, 235);
-      doc.rect(15, y - 4, pw - 30, 7, "F");
-      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(100, 100, 100);
-      doc.text("Area", 18, y);
-      doc.text("Count", 105, y, { align: "right" });
-      doc.text("Amount", pw - 18, y, { align: "right" }); y += 6;
+      y = drawTableHeader(doc, y, [
+        { text: "Area", x: 18 },
+        { text: "Count", x: 105, align: "right" },
+        { text: "Amount", x: pw - 18, align: "right" },
+      ]);
 
       // Table rows
       doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
-      areas.forEach((area) => {
+      areas.forEach((area, idx) => {
         checkPage(6);
-        doc.setFontSize(8);
+        if (idx % 2 === 0) {
+          doc.setFillColor(243, 240, 233);
+          doc.rect(15, y - 3.5, pw - 30, 5, "F");
+        }
+        doc.setFontSize(8); doc.setTextColor(50, 50, 50);
         doc.text(area, 18, y);
         doc.text(String(getCount(area)), 105, y, { align: "right" });
         doc.text(formatCurrency(getTotal(area)), pw - 18, y, { align: "right" }); y += 5;
@@ -122,21 +119,19 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
 
       // Table footer
       checkPage(8);
-      doc.setDrawColor(80, 80, 80); doc.line(15, y, pw - 15, y); y += 5;
-      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 30, 30);
+      y = drawAmberDivider(doc, y + 2);
+      doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(...PDF_DARK);
       doc.text("Total", 18, y);
+      doc.setTextColor(...PDF_PRIMARY);
       doc.text(formatCurrency(grandTotal), pw - 18, y, { align: "right" }); y += 10;
-
-      doc.setDrawColor(200, 200, 200); doc.line(15, y - 4, pw - 15, y - 4); y += 2;
     };
 
     if (isPayments) {
       const total = payments.reduce((a, p) => a + p.amount, 0);
-      doc.setFontSize(10); doc.setFont("helvetica", "normal");
-      doc.text("Total Collected:", 20, y); doc.setFont("helvetica", "bold"); doc.text(formatCurrency(total), 70, y); y += 6;
-      doc.setFont("helvetica", "normal"); doc.text("Payments:", 20, y); doc.setFont("helvetica", "bold"); doc.text(String(payments.length), 70, y); y += 10;
+      doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(30, 30, 30);
+      doc.text("Total Collected:", 20, y); doc.setFont("helvetica", "bold"); doc.setTextColor(...PDF_PRIMARY); doc.text(formatCurrency(total), 70, y); y += 6;
+      doc.setFont("helvetica", "normal"); doc.setTextColor(30, 30, 30); doc.text("Payments:", 20, y); doc.setFont("helvetica", "bold"); doc.text(String(payments.length), 70, y); y += 10;
 
-      // Area-wise summary table
       drawAreaTable(
         paymentAreaKeys,
         (area) => groupedPayments[area].length,
@@ -145,17 +140,14 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
       );
 
       // Detailed breakdown
-      doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 30, 30);
+      doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(...PDF_PRIMARY);
       doc.text("Detailed Breakdown", 18, y); y += 7;
 
       paymentAreaKeys.forEach((area) => {
         const items = groupedPayments[area];
         const subtotal = items.reduce((a, p) => a + p.amount, 0);
         checkPage(12);
-        doc.setFillColor(245, 245, 245); doc.rect(15, y - 4, pw - 30, 7, "F");
-        doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(50, 50, 50);
-        doc.text(`${area} (${items.length})`, 18, y);
-        doc.text(formatCurrency(subtotal), pw - 18, y, { align: "right" }); y += 6;
+        y = drawAreaSectionHeader(doc, y, `${area} (${items.length})`, formatCurrency(subtotal));
         doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(80, 80, 80);
         items.forEach((p) => {
           checkPage(6);
@@ -166,14 +158,13 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
         y += 3;
       });
     } else {
-      doc.setFontSize(10); doc.setFont("helvetica", "normal");
-      doc.text("Total Outstanding:", 20, y); doc.setFont("helvetica", "bold"); doc.text(formatCurrency(totalOutstanding), 70, y); y += 6;
+      doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(30, 30, 30);
+      doc.text("Total Outstanding:", 20, y); doc.setFont("helvetica", "bold"); doc.setTextColor(...PDF_PRIMARY); doc.text(formatCurrency(totalOutstanding), 70, y); y += 6;
       if (totalOverdue > 0) {
-        doc.setFont("helvetica", "normal"); doc.text("Overdue Amount:", 20, y); doc.setFont("helvetica", "bold"); doc.text(formatCurrency(totalOverdue), 70, y); y += 6;
+        doc.setFont("helvetica", "normal"); doc.setTextColor(30, 30, 30); doc.text("Overdue Amount:", 20, y); doc.setFont("helvetica", "bold"); doc.setTextColor(220, 50, 50); doc.text(formatCurrency(totalOverdue), 70, y); y += 6;
       }
-      doc.setFont("helvetica", "normal"); doc.text("Pending Invoices:", 20, y); doc.setFont("helvetica", "bold"); doc.text(String(pendingCount), 70, y); y += 10;
+      doc.setFont("helvetica", "normal"); doc.setTextColor(30, 30, 30); doc.text("Pending Invoices:", 20, y); doc.setFont("helvetica", "bold"); doc.text(String(pendingCount), 70, y); y += 10;
 
-      // Area-wise summary table
       drawAreaTable(
         invoiceAreaKeys,
         (area) => groupedInvoices[area].length,
@@ -182,17 +173,14 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
       );
 
       // Detailed breakdown
-      doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 30, 30);
+      doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(...PDF_PRIMARY);
       doc.text("Detailed Breakdown", 18, y); y += 7;
 
       invoiceAreaKeys.forEach((area) => {
         const items = groupedInvoices[area];
         const subtotal = items.reduce((a, i) => a + (i.amount - i.paid_amount), 0);
         checkPage(12);
-        doc.setFillColor(245, 245, 245); doc.rect(15, y - 4, pw - 30, 7, "F");
-        doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(50, 50, 50);
-        doc.text(`${area} (${items.length})`, 18, y);
-        doc.text(formatCurrency(subtotal), pw - 18, y, { align: "right" }); y += 6;
+        y = drawAreaSectionHeader(doc, y, `${area} (${items.length})`, formatCurrency(subtotal));
         doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(80, 80, 80);
         items.forEach((inv) => {
           checkPage(6);
@@ -203,9 +191,7 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
       });
     }
 
-    const footerY = ph - 10;
-    doc.setFontSize(7); doc.setFont("helvetica", "normal"); doc.setTextColor(160, 160, 160);
-    doc.text(`Generated by ${company?.name || "CollectWeb"}`, pw / 2, footerY, { align: "center" });
+    addBrandedFooters(doc, company?.name);
 
     return doc.output("blob");
   }, [type, hasData, isPayments, invoices, payments, company, totalOutstanding, totalOverdue, pendingCount, invoiceAreaKeys, paymentAreaKeys, groupedInvoices, groupedPayments]);
