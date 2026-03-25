@@ -11,7 +11,8 @@ import CustomerCombobox from "@/components/shared/CustomerCombobox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useInvoices, useCustomers, useProfiles, useRecordPayment, formatCurrency } from "@/hooks/use-data";
+import { useInvoices, useCustomers, useProfiles, useRecordPayment, useCompany, formatCurrency } from "@/hooks/use-data";
+import UpiQrDialog from "@/components/shared/UpiQrDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
