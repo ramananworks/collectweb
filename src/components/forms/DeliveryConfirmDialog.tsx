@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,14 +11,16 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { MapPin, Send, ShieldCheck, Loader2 } from "lucide-react";
+import { MapPin, Send, ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 import { hapticMedium, hapticSuccess, hapticHeavy } from "@/lib/haptics";
+import { useCustomers } from "@/hooks/use-data";
 
 interface DeliveryConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   invoiceId: string;
   customerName: string;
+  customerId?: string;
 }
 
 export function DeliveryConfirmDialog({
@@ -26,6 +28,7 @@ export function DeliveryConfirmDialog({
   onOpenChange,
   invoiceId,
   customerName,
+  customerId,
 }: DeliveryConfirmDialogProps) {
   const [step, setStep] = useState<"send" | "verify" | "done">("send");
   const [otpValue, setOtpValue] = useState("");
@@ -34,6 +37,10 @@ export function DeliveryConfirmDialog({
   const [testOtp, setTestOtp] = useState<string | null>(null);
   const [captureGps, setCaptureGps] = useState(true);
   const qc = useQueryClient();
+
+  const { data: customers = [] } = useCustomers();
+  const customer = customerId ? customers.find((c) => c.id === customerId) : null;
+  const hasPhone = customer ? customer.phone?.trim().length > 0 : true; // default true if no customerId passed
 
   const resetState = useCallback(() => {
     setStep("send");
@@ -133,34 +140,52 @@ export function DeliveryConfirmDialog({
 
         {step === "send" && (
           <div className="space-y-4 pt-2">
-            <p className="text-sm text-muted-foreground">
-              An OTP will be sent to the customer's registered mobile number. Ask the shopkeeper for the OTP to confirm delivery.
-            </p>
-            <div className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                id="captureGps"
-                checked={captureGps}
-                onChange={(e) => setCaptureGps(e.target.checked)}
-                className="rounded"
-              />
-              <label htmlFor="captureGps" className="flex items-center gap-1 text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5" /> Capture delivery location
-              </label>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSendOtp}
-                disabled={loading}
-                className="gradient-primary text-primary-foreground gap-2"
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                Send OTP
-              </Button>
-            </div>
+            {!hasPhone ? (
+              <>
+                <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-3 flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                  <p className="text-sm text-destructive">
+                    <span className="font-semibold">{customerName}</span> has no phone number registered. Please update the customer profile with a valid phone number before confirming delivery.
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    Close
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  An OTP will be sent to the customer's registered mobile number. Ask the shopkeeper for the OTP to confirm delivery.
+                </p>
+                <div className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    id="captureGps"
+                    checked={captureGps}
+                    onChange={(e) => setCaptureGps(e.target.checked)}
+                    className="rounded"
+                  />
+                  <label htmlFor="captureGps" className="flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5" /> Capture delivery location
+                  </label>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSendOtp}
+                    disabled={loading}
+                    className="gradient-primary text-primary-foreground gap-2"
+                  >
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    Send OTP
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
