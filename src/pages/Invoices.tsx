@@ -27,7 +27,7 @@ export default function Invoices() {
   const [currentPage, setCurrentPage] = useState(1);
   const [scanDefaults, setScanDefaults] = useState<ExtractedInvoiceData | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [deliveryInvoice, setDeliveryInvoice] = useState<{ id: string; customerName: string } | null>(null);
+  const [deliveryInvoice, setDeliveryInvoice] = useState<{ id: string; customerName: string; customerId: string } | null>(null);
   const { data: invoices = [], refetch } = useInvoices();
   const { data: customers = [] } = useCustomers();
   const { data: areas = [] } = useAreas();
@@ -185,7 +185,7 @@ export default function Invoices() {
                           className="gap-1 text-xs"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeliveryInvoice({ id: inv.id, customerName: inv.customer_name });
+                            setDeliveryInvoice({ id: inv.id, customerName: inv.customer_name, customerId: inv.customer_id });
                           }}
                         >
                           <Truck className="h-3.5 w-3.5" />
@@ -253,6 +253,7 @@ export default function Invoices() {
           onOpenChange={(o) => { if (!o) setDeliveryInvoice(null); }}
           invoiceId={deliveryInvoice.id}
           customerName={deliveryInvoice.customerName}
+          customerId={deliveryInvoice.customerId}
         />
       )}
     </div>
