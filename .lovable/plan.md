@@ -1,37 +1,31 @@
 
 
-## Updated Pricing Section
+## Make Customer Ledger Mobile Responsive
 
-Replace the current 3-tier pricing (Starter ₹0 / Professional ₹999 / Enterprise ₹2,499) with the new structure:
+### Problems
+- 5-column table (Date, Particulars, Debit, Credit, Balance) overflows on small screens
+- Fixed column widths (`w-[90px]`, `w-[100px]`, `w-[110px]`) don't fit mobile viewports
+- Header section with summary stats and date filters doesn't stack well
 
-### New Plan Cards (3 columns)
+### Solution
 
-1. **Free** — ₹0/forever
-   - 1 user (Owner only)
-   - Core features: invoices, payments, customers
-   - Basic reports
-   - Best for: Small shops
-   - CTA: "Get Started Free"
+**File: `src/components/customers/CustomerLedgerSheet.tsx`**
 
-2. **Pro Monthly** — ₹299/month (highlighted as popular)
-   - 1 Owner + 2 users included (3 total)
-   - All features unlocked
-   - AI invoice scanning, area-wise routes, advanced reports
-   - Extra users: ₹99/user/month
-   - Best for: Growing distributors
-   - CTA: "Start 14-Day Trial"
+1. **Mobile card layout instead of table**: On mobile (`isMobile` is already available), render each ledger entry as a compact card instead of a table row:
+   - Line 1: Date (left) + Balance with Dr/Cr (right, bold, colored)
+   - Line 2: Particulars text (full width, truncated)
+   - Line 3: Debit amount (red, left) + Credit amount (green, right)
 
-3. **Pro Yearly** — ₹2,999/year (with "Save ₹600" badge)
-   - 1 Owner + 2 users included (3 total)
-   - Everything in Pro Monthly
-   - Extra users: ₹999/user/year
-   - Best for: Serious businesses
-   - CTA: "Start 14-Day Trial"
+2. **Keep desktop table as-is**: Wrap the current `<Table>` in a condition — only render on `!isMobile`.
 
-### Additional details
-- Add a note below the cards: "Need more users? Add extra team members at ₹99/user/month or ₹999/user/year."
-- Keep existing animations, styling patterns, and CheckCircle2 list items.
+3. **Mobile footer summary**: Show closing balance as a sticky bottom bar on mobile with Debit total, Credit total, and Balance.
 
-### File changed
-- `src/pages/Home.tsx` — replace the pricing section content (cards and feature lists)
+4. **Header adjustments**: Reduce padding on mobile (`p-4` instead of `p-5`), ensure summary stats wrap cleanly in a grid layout on small screens.
+
+### Technical Details
+
+- Use the existing `isMobile` hook (already imported)
+- Mobile entries: `div` with `border-b` styling, compact `py-3 px-4` padding
+- Footer: sticky `bottom-0` bar with background matching card color
+- No new dependencies needed
 
