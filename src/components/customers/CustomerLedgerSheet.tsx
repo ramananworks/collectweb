@@ -252,7 +252,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   );
 
   const bodyContent = (
-    <ScrollArea className="flex-1">
+    <ScrollArea className="flex-1 min-h-0">
       {ledgerEntries.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground text-sm">No transactions found</div>
       ) : isMobile ? (
