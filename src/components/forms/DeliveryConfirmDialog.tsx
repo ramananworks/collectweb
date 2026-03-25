@@ -28,6 +28,7 @@ export function DeliveryConfirmDialog({
   onOpenChange,
   invoiceId,
   customerName,
+  customerId,
 }: DeliveryConfirmDialogProps) {
   const [step, setStep] = useState<"send" | "verify" | "done">("send");
   const [otpValue, setOtpValue] = useState("");
@@ -36,6 +37,10 @@ export function DeliveryConfirmDialog({
   const [testOtp, setTestOtp] = useState<string | null>(null);
   const [captureGps, setCaptureGps] = useState(true);
   const qc = useQueryClient();
+
+  const { data: customers = [] } = useCustomers();
+  const customer = customerId ? customers.find((c) => c.id === customerId) : null;
+  const hasPhone = customer ? customer.phone?.trim().length > 0 : true; // default true if no customerId passed
 
   const resetState = useCallback(() => {
     setStep("send");
