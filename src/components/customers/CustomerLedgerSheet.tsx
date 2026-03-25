@@ -9,7 +9,7 @@ import { cn, formatDisplayDate } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Badge } from "@/components/ui/badge";
 import { useInvoices, usePayments, useCompany, formatCurrency, type Customer } from "@/hooks/use-data";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -252,7 +252,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
   );
 
   const bodyContent = (
-    <ScrollArea className="flex-1 min-h-0">
+    <div className="flex-1 min-h-0 overflow-y-auto">
       {ledgerEntries.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground text-sm">No transactions found</div>
       ) : isMobile ? (
@@ -319,7 +319,7 @@ export default function CustomerLedgerSheet({ customer, onClose }: CustomerLedge
           </TableFooter>
         </Table>
       )}
-    </ScrollArea>
+    </div>
   );
 
   const mobileFooter = isMobile && ledgerEntries.length > 0 ? (
