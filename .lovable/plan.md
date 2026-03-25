@@ -1,31 +1,22 @@
 
 
-## Make Customer Ledger Mobile Responsive
+## Fix: Ledger Not Scrolling to End
 
-### Problems
-- 5-column table (Date, Particulars, Debit, Credit, Balance) overflows on small screens
-- Fixed column widths (`w-[90px]`, `w-[100px]`, `w-[110px]`) don't fit mobile viewports
-- Header section with summary stats and date filters doesn't stack well
+### Root Cause
+The `ScrollArea` (line 255) has `className="flex-1"` inside a flex column container, but it lacks `min-h-0`. In CSS flexbox, flex children default to `min-height: auto`, which prevents them from shrinking below their content size — so the ScrollArea expands to fit all content instead of constraining and scrolling.
 
-### Solution
+### Fix
+**File: `src/components/customers/CustomerLedgerSheet.tsx`** — Line 255
 
-**File: `src/components/customers/CustomerLedgerSheet.tsx`**
+Add `min-h-0` to the ScrollArea so it properly constrains within the flex layout and enables scrolling:
 
-1. **Mobile card layout instead of table**: On mobile (`isMobile` is already available), render each ledger entry as a compact card instead of a table row:
-   - Line 1: Date (left) + Balance with Dr/Cr (right, bold, colored)
-   - Line 2: Particulars text (full width, truncated)
-   - Line 3: Debit amount (red, left) + Credit amount (green, right)
+```tsx
+// Before
+<ScrollArea className="flex-1">
 
-2. **Keep desktop table as-is**: Wrap the current `<Table>` in a condition — only render on `!isMobile`.
+// After
+<ScrollArea className="flex-1 min-h-0">
+```
 
-3. **Mobile footer summary**: Show closing balance as a sticky bottom bar on mobile with Debit total, Credit total, and Balance.
-
-4. **Header adjustments**: Reduce padding on mobile (`p-4` instead of `p-5`), ensure summary stats wrap cleanly in a grid layout on small screens.
-
-### Technical Details
-
-- Use the existing `isMobile` hook (already imported)
-- Mobile entries: `div` with `border-b` styling, compact `py-3 px-4` padding
-- Footer: sticky `bottom-0` bar with background matching card color
-- No new dependencies needed
+This single change fixes both the mobile Drawer and desktop Sheet since both use the same `bodyContent` variable.
 
