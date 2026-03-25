@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import { formatDisplayDate } from "@/lib/utils";
+import { PDF_PRIMARY, PDF_ACCENT, drawBrandedHeader, drawTableHeader, drawAmberDivider, addBrandedFooters } from "@/lib/pdf-brand";
 
 export interface ShareSummaryData {
   title: string;
