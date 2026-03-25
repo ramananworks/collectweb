@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,14 +11,16 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { MapPin, Send, ShieldCheck, Loader2 } from "lucide-react";
+import { MapPin, Send, ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 import { hapticMedium, hapticSuccess, hapticHeavy } from "@/lib/haptics";
+import { useCustomers } from "@/hooks/use-data";
 
 interface DeliveryConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   invoiceId: string;
   customerName: string;
+  customerId?: string;
 }
 
 export function DeliveryConfirmDialog({
