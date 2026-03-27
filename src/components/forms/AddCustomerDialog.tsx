@@ -41,7 +41,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
-  const [optionalOpen, setOptionalOpen] = useState(false);
+  const [isCreatingArea, setIsCreatingArea] = useState(false);
   const [isCreatingArea, setIsCreatingArea] = useState(false);
   const [newAreaName, setNewAreaName] = useState("");
   const { data: areas = [] } = useAreas();
@@ -118,7 +118,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
           if (contact.phone) form.setValue("phone", contact.phone.replace(/[\s\-()]/g, ""));
           if (contact.address) {
             form.setValue("address", contact.address);
-            setOptionalOpen(true);
           }
           hapticLight();
           toast({ title: "Contact imported", description: `${contact.name || "Contact"} details filled in.` });
@@ -143,7 +142,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
             const parts = [addr.streetAddress, addr.locality, addr.region, addr.postalCode].filter(Boolean);
             if (parts.length > 0) {
               form.setValue("address", parts.join(", "));
-              setOptionalOpen(true);
             }
           }
           hapticLight();
