@@ -245,11 +245,13 @@ export default function Outstanding() {
             {outstandingData.length} customers
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF} disabled={exporting}>
-            {exporting ? <><Loader2 className="h-4 w-4 animate-spin" /> Sharing…</> : isMobile ? <><Share2 className="h-4 w-4" /> Share</> : <><Download className="h-4 w-4" /> PDF</>}
-          </Button>
-        </div>
+        {!isMobile && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF} disabled={exporting}>
+              {exporting ? <><Loader2 className="h-4 w-4 animate-spin" /> Sharing…</> : <><Download className="h-4 w-4" /> PDF</>}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Filters */}
