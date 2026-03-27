@@ -165,14 +165,12 @@ export function useAddCustomer() {
       area: string;
       gstin?: string;
       default_due_days?: number;
-      assigned_to?: string;
     }) => {
       const row = {
         ...values,
         company_id: profile!.company_id!,
         gstin: values.gstin || null,
         default_due_days: values.default_due_days ?? null,
-        assigned_to: values.assigned_to || null,
         outstanding: 0,
       };
       if (!navigator.onLine) {
@@ -295,7 +293,6 @@ export function useUpdateCustomer() {
       area: string;
       gstin?: string | null;
       default_due_days?: number | null;
-      assigned_to?: string | null;
     }) => {
       const { id, ...rest } = values;
       const { error } = await supabase.from("customers").update(rest).eq("id", id);
