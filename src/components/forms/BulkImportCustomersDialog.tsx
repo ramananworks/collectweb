@@ -86,8 +86,11 @@ export default function BulkImportCustomersDialog() {
   function handleImport() {
     if (!result || result.valid.length === 0) return;
     bulkImport.mutate(result.valid, {
-      onSuccess: () => {
-        toast({ title: "Import complete", description: `${result.valid.length} customers imported successfully.` });
+      onSuccess: (data) => {
+        const areasMsg = data && data.newAreasCount > 0
+          ? ` ${data.newAreasCount} new area${data.newAreasCount > 1 ? "s" : ""} created: ${data.newAreaNames.join(", ")}.`
+          : "";
+        toast({ title: "Import complete", description: `${result.valid.length} customers imported successfully.${areasMsg}` });
         setResult(null);
         setOpen(false);
         if (fileRef.current) fileRef.current.value = "";

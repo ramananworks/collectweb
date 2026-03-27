@@ -403,6 +403,8 @@ export function useBulkImportCustomers() {
       }));
       const { error } = await supabase.from("customers").insert(rows);
       if (error) throw error;
+
+      return { newAreasCount: newAreaNames.length, newAreaNames };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["customers"] });
