@@ -1,18 +1,47 @@
 
 
-## Fix: Remove `assigned_to` Column References from Code
+## Add Inline "Create Area" Option in Add & Edit Customer Dialogs
 
-### Root Cause
-The error "Could not find the 'assigned_to' column of 'customers' in the schema cache" occurs because the code references an `assigned_to` field that doesn't exist in the database `customers` table (it was previously removed per the memory note about removing the Assigned To staff field).
+### Overview
+Add a "+ Create New Area" option at the bottom of the area dropdown in both the Add Customer and Edit Customer dialogs. When selected, it shows an inline input field to type and save a new area name, which gets added to the database and auto-selected.
 
 ### Changes
 
-#### `src/hooks/use-data.ts`
+#### `src/components/forms/AddCustomerDialog.tsx`
+1. Import `useAddArea` from `use-data`
+2. Add state: `isCreatingArea`, `newAreaName`
+3. Replace the Area `Select` with a combined UI:
+   - Show the existing Select dropdown with an extra item `+ Create New Area` at the bottom
+   - When that item is clicked, toggle to an inline input + Save/Cancel buttons
+   - On save, call `addArea.mutate(newAreaName)`, then set the form field value to the new area name
+4. Reset `isCreatingArea` state when dialog closes
 
-1. **`useAddCustomer`** (lines 166-175): Remove `assigned_to` from the type definition and from the row object construction.
+#### `src/components/forms/EditCustomerDialog.tsx`
+1. Same pattern — import `useAddArea`, add `isCreatingArea`/`newAreaName` state
+2. Add `+ Create New Area` option to the area Select
+3. Inline input + save flow identical to AddCustomerDialog
 
-2. **`useUpdateCustomer`** (lines 296-298): Remove `assigned_to` from the type definition. Since the update uses `...rest` spread, removing it from the type is sufficient.
+### UX Flow
+```text
+Area: [Select area          ▼]
+      ├─ Andheri
+      ├─ Bandra
+      ├─ Dadar
+      └─ + Create New Area     ← special item
+
+Click "Create New Area" →
+
+Area: [Type area name____] [✓] [✗]
+```
+
+After saving, the new area appears in the dropdown and is auto-selected.
+
+### Technical Details
+- `useAddArea` already exists in `use-data.ts` and handles inserting into the `areas` table with company_id + cache invalidation
+- The `+ Create New Area` SelectItem uses a special sentinel value (e.g. `__create_new__`) to detect selection and switch to input mode
+- Duplicate check against existing `areas` array (case-insensitive) before saving
 
 ### Files Changed
-1. `src/hooks/use-data.ts` — Remove all `assigned_to` references from `useAddCustomer` and `useUpdateCustomer`
+1. `src/components/forms/AddCustomerDialog.tsx` — Add inline area creation
+2. `src/components/forms/EditCustomerDialog.tsx` — Add inline area creation
 
