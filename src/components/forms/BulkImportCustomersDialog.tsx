@@ -9,6 +9,7 @@ interface ParsedCustomer {
   name: string;
   phone: string;
   address: string;
+  area: string;
   gstin: string;
 }
 
