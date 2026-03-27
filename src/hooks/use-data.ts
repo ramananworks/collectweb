@@ -358,15 +358,15 @@ export function useBulkImportCustomers() {
   const qc = useQueryClient();
   const { profile } = useAuth();
   return useMutation({
-    mutationFn: async (customers: { name: string; phone: string; address: string; gstin: string }[]) => {
+    mutationFn: async (customers: { name: string; phone: string; address: string; area: string; gstin: string }[]) => {
       const rows = customers.map((c) => ({
         name: c.name,
         phone: c.phone,
         address: c.address,
+        area: c.area || "",
         gstin: c.gstin || null,
         company_id: profile!.company_id!,
         outstanding: 0,
-        area: "",
       }));
       const { error } = await supabase.from("customers").insert(rows);
       if (error) throw error;
