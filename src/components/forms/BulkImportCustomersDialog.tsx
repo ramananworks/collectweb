@@ -24,15 +24,16 @@ function parseCSV(text: string): ImportResult {
   if (lines.length < 2) return { total: 0, valid: [], errors: [{ row: 0, message: "File must have a header row and at least one data row" }] };
 
   const header = lines[0].toLowerCase().replace(/\r/g, "");
-  const expectedCols = ["name", "phone", "address", "area", "gstin"];
+  const requiredCols = ["name", "phone", "address"];
+  const allCols = ["name", "phone", "address", "area", "gstin"];
   const cols = header.split(",").map((h) => h.trim());
 
-  const missingCols = expectedCols.filter((c) => !cols.includes(c));
+  const missingCols = requiredCols.filter((c) => !cols.includes(c));
   if (missingCols.length > 0) {
     return { total: 0, valid: [], errors: [{ row: 0, message: `Missing columns: ${missingCols.join(", ")}` }] };
   }
 
-  const colIndex = Object.fromEntries(expectedCols.map((c) => [c, cols.indexOf(c)]));
+  const colIndex = Object.fromEntries(allCols.map((c) => [c, cols.indexOf(c)]));
   const valid: ParsedCustomer[] = [];
   const errors: { row: number; message: string }[] = [];
 
@@ -44,8 +45,8 @@ function parseCSV(text: string): ImportResult {
     const name = values[colIndex.name] || "";
     const phone = values[colIndex.phone] || "";
     const address = values[colIndex.address] || "";
-    const area = values[colIndex.area] || "";
-    const gstin = values[colIndex.gstin] || "";
+    const area = colIndex.area >= 0 ? (values[colIndex.area] || "") : "";
+    const gstin = colIndex.gstin >= 0 ? (values[colIndex.gstin] || "") : "";
 
     if (!name || name.length < 2) { errors.push({ row: i + 1, message: `Row ${i + 1}: Name is required (min 2 chars)` }); continue; }
     if (!phone || phone.length < 10) { errors.push({ row: i + 1, message: `Row ${i + 1}: Valid phone is required (min 10 chars)` }); continue; }
@@ -120,7 +121,7 @@ export default function BulkImportCustomersDialog() {
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Upload a CSV file with columns: <span className="font-mono text-xs text-foreground">name, phone, address, area, gstin</span>
+            Upload a CSV file with columns: <span className="font-mono text-xs text-foreground">name, phone, address</span> <span className="text-xs text-muted-foreground">(optional: area, gstin)</span>
           </p>
           <Button variant="link" className="h-auto p-0 text-xs" onClick={downloadSample}>
             <Download className="h-3 w-3 mr-1" /> Download sample CSV
