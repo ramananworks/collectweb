@@ -1,23 +1,28 @@
 
 
-## Fix: Contact Picker Should Only Update Phone in Edit Customer Form
+## Auto-Create Areas During Bulk Customer Import
 
-When editing an existing customer and using the contact picker, the customer's name should not be overwritten — only the phone number should be updated.
+### Overview
+When bulk importing customers, if a CSV row contains an area name that doesn't exist in the company's areas table, automatically create it before inserting the customers.
 
-### Change
+### Changes
 
-**`src/components/forms/EditCustomerDialog.tsx`** — Remove the `form.setValue("name", ...)` calls from both the Android bridge and Web Contact Picker paths inside `pickFromContacts()`.
+#### `src/hooks/use-data.ts` — `useBulkImportCustomers`
+1. Before inserting customers, fetch existing areas for the company
+2. Collect unique non-empty area names from the import data
+3. Filter to find new areas (case-insensitive comparison against existing)
+4. Insert new areas into the `areas` table
+5. Invalidate the `areas` query key on success (in addition to `customers`)
 
-Lines to remove:
-- Android path: `if (contact.name) form.setValue("name", contact.name);`
-- Web path: `if (c.name?.[0]) form.setValue("name", c.name[0]);`
-
-Also remove the address setValue calls since the user only wants phone updated:
-- Android path: `if (contact.address) form.setValue("address", contact.address);`
-- Web path: the address block
-
-Keep only the phone setValue lines in both paths.
+```text
+mutationFn flow:
+  1. Fetch existing areas: SELECT name FROM areas WHERE company_id = X
+  2. Collect unique area names from CSV rows (non-empty, trimmed)
+  3. Filter out names already in existing areas (case-insensitive)
+  4. INSERT new areas into areas table
+  5. INSERT customers as before
+```
 
 ### Files Changed
-1. `src/components/forms/EditCustomerDialog.tsx` — Strip name/address updates from contact picker, keep phone only
+1. `src/hooks/use-data.ts` — Add area auto-creation logic to `useBulkImportCustomers`, invalidate `areas` query
 
