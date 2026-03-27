@@ -42,7 +42,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const [isCreatingArea, setIsCreatingArea] = useState(false);
-  const [isCreatingArea, setIsCreatingArea] = useState(false);
   const [newAreaName, setNewAreaName] = useState("");
   const { data: areas = [] } = useAreas();
   const addCustomer = useAddCustomer();
@@ -66,7 +65,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
         hapticSuccess();
         toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
         form.reset();
-        setOptionalOpen(false);
+        setOpen(false);
         setOpen(false);
       },
       onError: (err) => {
