@@ -359,19 +359,55 @@ export function useBulkImportCustomers() {
   const { profile } = useAuth();
   return useMutation({
     mutationFn: async (customers: { name: string; phone: string; address: string; area: string; gstin: string }[]) => {
+      const companyId = profile!.company_id!;
+
+      // 1. Fetch existing areas
+      const { data: existingAreas } = await supabase
+        .from("areas")
+        .select("name")
+        .eq("company_id", companyId);
+      const existingSet = new Set(
+        (existingAreas || []).map((a) => a.name.toLowerCase())
+      );
+
+      // 2. Collect unique new area names from CSV
+      const newAreaNames: string[] = [];
+      const seen = new Set<string>();
+      for (const c of customers) {
+        const trimmed = (c.area || "").trim();
+        if (!trimmed) continue;
+        const key = trimmed.toLowerCase();
+        if (!existingSet.has(key) && !seen.has(key)) {
+          seen.add(key);
+          newAreaNames.push(trimmed);
+        }
+      }
+
+      // 3. Insert new areas
+      if (newAreaNames.length > 0) {
+        const { error: areaErr } = await supabase
+          .from("areas")
+          .insert(newAreaNames.map((name) => ({ name, company_id: companyId })));
+        if (areaErr) throw areaErr;
+      }
+
+      // 4. Insert customers
       const rows = customers.map((c) => ({
         name: c.name,
         phone: c.phone,
         address: c.address,
         area: c.area || "",
         gstin: c.gstin || null,
-        company_id: profile!.company_id!,
+        company_id: companyId,
         outstanding: 0,
       }));
       const { error } = await supabase.from("customers").insert(rows);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["customers"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["customers"] });
+      qc.invalidateQueries({ queryKey: ["areas"] });
+    },
   });
 }
 
