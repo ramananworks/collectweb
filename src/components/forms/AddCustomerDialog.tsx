@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Plus, ChevronDown, Contact, Check, X } from "lucide-react";
+import { Plus, Contact, Check, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAreas, useAddCustomer, useAddArea } from "@/hooks/use-data";
 import { hapticLight, hapticSuccess, hapticHeavy } from "@/lib/haptics";
@@ -42,7 +41,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
-  const [optionalOpen, setOptionalOpen] = useState(false);
   const [isCreatingArea, setIsCreatingArea] = useState(false);
   const [newAreaName, setNewAreaName] = useState("");
   const { data: areas = [] } = useAreas();
@@ -67,7 +65,7 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
         hapticSuccess();
         toast({ title: "Customer added", description: `${values.name} has been added successfully.` });
         form.reset();
-        setOptionalOpen(false);
+        setOpen(false);
         setOpen(false);
       },
       onError: (err) => {
@@ -119,7 +117,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
           if (contact.phone) form.setValue("phone", contact.phone.replace(/[\s\-()]/g, ""));
           if (contact.address) {
             form.setValue("address", contact.address);
-            setOptionalOpen(true);
           }
           hapticLight();
           toast({ title: "Contact imported", description: `${contact.name || "Contact"} details filled in.` });
@@ -144,7 +141,6 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
             const parts = [addr.streetAddress, addr.locality, addr.region, addr.postalCode].filter(Boolean);
             if (parts.length > 0) {
               form.setValue("address", parts.join(", "));
-              setOptionalOpen(true);
             }
           }
           hapticLight();
@@ -241,38 +237,27 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
                 </FormItem>
               )} />
 
-              {/* Collapsible optional fields */}
-              <Collapsible open={optionalOpen} onOpenChange={setOptionalOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button type="button" variant="ghost" className="w-full justify-between px-1 py-2 h-auto text-sm text-muted-foreground hover:text-foreground">
-                    Additional Details (Optional)
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${optionalOpen ? "rotate-180" : ""}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-3 pt-1">
-                  <FormField control={form.control} name="address" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <FormControl><Input placeholder="15 MG Road, Pune" {...field} onFocus={scrollInputIntoView} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="gstin" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GSTIN</FormLabel>
-                      <FormControl><Input placeholder="27AABCP1234A1Z5" maxLength={15} {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} onFocus={scrollInputIntoView} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="default_due_days" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Default Due Days</FormLabel>
-                      <FormControl><Input type="number" inputMode="numeric" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} onFocus={scrollInputIntoView} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </CollapsibleContent>
-              </Collapsible>
+              <FormField control={form.control} name="address" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl><Input placeholder="15 MG Road, Pune" {...field} onFocus={scrollInputIntoView} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="gstin" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GSTIN</FormLabel>
+                  <FormControl><Input placeholder="27AABCP1234A1Z5" maxLength={15} {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} onFocus={scrollInputIntoView} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="default_due_days" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Default Due Days</FormLabel>
+                  <FormControl><Input type="number" inputMode="numeric" placeholder="e.g. 30" min={0} max={365} {...field} value={field.value ?? ""} onFocus={scrollInputIntoView} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
 
               {/* Submit area with safe bottom padding */}
               <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2 pt-3 pb-6">
