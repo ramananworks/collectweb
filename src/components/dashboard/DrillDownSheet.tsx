@@ -224,9 +224,9 @@ export default function DrillDownSheet({ type, onClose, invoices, payments }: Dr
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="flex flex-row items-center justify-between pr-8">
           <SheetTitle className="text-lg">{titles[type]}</SheetTitle>
-          {hasData && (
+          {hasData && !isMobile && (
             <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handlePDF} disabled={exporting}>
-              {exporting ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Sharing…</> : isMobile ? <><Share2 className="h-3.5 w-3.5" /> Share</> : <><Download className="h-3.5 w-3.5" /> PDF</>}
+              {exporting ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Sharing…</> : <><Download className="h-3.5 w-3.5" /> PDF</>}
             </Button>
           )}
         </SheetHeader>
