@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Plus, ChevronDown, Contact } from "lucide-react";
+import { Plus, ChevronDown, Contact, Check, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAreas, useAddCustomer } from "@/hooks/use-data";
+import { useAreas, useAddCustomer, useAddArea } from "@/hooks/use-data";
 import { hapticLight, hapticSuccess, hapticHeavy } from "@/lib/haptics";
 
 function supportsContacts() {
@@ -43,8 +43,11 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const [optionalOpen, setOptionalOpen] = useState(false);
+  const [isCreatingArea, setIsCreatingArea] = useState(false);
+  const [newAreaName, setNewAreaName] = useState("");
   const { data: areas = [] } = useAreas();
   const addCustomer = useAddCustomer();
+  const addArea = useAddArea();
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
@@ -78,6 +81,30 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
     setTimeout(() => {
       e.target.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 300);
+  };
+
+  const handleSaveNewArea = (onChange: (val: string) => void) => {
+    const trimmed = newAreaName.trim();
+    if (!trimmed) return;
+    const duplicate = areas.some((a) => a.name.toLowerCase() === trimmed.toLowerCase());
+    if (duplicate) {
+      toast({ title: "Area exists", description: `"${trimmed}" already exists. Select it from the list.`, variant: "destructive" });
+      setIsCreatingArea(false);
+      setNewAreaName("");
+      onChange(trimmed);
+      return;
+    }
+    addArea.mutate(trimmed, {
+      onSuccess: () => {
+        onChange(trimmed);
+        setIsCreatingArea(false);
+        setNewAreaName("");
+        toast({ title: "Area created", description: `"${trimmed}" has been added.` });
+      },
+      onError: (err) => {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      },
+    });
   };
 
   const pickFromContacts = async () => {
@@ -166,16 +193,50 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
               <FormField control={form.control} name="area" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Area</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {areas.map((a) => (
-                        <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {isCreatingArea ? (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="New area name"
+                        value={newAreaName}
+                        onChange={(e) => setNewAreaName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSaveNewArea(field.onChange);
+                          }
+                        }}
+                        autoFocus
+                        onFocus={scrollInputIntoView}
+                      />
+                      <Button type="button" size="icon" variant="ghost" className="shrink-0" disabled={addArea.isPending} onClick={() => handleSaveNewArea(field.onChange)}>
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button type="button" size="icon" variant="ghost" className="shrink-0" onClick={() => { setIsCreatingArea(false); setNewAreaName(""); }}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Select onValueChange={(val) => {
+                      if (val === "__create_new__") {
+                        setIsCreatingArea(true);
+                        setNewAreaName("");
+                      } else {
+                        field.onChange(val);
+                      }
+                    }} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {areas.map((a) => (
+                          <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
+                        ))}
+                        <SelectItem value="__create_new__" className="text-primary font-medium">
+                          <span className="flex items-center gap-1"><Plus className="h-3.5 w-3.5" /> Create New Area</span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                   <FormMessage />
                 </FormItem>
               )} />
