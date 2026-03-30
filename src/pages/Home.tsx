@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
 import logoImg from "@/assets/logo.png";
+import { useRazorpayCheckout } from "@/hooks/use-razorpay";
 import {
   Building2,
   FileText,
@@ -93,6 +94,7 @@ const faqs = [
 ];
 
 export default function Home() {
+  const { checkout, loading: razorpayLoading } = useRazorpayCheckout();
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -333,8 +335,8 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-8 rounded-full">
-                <Link to="/signup">Start 14-Day Trial <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              <Button className="mt-8 rounded-full" disabled={razorpayLoading} onClick={() => checkout("pro_monthly")}>
+                {razorpayLoading ? "Processing…" : "Subscribe Now"} <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             </motion.div>
 
@@ -360,8 +362,8 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-8 rounded-full">
-                <Link to="/signup">Start 14-Day Trial <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              <Button className="mt-8 rounded-full" disabled={razorpayLoading} onClick={() => checkout("pro_yearly")}>
+                {razorpayLoading ? "Processing…" : "Subscribe Now"} <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             </motion.div>
           </motion.div>
