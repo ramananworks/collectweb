@@ -54,6 +54,7 @@ export type Database = {
           onboarding_completed: boolean
           phone: string
           plan: string
+          plan_expires_at: string | null
           status: string
           upi_id: string | null
         }
@@ -67,6 +68,7 @@ export type Database = {
           onboarding_completed?: boolean
           phone?: string
           plan?: string
+          plan_expires_at?: string | null
           status?: string
           upi_id?: string | null
         }
@@ -80,6 +82,7 @@ export type Database = {
           onboarding_completed?: boolean
           phone?: string
           plan?: string
+          plan_expires_at?: string | null
           status?: string
           upi_id?: string | null
         }
