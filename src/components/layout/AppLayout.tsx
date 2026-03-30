@@ -160,7 +160,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     await signOut();
     localStorage.clear();
     sessionStorage.clear();
-    window.location.replace("/home");
+    window.location.replace("/login");
   };
 
   return (
