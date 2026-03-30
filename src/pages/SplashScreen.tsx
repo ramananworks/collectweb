@@ -28,7 +28,7 @@ export default function SplashScreen() {
         if (data.session) {
           window.location.replace("/dashboard");
         } else {
-          window.location.replace("/login");
+          window.location.replace("/home");
         }
       }, 400);
     };
