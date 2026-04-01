@@ -7,6 +7,7 @@ import { useCustomers, useAreas, useCompany, useInvoices, formatCurrency, type C
 import AddCustomerDialog from "@/components/forms/AddCustomerDialog";
 import EditCustomerDialog from "@/components/forms/EditCustomerDialog";
 import BulkImportCustomersDialog from "@/components/forms/BulkImportCustomersDialog";
+import TallyImportDialog from "@/components/forms/TallyImportDialog";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 import CustomerLedgerSheet from "@/components/customers/CustomerLedgerSheet";
