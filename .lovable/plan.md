@@ -1,60 +1,69 @@
 
 
-## Razorpay Payment Gateway for Pricing Plans
+## Tally Prime Local Bridge for Customer Import
 
 ### Overview
-Integrate Razorpay checkout into the Home page pricing buttons so users can pay for Pro Monthly (₹299/mo) and Pro Yearly (₹2,999/yr) plans directly. The flow: user clicks "Start 14-Day Trial" → Razorpay checkout opens → payment is processed → user is redirected to signup/dashboard.
+Build a local bridge that connects to Tally Prime's XML API running on the user's PC (default `http://localhost:9000`) and pushes extracted customer data into the app's cloud database.
 
-### Prerequisites
-1. **Razorpay API Key (Secret)** — Need `RAZORPAY_KEY_ID` (publishable, stored in code) and `RAZORPAY_KEY_SECRET` (stored as a backend secret) from your Razorpay dashboard
-2. No existing connector for Razorpay, so we'll use a custom edge function
+### How Tally Prime XML API Works
+Tally Prime exposes an HTTP XML API on port 9000 (configurable). You send XML requests to fetch data like ledgers (customers/parties). The response is XML containing master data.
 
 ### Architecture
 
 ```text
-User clicks Plan → Edge Function creates Razorpay Order → 
-Frontend opens Razorpay Checkout → User pays → 
-Razorpay callback → Edge Function verifies payment → 
-Updates company plan in DB
+Browser (your app)
+   ↓ User clicks "Import from Tally"
+   ↓ Sends XML request to localhost:9000
+   ↓ Tally responds with customer XML
+   ↓ Parse XML → map to customer objects
+   ↓ Call existing bulk import logic (useBulkImportCustomers)
+   ↓ Customers + areas saved to cloud DB
 ```
+
+**Key constraint**: The browser must directly call `http://localhost:9000` since Tally runs on the user's local machine. This works because:
+- Tally's HTTP server doesn't enforce CORS headers (most local servers don't)
+- We'll use `fetch` with `mode: 'no-cors'` or handle CORS errors gracefully
+- **Fallback**: If CORS blocks direct browser access, we'll provide a downloadable Python/Node script the user runs locally that exports Tally data to CSV, then they use the existing CSV bulk import
 
 ### Changes
 
-#### 1. Store Razorpay Secret
-- Add `RAZORPAY_KEY_SECRET` as a backend secret
-- Store `RAZORPAY_KEY_ID` (publishable key) in the frontend code
+#### 1. New Component: `src/components/forms/TallyImportDialog.tsx`
+- Dialog with:
+  - Tally server URL input (default: `http://localhost:9000`)
+  - "Test Connection" button to verify Tally is running
+  - "Fetch Customers" button that sends Tally XML request for Sundry Debtors
+  - Preview table showing fetched customers (name, phone, address, area)
+  - "Import" button that calls `useBulkImportCustomers`
+- XML request to fetch customer ledgers:
+  ```xml
+  <ENVELOPE>
+    <HEADER><TALLYREQUEST>Export Data</TALLYREQUEST></HEADER>
+    <BODY><EXPORTDATA><REQUESTDESC>
+      <REPORTNAME>List of Accounts</REPORTNAME>
+      <STATICVARIABLES>
+        <ACCOUNTTYPE>Sundry Debtors</ACCOUNTTYPE>
+      </STATICVARIABLES>
+    </REQUESTDESC></EXPORTDATA></BODY>
+  </ENVELOPE>
+  ```
+- Parse XML response using `DOMParser` to extract: Name, Address, Phone/Mobile, Area/State, GSTIN
 
-#### 2. New Edge Function: `supabase/functions/create-razorpay-order/index.ts`
-- Accepts `{ plan: "pro_monthly" | "pro_yearly", company_id? }` 
-- Creates a Razorpay order via their API (`POST https://api.razorpay.com/v1/orders`)
-- Returns `{ order_id, amount, currency, key_id }`
-- Auth: validates JWT, gets user's company
+#### 2. Update `src/pages/Customers.tsx`
+- Add "Import from Tally" button next to existing "Bulk Import" button (permission-gated same as bulk import)
 
-#### 3. New Edge Function: `supabase/functions/verify-razorpay-payment/index.ts`
-- Accepts `{ razorpay_order_id, razorpay_payment_id, razorpay_signature }`
-- Verifies signature using HMAC SHA256 with `RAZORPAY_KEY_SECRET`
-- On success: updates `companies.plan` to `pro_monthly` or `pro_yearly`
-- Returns success/failure
+#### 3. Fallback: Export Script
+- If browser CORS blocks localhost access, show a message with instructions:
+  - "Tally must be running with Allow CORS or use our export script"
+  - Provide a downloadable Python script that connects to Tally locally, exports to CSV
+  - User then uses existing CSV bulk import
 
-#### 4. Database Migration
-- Add `plan_expires_at` (timestamptz, nullable) column to `companies` table for tracking subscription expiry
-
-#### 5. Frontend: `src/pages/Home.tsx`
-- Load Razorpay checkout script (`https://checkout.razorpay.com/v1/checkout.js`)
-- Replace "Start 14-Day Trial" links with buttons that:
-  1. Call `create-razorpay-order` edge function
-  2. Open Razorpay checkout with returned order details
-  3. On success callback, call `verify-razorpay-payment`
-  4. Show success toast and redirect to `/signup` or `/dashboard`
-
-#### 6. Frontend: New hook `src/hooks/use-razorpay.ts`
-- `useRazorpayCheckout()` — handles script loading, order creation, checkout opening, and verification
-- Reusable across Home page and potentially Settings page for plan upgrades
+### Important Notes
+- Tally must be running and its HTTP server enabled (Gateway → Configure → HTTP port 9000)
+- Only works when the user is on the same PC as Tally (localhost)
+- Auto-creates missing areas (reuses existing bulk import logic)
+- Maps Tally "Sundry Debtors" group to customers
 
 ### Files Changed
-1. `supabase/functions/create-razorpay-order/index.ts` — New edge function
-2. `supabase/functions/verify-razorpay-payment/index.ts` — New edge function  
-3. `src/hooks/use-razorpay.ts` — New hook for Razorpay checkout flow
-4. `src/pages/Home.tsx` — Wire pricing buttons to Razorpay checkout
-5. Database migration — Add `plan_expires_at` to companies table
+1. `src/components/forms/TallyImportDialog.tsx` — New dialog for Tally connection + import
+2. `src/pages/Customers.tsx` — Add "Import from Tally" button
 
