@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Database, Loader2, CheckCircle2, AlertCircle, Download, Wifi, WifiOff } from "lucide-react";
+import { Database, Loader2, CheckCircle2, AlertCircle, Download, Wifi, WifiOff, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useBulkImportCustomers } from "@/hooks/use-data";
 
@@ -15,159 +15,62 @@ interface TallyCustomer {
   gstin: string;
 }
 
-const TALLY_XML_REQUEST = `<ENVELOPE>
-<HEADER><VERSION>1</VERSION><TALLYREQUEST>Export</TALLYREQUEST><TYPE>Data</TYPE><ID>List of Accounts</ID></HEADER>
-<BODY><DESC><STATICVARIABLES><ACCOUNTTYPE>Sundry Debtors</ACCOUNTTYPE></STATICVARIABLES></DESC></BODY>
-</ENVELOPE>`;
-
-const FALLBACK_SCRIPT = `#!/usr/bin/env python3
-"""
-Tally Prime Customer Export Script
-Run this on the same PC where Tally Prime is running.
-Usage: python tally_export.py > customers.csv
-"""
-import urllib.request
-import xml.etree.ElementTree as ET
-import csv, sys
-
-TALLY_URL = "http://localhost:9000"
-
-xml_req = """<ENVELOPE>
-<HEADER><VERSION>1</VERSION><TALLYREQUEST>Export</TALLYREQUEST><TYPE>Data</TYPE><ID>List of Accounts</ID></HEADER>
-<BODY><DESC><STATICVARIABLES><ACCOUNTTYPE>Sundry Debtors</ACCOUNTTYPE></STATICVARIABLES></DESC></BODY>
-</ENVELOPE>"""
-
-try:
-    req = urllib.request.Request(TALLY_URL, data=xml_req.encode(), headers={"Content-Type": "text/xml"})
-    resp = urllib.request.urlopen(req, timeout=10)
-    root = ET.fromstring(resp.read())
-except Exception as e:
-    print(f"Error connecting to Tally: {e}", file=sys.stderr)
-    sys.exit(1)
-
-w = csv.writer(sys.stdout)
-w.writerow(["name", "phone", "address", "area", "gstin"])
-
-for ledger in root.iter("LEDGER"):
-    name = ledger.findtext("NAME", "").strip()
-    if not name:
-        continue
-    addr_lines = []
-    addr_el = ledger.find(".//ADDRESS.LIST")
-    if addr_el is not None:
-        for a in addr_el.findall("ADDRESS"):
-            if a.text:
-                addr_lines.append(a.text.strip())
-    phone = ""
-    for tag in ["LEDGERPHONE", "LEDGERMOBILE", "PHONENUMBER"]:
-        val = ledger.findtext(tag, "").strip()
-        if val:
-            phone = val
-            break
-    area = ledger.findtext("LEDSTATENAME", "").strip() or ledger.findtext("COUNTRYNAME", "").strip()
-    gstin = ledger.findtext("PARTYGSTIN", "").strip() or ledger.findtext("GSTIN", "").strip()
-    w.writerow([name, phone, ", ".join(addr_lines), area, gstin])
-
-print("Export complete.", file=sys.stderr)
-`;
-
-function getTextContent(el: Element, tagName: string): string {
-  const found = el.getElementsByTagName(tagName);
-  if (found.length > 0 && found[0].textContent) return found[0].textContent.trim();
-  return "";
-}
-
-function parseTallyXml(xmlText: string): TallyCustomer[] {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlText, "text/xml");
-  const customers: TallyCustomer[] = [];
-
-  const ledgers = doc.getElementsByTagName("LEDGER");
-  for (let i = 0; i < ledgers.length; i++) {
-    const ledger = ledgers[i];
-    const name = getTextContent(ledger, "NAME");
-    if (!name) continue;
-
-    // Address
-    const addrParts: string[] = [];
-    const addrList = ledger.getElementsByTagName("ADDRESS");
-    for (let j = 0; j < addrList.length; j++) {
-      if (addrList[j].textContent) addrParts.push(addrList[j].textContent!.trim());
-    }
-
-    // Phone
-    let phone = "";
-    for (const tag of ["LEDGERPHONE", "LEDGERMOBILE", "PHONENUMBER"]) {
-      const val = getTextContent(ledger, tag);
-      if (val) { phone = val; break; }
-    }
-
-    // Area / State
-    const area = getTextContent(ledger, "LEDSTATENAME") || getTextContent(ledger, "COUNTRYNAME");
-
-    // GSTIN
-    const gstin = getTextContent(ledger, "PARTYGSTIN") || getTextContent(ledger, "GSTIN");
-
-    customers.push({ name, phone, address: addrParts.join(", "), area, gstin });
-  }
-
-  return customers;
-}
+const MIDDLEWARE_DEFAULT_URL = "http://localhost:3456";
 
 export default function TallyImportDialog() {
   const [open, setOpen] = useState(false);
-  const [tallyUrl, setTallyUrl] = useState("http://localhost:9000");
-  const [status, setStatus] = useState<"idle" | "connecting" | "connected" | "error" | "fetching" | "cors_blocked">("idle");
+  const [middlewareUrl, setMiddlewareUrl] = useState(MIDDLEWARE_DEFAULT_URL);
+  const [status, setStatus] = useState<"idle" | "connecting" | "connected" | "error" | "fetching" | "no_middleware">("idle");
+  const [tallyConnected, setTallyConnected] = useState(false);
   const [customers, setCustomers] = useState<TallyCustomer[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const bulkImport = useBulkImportCustomers();
 
-  async function testConnection() {
+  async function checkMiddleware() {
     setStatus("connecting");
     try {
-      const resp = await fetch(tallyUrl, { method: "GET", signal: AbortSignal.timeout(5000) });
-      if (resp.ok || resp.status === 200) {
+      const resp = await fetch(`${middlewareUrl}/api/health`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      const data = await resp.json();
+      if (data.status === "ok") {
+        setTallyConnected(data.tally === true);
         setStatus("connected");
-        toast({ title: "Connected to Tally Prime" });
+        toast({
+          title: data.tally ? "Connected to Tally Bridge & Tally Prime" : "Tally Bridge running, but Tally Prime not detected",
+          description: data.tally ? undefined : "Make sure Tally Prime is running with HTTP enabled on port 9000",
+          variant: data.tally ? "default" : "destructive",
+        });
       } else {
         setStatus("error");
       }
-    } catch (err: any) {
-      if (err?.name === "TypeError" && err?.message?.includes("Failed to fetch")) {
-        setStatus("cors_blocked");
-      } else {
-        setStatus("error");
-      }
+    } catch {
+      setStatus("no_middleware");
     }
   }
 
   async function fetchCustomers() {
     setStatus("fetching");
     try {
-      const resp = await fetch(tallyUrl, {
-        method: "POST",
-        headers: { "Content-Type": "text/xml" },
-        body: TALLY_XML_REQUEST,
-        signal: AbortSignal.timeout(15000),
+      const resp = await fetch(`${middlewareUrl}/api/customers`, {
+        signal: AbortSignal.timeout(20000),
       });
-      const xmlText = await resp.text();
-      const parsed = parseTallyXml(xmlText);
-      if (parsed.length === 0) {
-        toast({ title: "No customers found", description: "No Sundry Debtors found in Tally response.", variant: "destructive" });
+      const data = await resp.json();
+      if (data.success && data.customers?.length > 0) {
+        setCustomers(data.customers);
+        setSelected(new Set(data.customers.map((_: any, i: number) => i)));
         setStatus("connected");
-        return;
-      }
-      setCustomers(parsed);
-      setSelected(new Set(parsed.map((_, i) => i)));
-      setStatus("connected");
-      toast({ title: `Found ${parsed.length} customers` });
-    } catch (err: any) {
-      if (err?.name === "TypeError" && err?.message?.includes("Failed to fetch")) {
-        setStatus("cors_blocked");
+        toast({ title: `Found ${data.customers.length} customers from Tally` });
+      } else if (data.success && data.customers?.length === 0) {
+        toast({ title: "No customers found", description: "No Sundry Debtors found in Tally.", variant: "destructive" });
+        setStatus("connected");
       } else {
-        setStatus("error");
-        toast({ title: "Failed to fetch", description: err?.message || "Could not connect to Tally", variant: "destructive" });
+        toast({ title: "Error", description: data.error || "Failed to fetch from Tally", variant: "destructive" });
+        setStatus("connected");
       }
+    } catch {
+      toast({ title: "Connection failed", description: "Cannot reach Tally Bridge. Make sure it's running.", variant: "destructive" });
+      setStatus("no_middleware");
     }
   }
 
@@ -203,19 +106,14 @@ export default function TallyImportDialog() {
     });
   }
 
-  function downloadFallbackScript() {
-    const blob = new Blob([FALLBACK_SCRIPT], { type: "text/x-python" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tally_export.py";
-    a.click();
-    URL.revokeObjectURL(url);
+  function downloadBridge() {
+    window.open("/tally-bridge/", "_blank");
   }
 
   function handleClose() {
     setOpen(false);
     setStatus("idle");
+    setTallyConnected(false);
     setCustomers([]);
     setSelected(new Set());
   }
@@ -236,61 +134,80 @@ export default function TallyImportDialog() {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Connection */}
+          {/* Step 1: Middleware connection */}
           <div className="space-y-2">
-            <Label>Tally Server URL</Label>
+            <Label>Tally Bridge URL</Label>
             <div className="flex gap-2">
               <Input
-                value={tallyUrl}
-                onChange={(e) => setTallyUrl(e.target.value)}
-                placeholder="http://localhost:9000"
+                value={middlewareUrl}
+                onChange={(e) => setMiddlewareUrl(e.target.value)}
+                placeholder="http://localhost:3456"
                 className="flex-1"
               />
               <Button
-                onClick={status === "connected" || customers.length > 0 ? fetchCustomers : testConnection}
+                onClick={status === "connected" && tallyConnected ? fetchCustomers : checkMiddleware}
                 disabled={status === "connecting" || status === "fetching"}
                 className="gap-2 shrink-0"
               >
                 {(status === "connecting" || status === "fetching") && <Loader2 className="h-4 w-4 animate-spin" />}
                 {status === "connected" && <Wifi className="h-4 w-4" />}
-                {status === "connected" || customers.length > 0 ? "Fetch Customers" : "Connect"}
+                {status === "connected" && tallyConnected ? "Fetch Customers" : "Connect"}
               </Button>
             </div>
           </div>
 
-          {/* Status messages */}
-          {status === "connected" && customers.length === 0 && (
-            <div className="flex items-center gap-2 text-sm text-success">
-              <CheckCircle2 className="h-4 w-4" /> Connected to Tally. Click "Fetch Customers" to load Sundry Debtors.
+          {/* Connected but Tally not running */}
+          {status === "connected" && !tallyConnected && customers.length === 0 && (
+            <div className="flex items-center gap-2 text-sm text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              Tally Bridge is running, but Tally Prime is not detected. Start Tally Prime and enable HTTP on port 9000.
             </div>
           )}
 
+          {/* Connected and Tally running */}
+          {status === "connected" && tallyConnected && customers.length === 0 && (
+            <div className="flex items-center gap-2 text-sm text-green-600">
+              <CheckCircle2 className="h-4 w-4" /> Connected to Tally Bridge & Tally Prime. Click "Fetch Customers" to load Sundry Debtors.
+            </div>
+          )}
+
+          {/* Connection error */}
           {status === "error" && (
             <div className="flex items-center gap-2 text-sm text-destructive">
-              <WifiOff className="h-4 w-4" /> Cannot connect. Make sure Tally Prime is running and HTTP server is enabled on port 9000.
+              <WifiOff className="h-4 w-4" /> Cannot connect. Check the Tally Bridge URL.
             </div>
           )}
 
-          {status === "cors_blocked" && (
+          {/* Middleware not running — setup instructions */}
+          {status === "no_middleware" && (
             <div className="space-y-3 rounded-lg border border-border p-4">
-              <div className="flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" /> Browser blocked the connection (CORS policy).
+              <div className="flex items-center gap-2 text-sm font-medium text-destructive">
+                <AlertCircle className="h-4 w-4" /> Tally Bridge not detected
               </div>
               <p className="text-sm text-muted-foreground">
-                Your browser blocks direct connections to local Tally. Use our export script instead:
+                To import from Tally, you need to install and run the <strong>Tally Bridge</strong> on the same PC where Tally Prime is running.
               </p>
-              <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
-                <li>Download the Python script below</li>
-                <li>Run it on the PC where Tally is running: <code className="text-xs bg-muted px-1 py-0.5 rounded">python tally_export.py &gt; customers.csv</code></li>
-                <li>Use the "Bulk Import" button to upload the CSV</li>
+              <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1.5">
+                <li>Download the Tally Bridge package below</li>
+                <li>Extract the zip on your Windows PC</li>
+                <li>Double-click <code className="text-xs bg-muted px-1 py-0.5 rounded">install.bat</code> to set up</li>
+                <li>Run <code className="text-xs bg-muted px-1 py-0.5 rounded">tally-bridge.exe</code> (or <code className="text-xs bg-muted px-1 py-0.5 rounded">node server.js</code>)</li>
+                <li>Come back here and click <strong>Connect</strong></li>
               </ol>
-              <Button variant="outline" size="sm" className="gap-2" onClick={downloadFallbackScript}>
-                <Download className="h-4 w-4" /> Download tally_export.py
-              </Button>
+              <div className="flex gap-2 pt-1">
+                <Button variant="outline" size="sm" className="gap-2" onClick={downloadBridge}>
+                  <Download className="h-4 w-4" /> Download Tally Bridge
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-2" asChild>
+                  <a href="/tally-bridge/README.md" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" /> Setup Guide
+                  </a>
+                </Button>
+              </div>
             </div>
           )}
 
-          {/* Customer preview */}
+          {/* Customer preview table */}
           {customers.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
