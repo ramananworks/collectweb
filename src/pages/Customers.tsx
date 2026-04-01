@@ -72,6 +72,7 @@ export default function Customers() {
         {canManageCustomers && (
           <div className="flex gap-2">
             {canBulkImport && <BulkImportCustomersDialog />}
+            {canBulkImport && <TallyImportDialog />}
             <AddCustomerDialog />
           </div>
         )}
