@@ -1,69 +1,84 @@
 
 
-## Tally Prime Local Bridge for Customer Import
+## Tally Prime Local Middleware (Windows Installer)
 
 ### Overview
-Build a local bridge that connects to Tally Prime's XML API running on the user's PC (default `http://localhost:9000`) and pushes extracted customer data into the app's cloud database.
-
-### How Tally Prime XML API Works
-Tally Prime exposes an HTTP XML API on port 9000 (configurable). You send XML requests to fetch data like ledgers (customers/parties). The response is XML containing master data.
+Build a lightweight local HTTP API server that runs on the user's Windows PC alongside Tally Prime. It acts as a CORS-friendly bridge: the browser app calls the middleware on `localhost:3456`, which forwards requests to Tally's XML API on `localhost:9000` and returns parsed JSON. Distributed as a downloadable `.exe` installer.
 
 ### Architecture
 
 ```text
-Browser (your app)
-   ↓ User clicks "Import from Tally"
-   ↓ Sends XML request to localhost:9000
-   ↓ Tally responds with customer XML
-   ↓ Parse XML → map to customer objects
-   ↓ Call existing bulk import logic (useBulkImportCustomers)
-   ↓ Customers + areas saved to cloud DB
+Browser (your web app)
+   ↓ fetch("http://localhost:3456/api/customers")
+Local Middleware (localhost:3456)
+   ↓ POST XML to Tally (localhost:9000)
+Tally Prime XML API
+   ↓ XML response
+Local Middleware
+   ↓ Parse XML → JSON with CORS headers
+Browser
+   ↓ Import customers via useBulkImportCustomers
 ```
 
-**Key constraint**: The browser must directly call `http://localhost:9000` since Tally runs on the user's local machine. This works because:
-- Tally's HTTP server doesn't enforce CORS headers (most local servers don't)
-- We'll use `fetch` with `mode: 'no-cors'` or handle CORS errors gracefully
-- **Fallback**: If CORS blocks direct browser access, we'll provide a downloadable Python/Node script the user runs locally that exports Tally data to CSV, then they use the existing CSV bulk import
+### What the Middleware Does
+- Runs as a small HTTP server on `localhost:3456`
+- Adds proper CORS headers so the browser can call it
+- Exposes endpoints:
+  - `GET /api/health` — check if middleware + Tally are running
+  - `GET /api/customers` — fetch Sundry Debtors from Tally, return JSON
+  - `GET /api/invoices` — (future) fetch sales vouchers
+- Parses Tally XML responses into clean JSON
+- Runs in system tray on Windows (start on boot optional)
 
-### Changes
+### Technology
+- **Node.js** standalone executable using `pkg` or `nexe` (compiles to single `.exe`)
+- **Express** for HTTP server with CORS middleware
+- **xml2js** for XML parsing
+- Packaged with **Inno Setup** or **NSIS** for `.exe` installer
 
-#### 1. New Component: `src/components/forms/TallyImportDialog.tsx`
-- Dialog with:
-  - Tally server URL input (default: `http://localhost:9000`)
-  - "Test Connection" button to verify Tally is running
-  - "Fetch Customers" button that sends Tally XML request for Sundry Debtors
-  - Preview table showing fetched customers (name, phone, address, area)
-  - "Import" button that calls `useBulkImportCustomers`
-- XML request to fetch customer ledgers:
-  ```xml
-  <ENVELOPE>
-    <HEADER><TALLYREQUEST>Export Data</TALLYREQUEST></HEADER>
-    <BODY><EXPORTDATA><REQUESTDESC>
-      <REPORTNAME>List of Accounts</REPORTNAME>
-      <STATICVARIABLES>
-        <ACCOUNTTYPE>Sundry Debtors</ACCOUNTTYPE>
-      </STATICVARIABLES>
-    </REQUESTDESC></EXPORTDATA></BODY>
-  </ENVELOPE>
-  ```
-- Parse XML response using `DOMParser` to extract: Name, Address, Phone/Mobile, Area/State, GSTIN
+### Limitation: Cannot Build in Lovable
+This middleware is a **standalone desktop application** — it cannot be built, compiled, or packaged within Lovable's browser-based environment. Lovable builds web apps, not native Windows executables.
 
-#### 2. Update `src/pages/Customers.tsx`
-- Add "Import from Tally" button next to existing "Bulk Import" button (permission-gated same as bulk import)
+### What We CAN Do in Lovable
 
-#### 3. Fallback: Export Script
-- If browser CORS blocks localhost access, show a message with instructions:
-  - "Tally must be running with Allow CORS or use our export script"
-  - Provide a downloadable Python script that connects to Tally locally, exports to CSV
-  - User then uses existing CSV bulk import
+#### 1. Generate the middleware source code as a downloadable package
+- Create a complete Node.js project (server code, package.json, build scripts)
+- Package it as a `.zip` the user downloads from the app
+- Include README with build instructions (`npm install && npm run build` → produces `.exe`)
 
-### Important Notes
-- Tally must be running and its HTTP server enabled (Gateway → Configure → HTTP port 9000)
-- Only works when the user is on the same PC as Tally (localhost)
-- Auto-creates missing areas (reuses existing bulk import logic)
-- Maps Tally "Sundry Debtors" group to customers
+#### 2. Update `TallyImportDialog.tsx` to use the middleware
+- Change fetch URL from `localhost:9000` (Tally direct) to `localhost:3456` (middleware)
+- Remove CORS fallback logic since middleware handles CORS
+- Add middleware download link in the dialog UI
+- Health check endpoint to verify middleware is running
 
-### Files Changed
-1. `src/components/forms/TallyImportDialog.tsx` — New dialog for Tally connection + import
-2. `src/pages/Customers.tsx` — Add "Import from Tally" button
+#### 3. Store middleware source in the project
+- `public/tally-bridge/` folder with the Node.js middleware source
+- Or generate it as a downloadable `.zip` from the dialog
+
+### Changes in Lovable
+
+| File | Change |
+|------|--------|
+| `public/tally-bridge/server.js` | Middleware source: Express server, Tally XML proxy, JSON parser |
+| `public/tally-bridge/package.json` | Dependencies + build script using `pkg` |
+| `public/tally-bridge/install.bat` | One-click install script: installs Node, deps, builds .exe |
+| `public/tally-bridge/README.md` | Setup instructions |
+| `src/components/forms/TallyImportDialog.tsx` | Point to middleware URL, add download/setup instructions, remove CORS fallback |
+
+### User Flow
+1. Open Customers → Import from Tally
+2. Dialog shows "Download Tally Bridge" button if middleware not detected
+3. User downloads `.zip`, extracts, runs `install.bat` on their Windows PC
+4. Middleware starts on `localhost:3456`, connects to Tally on `localhost:9000`
+5. User clicks "Connect" in dialog → middleware health check passes
+6. User clicks "Fetch Customers" → middleware proxies Tally data as JSON
+7. User selects and imports customers
+
+### Technical Details (Middleware `server.js`)
+- Express server on port 3456
+- CORS: `Access-Control-Allow-Origin: *`
+- `GET /api/health` → checks Tally connectivity, returns `{ tally: true/false }`
+- `GET /api/customers` → sends Sundry Debtors XML to Tally, parses response, returns `[{ name, phone, address, area, gstin }]`
+- Error handling with clear messages if Tally is not running
 
