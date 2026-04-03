@@ -1,84 +1,54 @@
 
 
-## Tally Prime Local Middleware (Windows Installer)
+## Fix: Tally Bridge Not Fetching Sundry Debtors
 
-### Overview
-Build a lightweight local HTTP API server that runs on the user's Windows PC alongside Tally Prime. It acts as a CORS-friendly bridge: the browser app calls the middleware on `localhost:3456`, which forwards requests to Tally's XML API on `localhost:9000` and returns parsed JSON. Distributed as a downloadable `.exe` installer.
+### Root Cause
+The XML request template uses a non-standard format. Tally Prime's XML API expects a specific request structure for fetching ledger data. The current XML uses `<ACCOUNTTYPE>Sundry Debtors</ACCOUNTTYPE>` which is not the correct Tally XML API format for exporting ledger masters.
 
-### Architecture
+### Correct Tally XML Request
+Tally Prime uses a `Collection`-based export with `STATICVARIABLES` to filter by group. The proper XML for fetching Sundry Debtors ledgers is:
 
-```text
-Browser (your web app)
-   ↓ fetch("http://localhost:3456/api/customers")
-Local Middleware (localhost:3456)
-   ↓ POST XML to Tally (localhost:9000)
-Tally Prime XML API
-   ↓ XML response
-Local Middleware
-   ↓ Parse XML → JSON with CORS headers
-Browser
-   ↓ Import customers via useBulkImportCustomers
+```xml
+<ENVELOPE>
+  <HEADER>
+    <VERSION>1</VERSION>
+    <TALLYREQUEST>Export</TALLYREQUEST>
+    <TYPE>Collection</TYPE>
+    <ID>All Ledgers</ID>
+  </HEADER>
+  <BODY>
+    <DESC>
+      <STATICVARIABLES>
+        <SVCURRENTCOMPANY/>
+      </STATICVARIABLES>
+      <TDL>
+        <TDLMESSAGE>
+          <COLLECTION NAME="All Ledgers" ISMODIFY="No">
+            <TYPE>Ledger</TYPE>
+            <FILTER>SundryDebtorsOnly</FILTER>
+            <FETCH>NAME,ADDRESS,LEDGERPHONE,LEDGERMOBILE,LEDSTATENAME,PARTYGSTIN,COUNTRYNAME</FETCH>
+          </COLLECTION>
+          <SYSTEM TYPE="Formulae" NAME="SundryDebtorsOnly">$Parent="Sundry Debtors"</SYSTEM>
+        </TDLMESSAGE>
+      </TDL>
+    </DESC>
+  </BODY>
+</ENVELOPE>
 ```
 
-### What the Middleware Does
-- Runs as a small HTTP server on `localhost:3456`
-- Adds proper CORS headers so the browser can call it
-- Exposes endpoints:
-  - `GET /api/health` — check if middleware + Tally are running
-  - `GET /api/customers` — fetch Sundry Debtors from Tally, return JSON
-  - `GET /api/invoices` — (future) fetch sales vouchers
-- Parses Tally XML responses into clean JSON
-- Runs in system tray on Windows (start on boot optional)
+### Changes
 
-### Technology
-- **Node.js** standalone executable using `pkg` or `nexe` (compiles to single `.exe`)
-- **Express** for HTTP server with CORS middleware
-- **xml2js** for XML parsing
-- Packaged with **Inno Setup** or **NSIS** for `.exe` installer
+#### `public/tally-bridge/server.js`
 
-### Limitation: Cannot Build in Lovable
-This middleware is a **standalone desktop application** — it cannot be built, compiled, or packaged within Lovable's browser-based environment. Lovable builds web apps, not native Windows executables.
+1. **Replace the XML request template** with the correct Tally TDL Collection-based export that filters ledgers where `$Parent="Sundry Debtors"`
+2. **Update the XML parser** (`parseCustomers`) to handle the Collection response format, which returns `COLLECTION > LEDGER` elements instead of `TALLYMESSAGE > LEDGER`
+3. **Add debug logging** to print the raw XML response so the user can see what Tally returns (helps troubleshoot further)
+4. **Add a `/api/raw` endpoint** (optional) that returns the raw XML from Tally for debugging
 
-### What We CAN Do in Lovable
+#### `public/tally-bridge.zip`
+Regenerate the zip with the updated `server.js`
 
-#### 1. Generate the middleware source code as a downloadable package
-- Create a complete Node.js project (server code, package.json, build scripts)
-- Package it as a `.zip` the user downloads from the app
-- Include README with build instructions (`npm install && npm run build` → produces `.exe`)
-
-#### 2. Update `TallyImportDialog.tsx` to use the middleware
-- Change fetch URL from `localhost:9000` (Tally direct) to `localhost:3456` (middleware)
-- Remove CORS fallback logic since middleware handles CORS
-- Add middleware download link in the dialog UI
-- Health check endpoint to verify middleware is running
-
-#### 3. Store middleware source in the project
-- `public/tally-bridge/` folder with the Node.js middleware source
-- Or generate it as a downloadable `.zip` from the dialog
-
-### Changes in Lovable
-
-| File | Change |
-|------|--------|
-| `public/tally-bridge/server.js` | Middleware source: Express server, Tally XML proxy, JSON parser |
-| `public/tally-bridge/package.json` | Dependencies + build script using `pkg` |
-| `public/tally-bridge/install.bat` | One-click install script: installs Node, deps, builds .exe |
-| `public/tally-bridge/README.md` | Setup instructions |
-| `src/components/forms/TallyImportDialog.tsx` | Point to middleware URL, add download/setup instructions, remove CORS fallback |
-
-### User Flow
-1. Open Customers → Import from Tally
-2. Dialog shows "Download Tally Bridge" button if middleware not detected
-3. User downloads `.zip`, extracts, runs `install.bat` on their Windows PC
-4. Middleware starts on `localhost:3456`, connects to Tally on `localhost:9000`
-5. User clicks "Connect" in dialog → middleware health check passes
-6. User clicks "Fetch Customers" → middleware proxies Tally data as JSON
-7. User selects and imports customers
-
-### Technical Details (Middleware `server.js`)
-- Express server on port 3456
-- CORS: `Access-Control-Allow-Origin: *`
-- `GET /api/health` → checks Tally connectivity, returns `{ tally: true/false }`
-- `GET /api/customers` → sends Sundry Debtors XML to Tally, parses response, returns `[{ name, phone, address, area, gstin }]`
-- Error handling with clear messages if Tally is not running
+### Files Changed
+1. `public/tally-bridge/server.js` — Fix XML request template and parser for Tally's actual API format
+2. `public/tally-bridge.zip` — Rebuild with updated source
 
