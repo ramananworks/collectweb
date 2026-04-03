@@ -107,7 +107,12 @@ export default function TallyImportDialog() {
   }
 
   function downloadBridge() {
-    window.open("/tally-bridge/", "_blank");
+    const a = document.createElement("a");
+    a.href = "/tally-bridge.zip";
+    a.download = "tally-bridge.zip";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   function handleClose() {
