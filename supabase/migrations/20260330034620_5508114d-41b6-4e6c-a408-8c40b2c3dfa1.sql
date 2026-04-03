@@ -1,1 +1,0 @@
-ALTER TABLE public.companies ADD COLUMN plan_expires_at timestamptz DEFAULT NULL;

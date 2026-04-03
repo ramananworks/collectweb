@@ -1,54 +1,47 @@
 
 
-## Fix: Tally Bridge Not Fetching Sundry Debtors
+## Add Inline "Create Area" Option in Add & Edit Customer Dialogs
 
-### Root Cause
-The XML request template uses a non-standard format. Tally Prime's XML API expects a specific request structure for fetching ledger data. The current XML uses `<ACCOUNTTYPE>Sundry Debtors</ACCOUNTTYPE>` which is not the correct Tally XML API format for exporting ledger masters.
-
-### Correct Tally XML Request
-Tally Prime uses a `Collection`-based export with `STATICVARIABLES` to filter by group. The proper XML for fetching Sundry Debtors ledgers is:
-
-```xml
-<ENVELOPE>
-  <HEADER>
-    <VERSION>1</VERSION>
-    <TALLYREQUEST>Export</TALLYREQUEST>
-    <TYPE>Collection</TYPE>
-    <ID>All Ledgers</ID>
-  </HEADER>
-  <BODY>
-    <DESC>
-      <STATICVARIABLES>
-        <SVCURRENTCOMPANY/>
-      </STATICVARIABLES>
-      <TDL>
-        <TDLMESSAGE>
-          <COLLECTION NAME="All Ledgers" ISMODIFY="No">
-            <TYPE>Ledger</TYPE>
-            <FILTER>SundryDebtorsOnly</FILTER>
-            <FETCH>NAME,ADDRESS,LEDGERPHONE,LEDGERMOBILE,LEDSTATENAME,PARTYGSTIN,COUNTRYNAME</FETCH>
-          </COLLECTION>
-          <SYSTEM TYPE="Formulae" NAME="SundryDebtorsOnly">$Parent="Sundry Debtors"</SYSTEM>
-        </TDLMESSAGE>
-      </TDL>
-    </DESC>
-  </BODY>
-</ENVELOPE>
-```
+### Overview
+Add a "+ Create New Area" option at the bottom of the area dropdown in both the Add Customer and Edit Customer dialogs. When selected, it shows an inline input field to type and save a new area name, which gets added to the database and auto-selected.
 
 ### Changes
 
-#### `public/tally-bridge/server.js`
+#### `src/components/forms/AddCustomerDialog.tsx`
+1. Import `useAddArea` from `use-data`
+2. Add state: `isCreatingArea`, `newAreaName`
+3. Replace the Area `Select` with a combined UI:
+   - Show the existing Select dropdown with an extra item `+ Create New Area` at the bottom
+   - When that item is clicked, toggle to an inline input + Save/Cancel buttons
+   - On save, call `addArea.mutate(newAreaName)`, then set the form field value to the new area name
+4. Reset `isCreatingArea` state when dialog closes
 
-1. **Replace the XML request template** with the correct Tally TDL Collection-based export that filters ledgers where `$Parent="Sundry Debtors"`
-2. **Update the XML parser** (`parseCustomers`) to handle the Collection response format, which returns `COLLECTION > LEDGER` elements instead of `TALLYMESSAGE > LEDGER`
-3. **Add debug logging** to print the raw XML response so the user can see what Tally returns (helps troubleshoot further)
-4. **Add a `/api/raw` endpoint** (optional) that returns the raw XML from Tally for debugging
+#### `src/components/forms/EditCustomerDialog.tsx`
+1. Same pattern — import `useAddArea`, add `isCreatingArea`/`newAreaName` state
+2. Add `+ Create New Area` option to the area Select
+3. Inline input + save flow identical to AddCustomerDialog
 
-#### `public/tally-bridge.zip`
-Regenerate the zip with the updated `server.js`
+### UX Flow
+```text
+Area: [Select area          ▼]
+      ├─ Andheri
+      ├─ Bandra
+      ├─ Dadar
+      └─ + Create New Area     ← special item
+
+Click "Create New Area" →
+
+Area: [Type area name____] [✓] [✗]
+```
+
+After saving, the new area appears in the dropdown and is auto-selected.
+
+### Technical Details
+- `useAddArea` already exists in `use-data.ts` and handles inserting into the `areas` table with company_id + cache invalidation
+- The `+ Create New Area` SelectItem uses a special sentinel value (e.g. `__create_new__`) to detect selection and switch to input mode
+- Duplicate check against existing `areas` array (case-insensitive) before saving
 
 ### Files Changed
-1. `public/tally-bridge/server.js` — Fix XML request template and parser for Tally's actual API format
-2. `public/tally-bridge.zip` — Rebuild with updated source
+1. `src/components/forms/AddCustomerDialog.tsx` — Add inline area creation
+2. `src/components/forms/EditCustomerDialog.tsx` — Add inline area creation
 
