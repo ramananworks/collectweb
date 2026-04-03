@@ -11,10 +11,20 @@ const TALLY_URL = process.env.TALLY_URL || "http://localhost:9000";
 app.use(cors());
 app.use(express.json());
 
-// XML request templates
+// Correct TDL Collection-based XML request for Sundry Debtors
 const SUNDRY_DEBTORS_XML = `<ENVELOPE>
-<HEADER><VERSION>1</VERSION><TALLYREQUEST>Export</TALLYREQUEST><TYPE>Data</TYPE><ID>List of Accounts</ID></HEADER>
-<BODY><DESC><STATICVARIABLES><ACCOUNTTYPE>Sundry Debtors</ACCOUNTTYPE></STATICVARIABLES></DESC></BODY>
+<HEADER><VERSION>1</VERSION><TALLYREQUEST>Export</TALLYREQUEST><TYPE>Collection</TYPE><ID>All Ledgers</ID></HEADER>
+<BODY><DESC>
+<STATICVARIABLES><SVCURRENTCOMPANY/></STATICVARIABLES>
+<TDL><TDLMESSAGE>
+<COLLECTION NAME="All Ledgers" ISMODIFY="No">
+<TYPE>Ledger</TYPE>
+<FILTER>SundryDebtorsOnly</FILTER>
+<FETCH>NAME,ADDRESS,LEDGERPHONE,LEDGERMOBILE,LEDSTATENAME,PARTYGSTIN,COUNTRYNAME</FETCH>
+</COLLECTION>
+<SYSTEM TYPE="Formulae" NAME="SundryDebtorsOnly">$Parent="Sundry Debtors"</SYSTEM>
+</TDLMESSAGE></TDL>
+</DESC></BODY>
 </ENVELOPE>`;
 
 /**
@@ -53,36 +63,48 @@ function tallyRequest(xmlBody) {
 }
 
 /**
- * Parse Tally XML response into customer objects
+ * Parse Tally Collection XML response into customer objects
  */
 function parseCustomers(xmlText) {
   return new Promise((resolve, reject) => {
-    parseString(xmlText, { explicitArray: false, ignoreAttrs: true }, (err, result) => {
+    parseString(xmlText, { explicitArray: false, ignoreAttrs: false }, (err, result) => {
       if (err) return reject(err);
 
       const customers = [];
 
       try {
-        // Navigate to ledger entries
         let ledgers = [];
-        const body = result?.ENVELOPE?.BODY;
 
-        if (body?.DATA?.TALLYMESSAGE?.LEDGER) {
-          const raw = body.DATA.TALLYMESSAGE.LEDGER;
-          ledgers = Array.isArray(raw) ? raw : [raw];
-        } else if (body?.TALLYMESSAGE?.LEDGER) {
-          const raw = body.TALLYMESSAGE.LEDGER;
+        // Collection response: ENVELOPE > COLLECTION > LEDGER
+        const collection = result?.ENVELOPE?.COLLECTION;
+        if (collection?.LEDGER) {
+          const raw = collection.LEDGER;
           ledgers = Array.isArray(raw) ? raw : [raw];
         }
 
-        // Also check for DESC path
-        if (ledgers.length === 0 && result?.ENVELOPE?.LEDGER) {
-          const raw = result.ENVELOPE.LEDGER;
-          ledgers = Array.isArray(raw) ? raw : [raw];
+        // Fallback: ENVELOPE > BODY > DATA > COLLECTION > LEDGER
+        if (ledgers.length === 0) {
+          const col2 = result?.ENVELOPE?.BODY?.DATA?.COLLECTION;
+          if (col2?.LEDGER) {
+            const raw = col2.LEDGER;
+            ledgers = Array.isArray(raw) ? raw : [raw];
+          }
         }
+
+        // Fallback: TALLYMESSAGE path
+        if (ledgers.length === 0) {
+          const body = result?.ENVELOPE?.BODY;
+          if (body?.DATA?.TALLYMESSAGE?.LEDGER) {
+            const raw = body.DATA.TALLYMESSAGE.LEDGER;
+            ledgers = Array.isArray(raw) ? raw : [raw];
+          }
+        }
+
+        console.log(`Found ${ledgers.length} ledger entries`);
 
         for (const ledger of ledgers) {
-          const name = (ledger.NAME || ledger._ || "").toString().trim();
+          // Name can be in NAME tag or in $ attribute
+          const name = (ledger.NAME || ledger.$ && ledger.$.NAME || ledger._ || "").toString().trim();
           if (!name) continue;
 
           // Address
@@ -126,7 +148,7 @@ function parseCustomers(xmlText) {
 // ==================== ROUTES ====================
 
 /**
- * Health check — verifies middleware is running and Tally is reachable
+ * Health check
  */
 app.get("/api/health", async (req, res) => {
   try {
@@ -143,6 +165,7 @@ app.get("/api/health", async (req, res) => {
 app.get("/api/customers", async (req, res) => {
   try {
     const xmlResponse = await tallyRequest(SUNDRY_DEBTORS_XML);
+    console.log("Raw Tally XML response (first 500 chars):", xmlResponse.substring(0, 500));
     const customers = await parseCustomers(xmlResponse);
     res.json({ success: true, count: customers.length, customers });
   } catch (err) {
@@ -153,6 +176,19 @@ app.get("/api/customers", async (req, res) => {
       details: err.message,
       hint: "Make sure Tally Prime is running and HTTP server is enabled on port 9000",
     });
+  }
+});
+
+/**
+ * Debug endpoint — returns raw XML from Tally
+ */
+app.get("/api/raw", async (req, res) => {
+  try {
+    const xmlResponse = await tallyRequest(SUNDRY_DEBTORS_XML);
+    res.set("Content-Type", "text/xml");
+    res.send(xmlResponse);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
   }
 });
 
