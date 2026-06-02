@@ -129,15 +129,20 @@ Deno.serve(async (req) => {
     }
 
     const route = routesData.routes[0];
-    const orderIdx: number[] = route.optimizedIntermediateWaypointIndex || valid.map((_, i) => i);
 
-    // Build ordered stops list
+    // Build ordered stops list using the API's optimized order
     const stopsToOrder = body.returnToOrigin ? valid : valid.slice(0, valid.length - 1);
-    const orderedStops = orderIdx.map((i) => ({
-      ...stopsToOrder[i],
-      coord: stopsToOrder[i].coord,
-    }));
-    if (!body.returnToOrigin) orderedStops.push(valid[valid.length - 1]);
+    const orderIdx: number[] =
+      route.optimizedIntermediateWaypointIndex && route.optimizedIntermediateWaypointIndex.length === stopsToOrder.length
+        ? route.optimizedIntermediateWaypointIndex
+        : stopsToOrder.map((_, i) => i);
+
+    const orderedStops = orderIdx
+      .map((i) => stopsToOrder[i])
+      .filter((s): s is typeof valid[number] => !!s);
+    if (!body.returnToOrigin && valid.length > 0) {
+      orderedStops.push(valid[valid.length - 1]);
+    }
 
     return new Response(
       JSON.stringify({
