@@ -17,7 +17,6 @@ import {
   Sun,
   Moon,
   Lock,
-  Route as RouteIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -60,7 +59,6 @@ const allNavItems = [
   { to: "/invoices", icon: FileText, label: "Invoices", roles: null },
   { to: "/outstanding", icon: IndianRupee, label: "Outstanding", roles: null },
   { to: "/collections", icon: CreditCard, label: "Collections", roles: ["owner", "manager", "collection_staff"] as string[] },
-  { to: "/route-planner", icon: RouteIcon, label: "Route Planner", roles: ["owner", "manager", "collection_staff", "delivery_staff"] as string[] },
   { to: "/reports", icon: BarChart3, label: "Reports", roles: ["owner", "manager"] as string[] },
   { to: "/users", icon: UserCog, label: "Team", roles: ["owner"] as string[] },
   { to: "/settings", icon: Settings, label: "Company Settings", roles: ["owner", "manager"] as string[] },
