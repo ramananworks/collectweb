@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCompany, useAreas, useAddArea, useUpdateArea, useDeleteArea, useUpdateCompany } from "@/hooks/use-data";
 import { toast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
+import TallyApiIntegration from "@/components/settings/TallyApiIntegration";
 
 export default function Settings() {
   const { data: company } = useCompany();
@@ -265,6 +266,9 @@ export default function Settings() {
         </ul>
       </div>
       )}
+
+      {/* Tally Prime Connector API - Owner only */}
+      {canManageSettings && <TallyApiIntegration />}
     </div>
   );
 }

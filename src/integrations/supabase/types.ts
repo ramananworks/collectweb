@@ -14,6 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_devices: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          device_name: string
+          id: string
+          last_used_at: string | null
+          revoked_at: string | null
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          device_name: string
+          id?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          device_name?: string
+          id?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_devices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_pair_codes: {
+        Row: {
+          claimed_at: string | null
+          claimed_device_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_device_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_device_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_pair_codes_claimed_device_id_fkey"
+            columns: ["claimed_device_id"]
+            isOneToOne: false
+            referencedRelation: "api_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_pair_codes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_request_log: {
+        Row: {
+          company_id: string
+          created_at: string
+          device_id: string | null
+          duration_ms: number | null
+          id: string
+          method: string
+          path: string
+          status: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          device_id?: string | null
+          duration_ms?: number | null
+          id?: string
+          method: string
+          path: string
+          status: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          device_id?: string | null
+          duration_ms?: number | null
+          id?: string
+          method?: string
+          path?: string
+          status?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_request_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_request_log_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "api_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       areas: {
         Row: {
           company_id: string
@@ -96,12 +236,14 @@ export type Database = {
           created_at: string
           credit_limit: number
           default_due_days: number | null
+          external_ref: string | null
           gstin: string | null
           id: string
           local_id: string | null
           name: string
           outstanding: number
           phone: string
+          source: string
           synced: boolean
         }
         Insert: {
@@ -111,12 +253,14 @@ export type Database = {
           created_at?: string
           credit_limit?: number
           default_due_days?: number | null
+          external_ref?: string | null
           gstin?: string | null
           id?: string
           local_id?: string | null
           name: string
           outstanding?: number
           phone?: string
+          source?: string
           synced?: boolean
         }
         Update: {
@@ -126,12 +270,14 @@ export type Database = {
           created_at?: string
           credit_limit?: number
           default_due_days?: number | null
+          external_ref?: string | null
           gstin?: string | null
           id?: string
           local_id?: string | null
           name?: string
           outstanding?: number
           phone?: string
+          source?: string
           synced?: boolean
         }
         Relationships: [
@@ -213,12 +359,14 @@ export type Database = {
           description: string | null
           due_date: string
           due_date_source: string
+          external_ref: string | null
           id: string
           invoice_date: string
           invoice_number: string
           local_id: string | null
           otp_verified: boolean | null
           paid_amount: number
+          source: string
           status: string
           synced: boolean
         }
@@ -235,12 +383,14 @@ export type Database = {
           description?: string | null
           due_date: string
           due_date_source?: string
+          external_ref?: string | null
           id?: string
           invoice_date?: string
           invoice_number: string
           local_id?: string | null
           otp_verified?: boolean | null
           paid_amount?: number
+          source?: string
           status?: string
           synced?: boolean
         }
@@ -257,12 +407,14 @@ export type Database = {
           description?: string | null
           due_date?: string
           due_date_source?: string
+          external_ref?: string | null
           id?: string
           invoice_date?: string
           invoice_number?: string
           local_id?: string | null
           otp_verified?: boolean | null
           paid_amount?: number
+          source?: string
           status?: string
           synced?: boolean
         }
@@ -298,11 +450,13 @@ export type Database = {
           created_at: string
           customer_name: string
           date: string
+          external_ref: string | null
           id: string
           invoice_id: string
           local_id: string | null
           mode: string
           notes: string | null
+          source: string
           synced: boolean
         }
         Insert: {
@@ -312,11 +466,13 @@ export type Database = {
           created_at?: string
           customer_name: string
           date?: string
+          external_ref?: string | null
           id?: string
           invoice_id: string
           local_id?: string | null
           mode?: string
           notes?: string | null
+          source?: string
           synced?: boolean
         }
         Update: {
@@ -326,11 +482,13 @@ export type Database = {
           created_at?: string
           customer_name?: string
           date?: string
+          external_ref?: string | null
           id?: string
           invoice_id?: string
           local_id?: string | null
           mode?: string
           notes?: string | null
+          source?: string
           synced?: boolean
         }
         Relationships: [
@@ -425,6 +583,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_device_by_token_hash: {
+        Args: { _token_hash: string }
+        Returns: {
+          company_id: string
+          device_id: string
+        }[]
+      }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
