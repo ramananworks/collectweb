@@ -22,6 +22,7 @@ import Reports from "@/pages/Reports";
 import UserManagement from "@/pages/UserManagement";
 import Settings from "@/pages/Settings";
 import Outstanding from "@/pages/Outstanding";
+import Billing from "@/pages/Billing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/users" element={<ProtectedLayout><UserManagement /></ProtectedLayout>} />
             <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
             <Route path="/outstanding" element={<ProtectedLayout><Outstanding /></ProtectedLayout>} />
+            <Route path="/settings/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </AppLockProvider>

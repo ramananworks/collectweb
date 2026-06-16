@@ -52,6 +52,7 @@ import GlobalFAB from "@/components/shared/GlobalFAB";
 import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
 import { useAppLock } from "@/contexts/AppLockContext";
 import { Switch } from "@/components/ui/switch";
+import ReadOnlyBanner from "@/components/billing/ReadOnlyBanner";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
@@ -371,6 +372,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
+        <ReadOnlyBanner />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
         <GlobalFAB />
       </div>
