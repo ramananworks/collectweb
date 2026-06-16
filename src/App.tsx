@@ -59,6 +59,7 @@ const App = () => (
             <Route path="/users" element={<ProtectedLayout><UserManagement /></ProtectedLayout>} />
             <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
             <Route path="/outstanding" element={<ProtectedLayout><Outstanding /></ProtectedLayout>} />
+            <Route path="/settings/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </AppLockProvider>
