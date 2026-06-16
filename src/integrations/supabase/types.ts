@@ -549,6 +549,65 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          company_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_type: string
+          quantity: number
+          raw: Json | null
+          razorpay_plan_id: string | null
+          razorpay_subscription_id: string | null
+          short_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          company_id: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type: string
+          quantity?: number
+          raw?: Json | null
+          razorpay_plan_id?: string | null
+          razorpay_subscription_id?: string | null
+          short_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          company_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type?: string
+          quantity?: number
+          raw?: Json | null
+          razorpay_plan_id?: string | null
+          razorpay_subscription_id?: string | null
+          short_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           company_id: string
@@ -583,6 +642,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      company_has_active_plan: {
+        Args: { _company_id: string }
+        Returns: boolean
+      }
+      current_user_can_write: { Args: never; Returns: boolean }
       get_device_by_token_hash: {
         Args: { _token_hash: string }
         Returns: {
