@@ -22,6 +22,7 @@ import Reports from "@/pages/Reports";
 import UserManagement from "@/pages/UserManagement";
 import Settings from "@/pages/Settings";
 import Outstanding from "@/pages/Outstanding";
+import Billing from "@/pages/Billing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
