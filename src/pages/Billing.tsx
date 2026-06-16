@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { formatDisplayDate } from "@/lib/dateUtils";
+import { formatDisplayDate } from "@/lib/utils";
 
 const PRICE_MONTHLY = 299;
 const PRICE_YEARLY = 2999;
