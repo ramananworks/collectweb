@@ -113,6 +113,23 @@ export default function Settings() {
         </div>
       )}
 
+      {/* Billing - Owner only */}
+      {canManageSettings && (
+        <Link
+          to="/settings/billing"
+          className="block rounded-xl bg-card p-4 sm:p-5 stat-card-shadow max-w-xl hover:bg-accent transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <CreditCard className="h-5 w-5 text-primary" />
+            <div className="flex-1">
+              <div className="font-semibold">Billing & Subscription</div>
+              <div className="text-xs text-muted-foreground">Manage your CollectWeb Pro plan and seats</div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </Link>
+      )}
+
       {/* Company Details - Owner only */}
       {canManageSettings && (<>
       {/* Company Details */}
