@@ -8,8 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { formatDisplayDate } from "@/lib/utils";
 
-const PRICE_MONTHLY = 299;
-const PRICE_YEARLY = 2999;
+const PRICE_MONTHLY = 450;
+const PRICE_YEARLY = 4500;
 
 declare global {
   interface Window {

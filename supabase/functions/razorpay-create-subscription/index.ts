@@ -34,7 +34,7 @@ async function rpFetch(path: string, init: RequestInit = {}) {
 /** Find or create a per-seat plan for the requested period. */
 async function ensurePlan(plan_type: "monthly" | "yearly") {
   const period = plan_type === "monthly" ? "monthly" : "yearly";
-  const amount = plan_type === "monthly" ? 29900 : 299900; // INR paise per seat
+  const amount = plan_type === "monthly" ? 45000 : 450000; // INR paise per seat
   const name = plan_type === "monthly" ? "CollectWeb Pro Monthly (per user)" : "CollectWeb Pro Yearly (per user)";
 
   // List existing plans and try to match by item.name + amount + period
