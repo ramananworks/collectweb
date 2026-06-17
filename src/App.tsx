@@ -10,7 +10,7 @@ import { AppLockProvider } from "@/contexts/AppLockContext";
 import AppLockScreen from "@/components/lock/AppLockScreen";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
-import SplashScreen from "@/pages/SplashScreen";
+import RootRedirect from "@/components/RootRedirect";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import SetPassword from "@/pages/SetPassword";
@@ -46,7 +46,7 @@ const App = () => (
           <AppLockProvider>
           <AppLockScreen />
           <Routes>
-            <Route path="/" element={<SplashScreen />} />
+            <Route path="/" element={<RootRedirect />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
