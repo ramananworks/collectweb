@@ -549,6 +549,68 @@ export type Database = {
           },
         ]
       }
+      subscription_payment_audits: {
+        Row: {
+          actual_amount_paise: number
+          amount_matches: boolean
+          company_id: string
+          created_at: string
+          currency: string
+          event_name: string
+          expected_amount_paise: number
+          id: string
+          mismatch_reason: string | null
+          plan_type: string
+          quantity: number
+          raw: Json | null
+          razorpay_event_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_subscription_id: string
+        }
+        Insert: {
+          actual_amount_paise: number
+          amount_matches: boolean
+          company_id: string
+          created_at?: string
+          currency?: string
+          event_name: string
+          expected_amount_paise: number
+          id?: string
+          mismatch_reason?: string | null
+          plan_type: string
+          quantity: number
+          raw?: Json | null
+          razorpay_event_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id: string
+        }
+        Update: {
+          actual_amount_paise?: number
+          amount_matches?: boolean
+          company_id?: string
+          created_at?: string
+          currency?: string
+          event_name?: string
+          expected_amount_paise?: number
+          id?: string
+          mismatch_reason?: string | null
+          plan_type?: string
+          quantity?: number
+          raw?: Json | null
+          razorpay_event_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_payment_audits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean
