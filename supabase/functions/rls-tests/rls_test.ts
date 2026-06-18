@@ -32,6 +32,7 @@ interface TestOwner {
 }
 
 async function createOwner(suffix: string): Promise<TestOwner> {
+  if (!admin) throw new Error("admin client not initialised");
   const email = `rls-test-${suffix}-${crypto.randomUUID()}@example.test`;
   const password = `Test-${crypto.randomUUID()}`;
 
