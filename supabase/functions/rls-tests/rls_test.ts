@@ -169,3 +169,11 @@ Deno.test("RLS multi-tenant isolation", { ignore: !ENV_READY }, async (t) => {
     await cleanup(B);
   }
 });
+
+Deno.test("env check (skipped if service role unavailable)", () => {
+  if (!ENV_READY) {
+    console.warn(
+      "[rls-tests] SUPABASE_SERVICE_ROLE_KEY/SUPABASE_URL/SUPABASE_ANON_KEY missing — main RLS test is ignored. Provide them to actually exercise the policies.",
+    );
+  }
+});
