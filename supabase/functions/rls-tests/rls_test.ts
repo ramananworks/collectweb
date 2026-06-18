@@ -67,6 +67,7 @@ async function createOwner(suffix: string): Promise<TestOwner> {
 }
 
 async function cleanup(owner: TestOwner) {
+  if (!admin) return;
   await admin.from("invoices").delete().eq("company_id", owner.companyId);
   await admin.from("customers").delete().eq("company_id", owner.companyId);
   await admin.from("areas").delete().eq("company_id", owner.companyId);
@@ -76,7 +77,8 @@ async function cleanup(owner: TestOwner) {
   await admin.auth.admin.deleteUser(owner.userId);
 }
 
-Deno.test("RLS multi-tenant isolation", async (t) => {
+Deno.test("RLS multi-tenant isolation", { ignore: !ENV_READY }, async (t) => {
+  if (!admin) return;
   const A = await createOwner("A");
   const B = await createOwner("B");
 
