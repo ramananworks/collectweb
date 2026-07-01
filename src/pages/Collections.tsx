@@ -24,6 +24,30 @@ export default function Collections() {
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
+  const { data: invoices = [] } = useInvoices();
+  const { data: company } = useCompany();
+
+  function handleReprint(customerName: string, p: typeof payments[number]) {
+    const inv = invoices.find((i) => i.id === p.invoice_id);
+    const outstanding = Math.max(0, invoices
+      .filter((i) => i.customer_name === customerName)
+      .reduce((s, i) => s + (Number(i.amount) - Number(i.paid_amount)), 0));
+    printReceipt({
+      companyName: company?.name || "My Company",
+      companyPhone: (company as any)?.phone,
+      companyAddress: (company as any)?.address,
+      customerName,
+      invoiceNumber: inv?.invoice_number,
+      invoiceDate: inv?.invoice_date,
+      paymentDate: p.date,
+      amount: Number(p.amount),
+      mode: p.mode,
+      collectedBy: p.collected_by,
+      notes: (p as any).notes || undefined,
+      outstandingAfter: outstanding,
+      receiptNumber: String(p.id).slice(0, 8).toUpperCase(),
+    });
+  }
 
   const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"], ["profiles"]] });
 
