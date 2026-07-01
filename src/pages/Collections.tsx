@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Search, ChevronDown, ChevronRight, CalendarIcon, X } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, CalendarIcon, X, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,8 +8,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
-import { usePayments, useCustomers, useProfiles, formatCurrency } from "@/hooks/use-data";
+import { usePayments, useCustomers, useProfiles, useInvoices, useCompany, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
+import { printReceipt } from "@/lib/bluetooth-print";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
