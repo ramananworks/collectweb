@@ -15,6 +15,8 @@ import { useInvoices, useCustomers, useProfiles, useRecordPayment, useCompany, f
 import UpiQrDialog from "@/components/shared/UpiQrDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
+import { printReceipt, getAutoPrint } from "@/lib/bluetooth-print";
+import { toast as sonnerToast } from "sonner";
 
 const collectionSchema = z.object({
   customer_id: z.string().min(1, "Select a customer"),
