@@ -106,6 +106,37 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
       onSuccess: () => {
         hapticSuccess();
         toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${customer?.name}.` });
+
+        // Compute outstanding-after for this customer using latest invoices minus this payment
+        const outstandingAfter = Math.max(0,
+          invoices
+            .filter((i) => i.customer_id === values.customer_id)
+            .reduce((s, i) => s + (Number(i.amount) - Number(i.paid_amount)), 0)
+          - (values.amount ?? 0)
+        );
+        const receiptData = {
+          companyName: company?.name || "My Company",
+          companyPhone: (company as any)?.phone,
+          companyAddress: (company as any)?.address,
+          customerName: customer?.name || "",
+          invoiceNumber: selectedInv?.invoice_number,
+          invoiceDate: selectedInv?.invoice_date,
+          paymentDate: values.date,
+          amount: values.amount ?? 0,
+          mode: values.mode,
+          collectedBy: values.collected_by,
+          notes: values.notes,
+          outstandingAfter,
+          receiptNumber: transactionId.slice(0, 8).toUpperCase(),
+        };
+        if (getAutoPrint()) {
+          printReceipt(receiptData);
+        } else {
+          sonnerToast.success("Collection recorded", {
+            description: `${formatCurrency(values.amount ?? 0)} from ${customer?.name}`,
+            action: { label: "Print Receipt", onClick: () => printReceipt(receiptData) },
+          });
+        }
         form.reset();
         setIsSubmitting(false);
         setOpen(false);
