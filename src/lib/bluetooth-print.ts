@@ -5,21 +5,9 @@
 // When neither exists (regular browser), we fall back to the browser print dialog
 // so the receipt can still be sent to any paired system Bluetooth printer.
 
-import { formatCurrency } from "@/hooks/use-data";
+import "@/lib/haptics"; // ensures the Window.Android global augmentation is loaded
 
-declare global {
-  interface Window {
-    Android?: {
-      printReceipt?: (text: string, widthMm: number) => void;
-      printText?: (text: string) => void;
-      vibrate?: (milliseconds: number) => void;
-      vibratePattern?: (patternJson: string) => void;
-      pickContact?: () => Promise<string>;
-      minimizeApp?: () => void;
-      exitApp?: () => void;
-    };
-  }
-}
+import { formatCurrency } from "@/hooks/use-data";
 
 export type PaperWidth = 58 | 80; // mm — 2 inch and 3 inch rolls
 const CHARS_PER_LINE: Record<PaperWidth, number> = { 58: 32, 80: 48 };
