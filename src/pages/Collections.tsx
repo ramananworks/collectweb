@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Search, ChevronDown, ChevronRight, CalendarIcon, X } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, CalendarIcon, X, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,8 +8,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
-import { usePayments, useCustomers, useProfiles, formatCurrency } from "@/hooks/use-data";
+import { usePayments, useCustomers, useProfiles, useInvoices, useCompany, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
+import { printReceipt } from "@/lib/bluetooth-print";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
@@ -23,6 +24,30 @@ export default function Collections() {
   const { data: payments = [] } = usePayments();
   const { data: customers = [] } = useCustomers();
   const { data: profiles = [] } = useProfiles();
+  const { data: invoices = [] } = useInvoices();
+  const { data: company } = useCompany();
+
+  function handleReprint(customerName: string, p: typeof payments[number]) {
+    const inv = invoices.find((i) => i.id === p.invoice_id);
+    const outstanding = Math.max(0, invoices
+      .filter((i) => i.customer_name === customerName)
+      .reduce((s, i) => s + (Number(i.amount) - Number(i.paid_amount)), 0));
+    printReceipt({
+      companyName: company?.name || "My Company",
+      companyPhone: (company as any)?.phone,
+      companyAddress: (company as any)?.address,
+      customerName,
+      invoiceNumber: inv?.invoice_number,
+      invoiceDate: inv?.invoice_date,
+      paymentDate: p.date,
+      amount: Number(p.amount),
+      mode: p.mode,
+      collectedBy: p.collected_by,
+      notes: (p as any).notes || undefined,
+      outstandingAfter: outstanding,
+      receiptNumber: String(p.id).slice(0, 8).toUpperCase(),
+    });
+  }
 
   const ptr = usePullToRefresh({ queryKeys: [["payments"], ["customers"], ["profiles"]] });
 
@@ -175,6 +200,7 @@ export default function Collections() {
                           <th className="px-4 py-2.5 font-medium text-muted-foreground">Mode</th>
                           <th className="px-4 py-2.5 font-medium text-muted-foreground hidden sm:table-cell">Collected By</th>
                           <th className="px-4 py-2.5 font-medium text-muted-foreground">Date</th>
+                          <th className="px-2 py-2.5 font-medium text-muted-foreground text-right">Print</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -184,6 +210,11 @@ export default function Collections() {
                             <td className="px-4 py-2.5"><PaymentModeBadge mode={p.mode} /></td>
                             <td className="px-4 py-2.5 hidden sm:table-cell text-muted-foreground">{p.collected_by}</td>
                             <td className="px-4 py-2.5 text-muted-foreground">{p.date}</td>
+                            <td className="px-2 py-2.5 text-right">
+                              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleReprint(customer.name, p)} aria-label="Reprint receipt">
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>

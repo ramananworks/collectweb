@@ -9,6 +9,8 @@ declare global {
       pickContact?: () => Promise<string>;
       minimizeApp?: () => void;
       exitApp?: () => void;
+      printReceipt?: (text: string, widthMm: number) => void;
+      printText?: (text: string) => void;
     };
   }
 }
