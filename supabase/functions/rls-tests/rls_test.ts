@@ -170,6 +170,216 @@ Deno.test("RLS multi-tenant isolation", { ignore: !ENV_READY }, async (t) => {
   }
 });
 
+// Create a staff user attached to an existing company via handle_new_user metadata.
+async function createStaff(
+  companyId: string,
+  role: "delivery_staff" | "manager" | "collection_staff" | "owner",
+  suffix: string,
+): Promise<TestOwner> {
+  if (!admin) throw new Error("admin client not initialised");
+  const email = `rls-${role}-${suffix}-${crypto.randomUUID()}@example.test`;
+  const password = `Test-${crypto.randomUUID()}`;
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: {
+      name: `${role} ${suffix}`,
+      company_id: companyId,
+      role,
+      phone: "",
+    },
+  });
+  if (error) throw error;
+  const userId = data.user!.id;
+  const client = createClient(SUPABASE_URL, ANON, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { error: signErr } = await client.auth.signInWithPassword({ email, password });
+  if (signErr) throw signErr;
+  return { userId, companyId, client, email };
+}
+
+Deno.test(
+  "RLS: delivery_staff OTP visibility scoped to assigned invoices",
+  { ignore: !ENV_READY },
+  async (t) => {
+    if (!admin) return;
+    const A = await createOwner("otp-A");
+    const B = await createOwner("otp-B");
+    const D = await createStaff(A.companyId, "delivery_staff", "D");
+    const D2 = await createStaff(A.companyId, "delivery_staff", "D2");
+
+    // Seed customer + invoices in company A, and one in company B.
+    const { data: custA } = await admin
+      .from("customers")
+      .insert({ company_id: A.companyId, name: "Cust A", phone: "111" })
+      .select().single();
+    const { data: custB } = await admin
+      .from("customers")
+      .insert({ company_id: B.companyId, name: "Cust B", phone: "222" })
+      .select().single();
+
+    const today = new Date().toISOString().slice(0, 10);
+    const mkInvoice = async (companyId: string, customerId: string, deliveredBy: string | null) => {
+      const { data, error } = await admin!.from("invoices").insert({
+        company_id: companyId,
+        customer_id: customerId,
+        customer_name: "x",
+        invoice_number: `OTP-${crypto.randomUUID().slice(0, 8)}`,
+        amount: 100,
+        due_date: today,
+        invoice_date: today,
+        status: "pending",
+        delivered_by: deliveredBy,
+      }).select().single();
+      if (error) throw error;
+      return data;
+    };
+
+    const invMine = await mkInvoice(A.companyId, custA!.id, D.userId);
+    const invOther = await mkInvoice(A.companyId, custA!.id, D2.userId);
+    const invUnassigned = await mkInvoice(A.companyId, custA!.id, null);
+    const invCoB = await mkInvoice(B.companyId, custB!.id, null);
+
+    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    const mkOtp = async (companyId: string, invoiceId: string, customerId: string, code: string) => {
+      const { data, error } = await admin!.from("delivery_otps").insert({
+        company_id: companyId,
+        invoice_id: invoiceId,
+        customer_id: customerId,
+        otp_code: code,
+        expires_at: expires,
+      }).select().single();
+      if (error) throw error;
+      return data;
+    };
+
+    const otpMine = await mkOtp(A.companyId, invMine.id, custA!.id, "111111");
+    const otpOther = await mkOtp(A.companyId, invOther.id, custA!.id, "222222");
+    const otpUnassigned = await mkOtp(A.companyId, invUnassigned.id, custA!.id, "333333");
+    const otpCoB = await mkOtp(B.companyId, invCoB.id, custB!.id, "444444");
+
+    try {
+      await t.step("delivery_staff CAN read OTP for invoice assigned to them", async () => {
+        const { data, error } = await D.client
+          .from("delivery_otps").select("id, otp_code").eq("id", otpMine.id);
+        assertEquals(error, null);
+        assertEquals(data?.length, 1, "assigned OTP must be visible");
+      });
+
+      await t.step("delivery_staff CAN read OTP for unassigned invoice in their company", async () => {
+        const { data } = await D.client
+          .from("delivery_otps").select("id").eq("id", otpUnassigned.id);
+        assertEquals(data?.length, 1, "unassigned OTP in same company must be visible");
+      });
+
+      await t.step("delivery_staff CANNOT read OTP for invoice assigned to another staff", async () => {
+        const { data } = await D.client
+          .from("delivery_otps").select("id").eq("id", otpOther.id);
+        assertEquals(data?.length ?? 0, 0, "OTP for other staff's invoice must be hidden");
+      });
+
+      await t.step("delivery_staff CANNOT read OTPs from a different company", async () => {
+        const { data } = await D.client
+          .from("delivery_otps").select("id").eq("id", otpCoB.id);
+        assertEquals(data?.length ?? 0, 0, "cross-tenant OTP must be hidden");
+      });
+
+      await t.step("delivery_staff CANNOT update or delete OTPs", async () => {
+        await D.client.from("delivery_otps").update({ verified: true }).eq("id", otpMine.id);
+        await D.client.from("delivery_otps").delete().eq("id", otpMine.id);
+        const { data } = await admin!.from("delivery_otps")
+          .select("id, verified").eq("id", otpMine.id).single();
+        assert(data, "OTP must still exist");
+        assertEquals(data!.verified, false, "verified flag must not change");
+      });
+    } finally {
+      await admin.from("delivery_otps").delete().in("id", [otpMine.id, otpOther.id, otpUnassigned.id, otpCoB.id]);
+      await admin.from("invoices").delete().in("id", [invMine.id, invOther.id, invUnassigned.id, invCoB.id]);
+      await admin.from("customers").delete().in("id", [custA!.id, custB!.id]);
+      await cleanup(A);
+      await cleanup(B);
+      await admin.from("user_roles").delete().eq("user_id", D.userId);
+      await admin.from("profiles").delete().eq("id", D.userId);
+      await admin.auth.admin.deleteUser(D.userId);
+      await admin.from("user_roles").delete().eq("user_id", D2.userId);
+      await admin.from("profiles").delete().eq("id", D2.userId);
+      await admin.auth.admin.deleteUser(D2.userId);
+    }
+  },
+);
+
+Deno.test(
+  "RLS: has_role() is scoped to the user's own company",
+  { ignore: !ENV_READY },
+  async (t) => {
+    if (!admin) return;
+    // U is owner of A. Admin injects a bonus 'owner' role for U in company B.
+    // has_role(U, 'owner') must still reflect U's company (A) context only:
+    // a role granted in an unrelated company must NOT satisfy role checks.
+    const A = await createOwner("hr-A");
+    const B = await createOwner("hr-B");
+
+    // Inject cross-company role grant directly (simulates a hypothetical mis-provisioning).
+    const { error: injectErr } = await admin.from("user_roles").insert({
+      user_id: A.userId,
+      role: "manager",
+      company_id: B.companyId,
+    });
+    if (injectErr) throw injectErr;
+
+    // Seed a customer in company B; A must NOT be able to touch it despite the injected B-role.
+    const { data: custB } = await admin.from("customers")
+      .insert({ company_id: B.companyId, name: "Cust B", phone: "555" })
+      .select().single();
+
+    try {
+      await t.step("has_role RPC returns false for a role held only in another company", async () => {
+        // A holds 'manager' ONLY in B, not in A. Their profile.company_id = A,
+        // so has_role(A.uid, 'manager') must be false.
+        const { data, error } = await A.client.rpc("has_role", {
+          _user_id: A.userId,
+          _role: "manager",
+        });
+        assertEquals(error, null);
+        assertEquals(data, false, "cross-company role must not satisfy has_role()");
+      });
+
+      await t.step("has_role RPC returns true for a role held in the user's own company", async () => {
+        const { data, error } = await A.client.rpc("has_role", {
+          _user_id: A.userId,
+          _role: "owner",
+        });
+        assertEquals(error, null);
+        assertEquals(data, true, "own-company role must still satisfy has_role()");
+      });
+
+      await t.step("cross-company role grant does NOT allow reading B's customers", async () => {
+        const { data } = await A.client.from("customers").select("id").eq("id", custB!.id);
+        assertEquals(data?.length ?? 0, 0, "cross-company role must not leak reads");
+      });
+
+      await t.step("cross-company role grant does NOT allow deleting B's customer", async () => {
+        await A.client.from("customers").delete().eq("id", custB!.id);
+        const { data } = await admin!.from("customers").select("id").eq("id", custB!.id);
+        assertEquals(data?.length, 1, "cross-company role must not allow deletes");
+      });
+
+      await t.step("cross-company role grant does NOT allow updating B's customer", async () => {
+        await A.client.from("customers").update({ name: "HIJACK" }).eq("id", custB!.id);
+        const { data } = await admin!.from("customers").select("name").eq("id", custB!.id).single();
+        assertEquals(data?.name, "Cust B", "cross-company role must not allow updates");
+      });
+    } finally {
+      await admin.from("customers").delete().eq("id", custB!.id);
+      await admin.from("user_roles").delete().eq("user_id", A.userId).eq("company_id", B.companyId);
+      await cleanup(A);
+      await cleanup(B);
+    }
+  },
+);
+
 Deno.test("env check (skipped if service role unavailable)", () => {
   if (!ENV_READY) {
     console.warn(
