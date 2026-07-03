@@ -11,6 +11,10 @@ declare global {
       exitApp?: () => void;
       printReceipt?: (text: string, widthMm: number) => void;
       printText?: (text: string) => void;
+      listBluetoothPrinters?: () => string;
+      connectPrinter?: (id: string) => string;
+      disconnectPrinter?: () => void;
+      getConnectedPrinter?: () => string;
     };
   }
 }
