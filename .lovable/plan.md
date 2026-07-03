@@ -1,32 +1,44 @@
-# Make the landing page reachable at the root URL
+## Add Bluetooth printer connection in Settings
 
-## Problem
-Today the root URL `/` mounts `SplashScreen`, which always redirects:
-- to `/dashboard` if a session exists
-- to `/login` if not
+Extend the existing "Receipt Printing" card so users can scan, pair, connect and remember a Bluetooth thermal printer — all through the Android host app, with graceful fallback when the bridge isn't available.
 
-The marketing/landing page lives at `/home` and is a public route, but new visitors landing on `collectweb.in` never see it — they are immediately sent to `/login`. That's why "the home page isn't loading."
+### What the user will see (Settings → Receipt Printing)
+- New "Printer device" row showing one of:
+  - `Not connected` + **Scan & connect** button
+  - `Connected: <name>` + **Disconnect** / **Change**
+- After tapping Scan: a modal lists nearby/paired Bluetooth printers returned by the Android bridge; tapping one pairs + connects and saves it as the default.
+- Saved printer auto-reconnects silently on next print. If reconnect fails, receipt still prints via the current fallback and a toast offers **Reconnect**.
+- Existing paper width, auto-print toggle and test-print button stay as-is; test-print now uses the connected device.
 
-## Fix
-Stop using the splash as the unauthenticated entry point. The root URL should show the landing page for guests and the dashboard for signed-in users.
+### Android bridge contract (extension)
+Add these methods to `window.Android` (the Android WebView host app must implement them; JS side just declares + calls them):
 
-### Changes
-1. **`src/App.tsx`**
-   - Route `/` to a small `RootRedirect` component instead of `SplashScreen`.
-   - `RootRedirect` reads `useAuth()`:
-     - while `loading` → show the existing splash visual (so we keep the branded loading state)
-     - if `session` → `<Navigate to="/dashboard" replace />`
-     - else → render `<Home />` directly (no redirect to `/login`)
-   - Keep `/home` as an alias that always renders `<Home />` (so existing inbound links still work).
-   - Keep `/login`, `/signup`, `/dashboard`, etc. unchanged.
+| Method | Purpose |
+|---|---|
+| `listBluetoothPrinters(): string` | Returns JSON string `[{id, name, paired}]` of discoverable + paired BT printers. |
+| `connectPrinter(id: string): string` | Pairs (if needed) and opens an RFCOMM socket. Returns `"ok"` or an error message. |
+| `disconnectPrinter(): void` | Closes the socket. |
+| `getConnectedPrinter(): string` | Returns JSON `{id, name} | null`. |
+| `printReceipt(text, widthMm)` *(existing)* | Now expected to use the currently connected socket. |
 
-2. **`src/pages/SplashScreen.tsx`**
-   - Extract the visual JSX (logo, pulse ring, tagline, progress bar) into a reusable `SplashVisual` so `RootRedirect` can show it during the auth-loading state without the auto-redirect side effect.
-   - The old `SplashScreen` page is no longer routed; remove the import from `App.tsx`.
+Nothing changes on the ESC/POS text side — same `formatReceipt` output.
 
-3. **No backend, no styling, no copy changes.** Landing page content stays as-is.
+### Frontend changes
+- **`src/lib/bluetooth-print.ts`**
+  - Add `listPrinters()`, `connectPrinter(id)`, `disconnectPrinter()`, `getConnectedPrinter()` wrappers that call the bridge and JSON-parse safely.
+  - Add `getSavedPrinter()` / `setSavedPrinter()` using `localStorage` key `cw:print:device` (`{id, name}`).
+  - Add `ensurePrinterConnected()` — called before `printReceipt`; if bridge exposes `getConnectedPrinter` and returns null but a saved device exists, silently `connectPrinter(saved.id)`.
+  - Expose `hasPrinterBridge()` (checks for `listBluetoothPrinters`) separately from existing `isBluetoothPrintingAvailable()`.
+- **`src/lib/haptics.ts`** — extend the `Window.Android` type augmentation with the four new methods.
+- **`src/components/settings/PrintSettings.tsx`**
+  - New "Printer device" section with Scan/Connect/Disconnect UI, current-device label, and a shadcn `Dialog` listing scan results with a loading state.
+  - Handle the no-bridge case: show an info line "In-app pairing needs the CollectWeb Android app. In browser, use the system print dialog."
+  - Wire test-print to attempt `ensurePrinterConnected()` first.
+- **`src/components/forms/RecordPaymentDialog.tsx`** and **`src/pages/Collections.tsx`** — call `ensurePrinterConnected()` (fire-and-forget) just before `printReceipt`. No behavior change when bridge missing.
+- **`.lovable/memory/features/receipt-printing.md`** — document the new bridge methods, storage key, and auto-reconnect flow.
 
-## Result
-- `https://collectweb.in/` → shows the landing page for guests, dashboard for signed-in users.
-- `https://collectweb.in/home` → still shows the landing page (back-compat).
-- Signed-in users still get the dashboard immediately; the branded splash visual still appears briefly while the session check resolves.
+### Out of scope
+- No Web Bluetooth path (per your choice).
+- No Capacitor migration.
+- No changes to receipt content, ESC/POS formatting, RLS, or edge functions.
+- The Android host app itself must implement the new bridge methods; this plan only adds the JS side and UI. I'll note that clearly to you after implementation so the native side can be updated in the wrapper.
