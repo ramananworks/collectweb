@@ -176,3 +176,76 @@ export function printReceipt(data: ReceiptData, widthMm: PaperWidth = getPaperWi
     return false;
   }
 }
+
+// ---------------- Bluetooth device pairing (Android bridge) ----------------
+
+export interface BluetoothPrinterDevice {
+  id: string;
+  name: string;
+  paired?: boolean;
+}
+
+const STORAGE_DEVICE = "cw:print:device";
+
+export function hasPrinterBridge(): boolean {
+  return typeof window !== "undefined" && !!window.Android?.listBluetoothPrinters;
+}
+
+function safeParse<T>(raw: string | null | undefined, fallback: T): T {
+  if (!raw) return fallback;
+  try { return JSON.parse(raw) as T; } catch { return fallback; }
+}
+
+export function listPrinters(): BluetoothPrinterDevice[] {
+  try {
+    const raw = window.Android?.listBluetoothPrinters?.();
+    return safeParse<BluetoothPrinterDevice[]>(raw, []);
+  } catch (e) {
+    console.error("listBluetoothPrinters failed", e);
+    return [];
+  }
+}
+
+export function connectPrinter(id: string): { ok: boolean; message?: string } {
+  try {
+    const res = window.Android?.connectPrinter?.(id);
+    if (res === "ok" || res === undefined) return { ok: true };
+    return { ok: false, message: String(res) };
+  } catch (e: any) {
+    return { ok: false, message: e?.message || "Connection failed" };
+  }
+}
+
+export function disconnectPrinter(): void {
+  try { window.Android?.disconnectPrinter?.(); } catch (e) { console.error(e); }
+}
+
+export function getConnectedPrinter(): BluetoothPrinterDevice | null {
+  try {
+    const raw = window.Android?.getConnectedPrinter?.();
+    return safeParse<BluetoothPrinterDevice | null>(raw, null);
+  } catch { return null; }
+}
+
+export function getSavedPrinter(): BluetoothPrinterDevice | null {
+  return safeParse<BluetoothPrinterDevice | null>(localStorage.getItem(STORAGE_DEVICE), null);
+}
+
+export function setSavedPrinter(d: BluetoothPrinterDevice | null): void {
+  if (!d) localStorage.removeItem(STORAGE_DEVICE);
+  else localStorage.setItem(STORAGE_DEVICE, JSON.stringify({ id: d.id, name: d.name }));
+}
+
+/**
+ * Ensure the saved printer is connected before sending a receipt.
+ * No-op when the Android bridge is unavailable. Silent on success.
+ */
+export function ensurePrinterConnected(): { ok: boolean; message?: string } {
+  if (!hasPrinterBridge()) return { ok: true };
+  const current = getConnectedPrinter();
+  if (current) return { ok: true };
+  const saved = getSavedPrinter();
+  if (!saved) return { ok: false, message: "No printer saved" };
+  return connectPrinter(saved.id);
+}
+
