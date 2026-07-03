@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
 import { usePayments, useCustomers, useProfiles, useInvoices, useCompany, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
-import { printReceipt } from "@/lib/bluetooth-print";
+import { printReceipt, ensurePrinterConnected } from "@/lib/bluetooth-print";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
@@ -32,6 +32,7 @@ export default function Collections() {
     const outstanding = Math.max(0, invoices
       .filter((i) => i.customer_name === customerName)
       .reduce((s, i) => s + (Number(i.amount) - Number(i.paid_amount)), 0));
+    ensurePrinterConnected();
     printReceipt({
       companyName: company?.name || "My Company",
       companyPhone: (company as any)?.phone,
