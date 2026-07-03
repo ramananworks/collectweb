@@ -32,6 +32,7 @@ export default function Collections() {
     const outstanding = Math.max(0, invoices
       .filter((i) => i.customer_name === customerName)
       .reduce((s, i) => s + (Number(i.amount) - Number(i.paid_amount)), 0));
+    ensurePrinterConnected();
     printReceipt({
       companyName: company?.name || "My Company",
       companyPhone: (company as any)?.phone,
