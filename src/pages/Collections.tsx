@@ -27,12 +27,13 @@ export default function Collections() {
   const { data: invoices = [] } = useInvoices();
   const { data: company } = useCompany();
 
-  function handleReprint(customerName: string, p: typeof payments[number]) {
+  async function handleReprint(customerName: string, p: typeof payments[number]) {
     const inv = invoices.find((i) => i.id === p.invoice_id);
     const outstanding = Math.max(0, invoices
       .filter((i) => i.customer_name === customerName)
       .reduce((s, i) => s + (Number(i.amount) - Number(i.paid_amount)), 0));
-    ensurePrinterConnected();
+    const ready = await ensurePrinterReady();
+    if (ready.cancelled) return;
     printReceipt({
       companyName: company?.name || "My Company",
       companyPhone: (company as any)?.phone,
