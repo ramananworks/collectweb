@@ -53,6 +53,7 @@ import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
 import { useAppLock } from "@/contexts/AppLockContext";
 import { Switch } from "@/components/ui/switch";
 import ReadOnlyBanner from "@/components/billing/ReadOnlyBanner";
+import PrinterPickerHost from "@/components/shared/PrinterPickerHost";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
