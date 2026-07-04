@@ -15,7 +15,7 @@ import { useInvoices, useCustomers, useProfiles, useRecordPayment, useCompany, f
 import UpiQrDialog from "@/components/shared/UpiQrDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
-import { printReceipt, getAutoPrint, ensurePrinterConnected } from "@/lib/bluetooth-print";
+import { printReceipt, getAutoPrint, ensurePrinterReady } from "@/lib/bluetooth-print";
 import { toast as sonnerToast } from "sonner";
 
 const collectionSchema = z.object({
