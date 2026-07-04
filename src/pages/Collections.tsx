@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { PaymentModeBadge } from "@/components/shared/StatusBadges";
 import { usePayments, useCustomers, useProfiles, useInvoices, useCompany, formatCurrency } from "@/hooks/use-data";
 import RecordPaymentDialog from "@/components/forms/RecordPaymentDialog";
-import { printReceipt, ensurePrinterConnected } from "@/lib/bluetooth-print";
+import { printReceipt, ensurePrinterReady } from "@/lib/bluetooth-print";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import PullToRefreshIndicator from "@/components/shared/PullToRefreshIndicator";
 
