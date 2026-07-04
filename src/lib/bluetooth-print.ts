@@ -157,6 +157,18 @@ export function printReceipt(data: ReceiptData, widthMm: PaperWidth = getPaperWi
       window.Android.printText(text);
       return true;
     }
+    // Alternate bridge: address-based, base64 payload
+    if (window.Android?.printBluetooth) {
+      const saved = getSavedPrinter();
+      const target = saved?.id || pickFirstBluetoothAddress();
+      if (target) {
+        const b64 = typeof btoa !== "undefined"
+          ? btoa(unescape(encodeURIComponent(text)))
+          : text;
+        window.Android.printBluetooth(target, b64);
+        return true;
+      }
+    }
   } catch (e) {
     console.error("Android print bridge failed", e);
   }
