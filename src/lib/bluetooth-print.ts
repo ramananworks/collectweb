@@ -219,17 +219,24 @@ function pickFirstBluetoothAddress(): string | null {
   return list[0]?.id || null;
 }
 
-function safeParse<T>(raw: string | null | undefined, fallback: T): T {
-  if (!raw) return fallback;
-  try { return JSON.parse(raw) as T; } catch { return fallback; }
-}
-
 export function listPrinters(): BluetoothPrinterDevice[] {
   try {
-    const raw = window.Android?.listBluetoothPrinters?.();
-    return safeParse<BluetoothPrinterDevice[]>(raw, []);
+    if (window.Android?.listBluetoothPrinters) {
+      const raw = window.Android.listBluetoothPrinters();
+      return safeParse<BluetoothPrinterDevice[]>(raw, []);
+    }
+    if (window.Android?.getBluetoothDevices) {
+      const raw = window.Android.getBluetoothDevices();
+      const arr = safeParse<Array<{ address?: string; id?: string; name?: string }>>(raw, []);
+      return arr.map((d) => ({
+        id: d.address || d.id || "",
+        name: d.name || d.address || "Unknown",
+        paired: true,
+      })).filter((d) => d.id);
+    }
+    return [];
   } catch (e) {
-    console.error("listBluetoothPrinters failed", e);
+    console.error("listPrinters failed", e);
     return [];
   }
 }
