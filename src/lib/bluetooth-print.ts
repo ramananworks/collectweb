@@ -30,7 +30,11 @@ export function setAutoPrint(v: boolean) {
 }
 
 export function isBluetoothPrintingAvailable(): boolean {
-  return typeof window !== "undefined" && !!(window.Android?.printReceipt || window.Android?.printText);
+  return typeof window !== "undefined" && !!(
+    window.Android?.printReceipt ||
+    window.Android?.printText ||
+    window.Android?.printBluetooth
+  );
 }
 
 export interface ReceiptData {
@@ -153,6 +157,18 @@ export function printReceipt(data: ReceiptData, widthMm: PaperWidth = getPaperWi
       window.Android.printText(text);
       return true;
     }
+    // Alternate bridge: address-based, base64 payload
+    if (window.Android?.printBluetooth) {
+      const saved = getSavedPrinter();
+      const target = saved?.id || pickFirstBluetoothAddress();
+      if (target) {
+        const b64 = typeof btoa !== "undefined"
+          ? btoa(unescape(encodeURIComponent(text)))
+          : text;
+        window.Android.printBluetooth(target, b64);
+        return true;
+      }
+    }
   } catch (e) {
     console.error("Android print bridge failed", e);
   }
@@ -188,7 +204,9 @@ export interface BluetoothPrinterDevice {
 const STORAGE_DEVICE = "cw:print:device";
 
 export function hasPrinterBridge(): boolean {
-  return typeof window !== "undefined" && !!window.Android?.listBluetoothPrinters;
+  return typeof window !== "undefined" && !!(
+    window.Android?.listBluetoothPrinters || window.Android?.getBluetoothDevices
+  );
 }
 
 function safeParse<T>(raw: string | null | undefined, fallback: T): T {
@@ -196,12 +214,29 @@ function safeParse<T>(raw: string | null | undefined, fallback: T): T {
   try { return JSON.parse(raw) as T; } catch { return fallback; }
 }
 
+function pickFirstBluetoothAddress(): string | null {
+  const list = listPrinters();
+  return list[0]?.id || null;
+}
+
 export function listPrinters(): BluetoothPrinterDevice[] {
   try {
-    const raw = window.Android?.listBluetoothPrinters?.();
-    return safeParse<BluetoothPrinterDevice[]>(raw, []);
+    if (window.Android?.listBluetoothPrinters) {
+      const raw = window.Android.listBluetoothPrinters();
+      return safeParse<BluetoothPrinterDevice[]>(raw, []);
+    }
+    if (window.Android?.getBluetoothDevices) {
+      const raw = window.Android.getBluetoothDevices();
+      const arr = safeParse<Array<{ address?: string; id?: string; name?: string }>>(raw, []);
+      return arr.map((d) => ({
+        id: d.address || d.id || "",
+        name: d.name || d.address || "Unknown",
+        paired: true,
+      })).filter((d) => d.id);
+    }
+    return [];
   } catch (e) {
-    console.error("listBluetoothPrinters failed", e);
+    console.error("listPrinters failed", e);
     return [];
   }
 }
