@@ -30,7 +30,11 @@ export function setAutoPrint(v: boolean) {
 }
 
 export function isBluetoothPrintingAvailable(): boolean {
-  return typeof window !== "undefined" && !!(window.Android?.printReceipt || window.Android?.printText);
+  return typeof window !== "undefined" && !!(
+    window.Android?.printReceipt ||
+    window.Android?.printText ||
+    window.Android?.printBluetooth
+  );
 }
 
 export interface ReceiptData {
