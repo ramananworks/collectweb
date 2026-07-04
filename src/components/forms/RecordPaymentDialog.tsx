@@ -15,7 +15,7 @@ import { useInvoices, useCustomers, useProfiles, useRecordPayment, useCompany, f
 import UpiQrDialog from "@/components/shared/UpiQrDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { hapticSuccess, hapticHeavy } from "@/lib/haptics";
-import { printReceipt, getAutoPrint, ensurePrinterConnected } from "@/lib/bluetooth-print";
+import { printReceipt, getAutoPrint, ensurePrinterReady } from "@/lib/bluetooth-print";
 import { toast as sonnerToast } from "sonner";
 
 const collectionSchema = z.object({
@@ -130,12 +130,20 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
           receiptNumber: transactionId.slice(0, 8).toUpperCase(),
         };
         if (getAutoPrint()) {
-          ensurePrinterConnected();
-          printReceipt(receiptData);
+          (async () => {
+            const ready = await ensurePrinterReady();
+            if (!ready.cancelled) printReceipt(receiptData);
+          })();
         } else {
           sonnerToast.success("Collection recorded", {
             description: `${formatCurrency(values.amount ?? 0)} from ${customer?.name}`,
-            action: { label: "Print Receipt", onClick: () => { ensurePrinterConnected(); printReceipt(receiptData); } },
+            action: {
+              label: "Print Receipt",
+              onClick: async () => {
+                const ready = await ensurePrinterReady();
+                if (!ready.cancelled) printReceipt(receiptData);
+              },
+            },
           });
         }
         form.reset();

@@ -284,3 +284,36 @@ export function ensurePrinterConnected(): { ok: boolean; message?: string } {
   return connectPrinter(saved.id);
 }
 
+/**
+ * Async variant: ensures a printer is selected & connected, prompting the user
+ * with a picker dialog when no saved device exists and multiple devices are found.
+ * Returns { ok: true } when a printer is ready (or bridge unavailable / single device auto-picked).
+ */
+export async function ensurePrinterReady(): Promise<{ ok: boolean; cancelled?: boolean; message?: string }> {
+  if (!hasPrinterBridge()) return { ok: true }; // browser fallback path
+  if (getConnectedPrinter()) return { ok: true };
+
+  const saved = getSavedPrinter();
+  if (saved) {
+    const res = connectPrinter(saved.id);
+    if (res.ok) return { ok: true };
+    // fall through to picker if reconnect fails
+  }
+
+  const devices = listPrinters();
+  if (devices.length === 0) return { ok: false, message: "No paired printers found" };
+  if (devices.length === 1 && !saved) {
+    // auto-select the only device
+    const only = devices[0];
+    const res = connectPrinter(only.id);
+    if (res.ok) { setSavedPrinter(only); return { ok: true }; }
+  }
+
+  // Dynamic import to avoid a hard circular dep with UI layer.
+  const { promptPickPrinter } = await import("@/components/shared/PrinterPickerHost");
+  const picked = await promptPickPrinter();
+  if (!picked) return { ok: false, cancelled: true };
+  return { ok: true };
+}
+
+
