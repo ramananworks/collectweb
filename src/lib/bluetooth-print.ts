@@ -204,7 +204,19 @@ export interface BluetoothPrinterDevice {
 const STORAGE_DEVICE = "cw:print:device";
 
 export function hasPrinterBridge(): boolean {
-  return typeof window !== "undefined" && !!window.Android?.listBluetoothPrinters;
+  return typeof window !== "undefined" && !!(
+    window.Android?.listBluetoothPrinters || window.Android?.getBluetoothDevices
+  );
+}
+
+function safeParse<T>(raw: string | null | undefined, fallback: T): T {
+  if (!raw) return fallback;
+  try { return JSON.parse(raw) as T; } catch { return fallback; }
+}
+
+function pickFirstBluetoothAddress(): string | null {
+  const list = listPrinters();
+  return list[0]?.id || null;
 }
 
 function safeParse<T>(raw: string | null | undefined, fallback: T): T {
