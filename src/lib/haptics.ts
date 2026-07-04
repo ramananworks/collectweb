@@ -15,6 +15,9 @@ declare global {
       connectPrinter?: (id: string) => string;
       disconnectPrinter?: () => void;
       getConnectedPrinter?: () => string;
+      // Alternate bridge shape: direct address-based print
+      getBluetoothDevices?: () => string;
+      printBluetooth?: (address: string, base64Data: string) => void;
     };
   }
 }
