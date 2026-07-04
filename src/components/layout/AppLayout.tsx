@@ -396,6 +396,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </AlertDialog>
 
       <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
+      <PrinterPickerHost />
     </div>
   );
 }
