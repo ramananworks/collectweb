@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Check, X, MapPin, Settings as SettingsIcon, Save, Building2, CreditCard, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, MapPin, Settings as SettingsIcon, Save, Building2, CreditCard, ChevronRight, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,6 +125,23 @@ export default function Settings() {
             <div className="flex-1">
               <div className="font-semibold">Billing & Subscription</div>
               <div className="text-xs text-muted-foreground">Manage your CollectWeb Pro plan and seats</div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </Link>
+      )}
+
+      {/* Plan Status - Owner only */}
+      {canManageSettings && (
+        <Link
+          to="/settings/plan-status"
+          className="block rounded-xl bg-card p-4 sm:p-5 stat-card-shadow max-w-xl hover:bg-accent transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <BadgeCheck className="h-5 w-5 text-primary" />
+            <div className="flex-1">
+              <div className="font-semibold">Plan Status</div>
+              <div className="text-xs text-muted-foreground">View current plan, complimentary flag & exact expiry</div>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </div>
