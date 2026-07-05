@@ -155,7 +155,7 @@ export function formatReceipt(data: ReceiptData, widthMm: PaperWidth = getPaperW
   rows.push("");
   rows.push("");
 
-  return rows.join("\n");
+  return toAscii(rows.join("\n"));
 }
 
 /**
