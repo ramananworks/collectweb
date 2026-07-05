@@ -98,6 +98,24 @@ function modeLabel(m: string): string {
   }
 }
 
+// Thermal printers use CP437/ASCII and cannot render the Rupee glyph (₹, U+20B9)
+// or other Unicode punctuation. Format amounts as "Rs. 1,234" for receipts and
+// strip anything outside printable ASCII to keep column alignment intact.
+function formatAmountAscii(n: number): string {
+  const rounded = Math.round(Number(n) || 0);
+  return `Rs. ${rounded.toLocaleString("en-IN")}`;
+}
+
+function toAscii(s: string): string {
+  return s
+    .replace(/\u20B9/g, "Rs.")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    // drop anything else outside printable ASCII (keep tab/newline)
+    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
+}
+
 export function formatReceipt(data: ReceiptData, widthMm: PaperWidth = getPaperWidth()): string {
   const W = CHARS_PER_LINE[widthMm];
   const rows: string[] = [];
