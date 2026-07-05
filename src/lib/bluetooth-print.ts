@@ -141,9 +141,9 @@ export function formatReceipt(data: ReceiptData, widthMm: PaperWidth = getPaperW
 
   // Amount block
   rows.push(pad("Mode", modeLabel(data.mode), W));
-  rows.push(pad("AMOUNT PAID", formatCurrency(data.amount), W));
+  rows.push(pad("AMOUNT PAID", formatAmountAscii(data.amount), W));
   rows.push(line("-", W));
-  rows.push(pad("Balance Due", formatCurrency(data.outstandingAfter), W));
+  rows.push(pad("Balance Due", formatAmountAscii(data.outstandingAfter), W));
   rows.push(line("=", W));
 
   // Footer
