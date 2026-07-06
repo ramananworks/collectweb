@@ -84,6 +84,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
   const { lockEnabled, biometricAvailable, enableLock, disableLock } = useAppLock();
   const [lockToggling, setLockToggling] = useState(false);
+  const [printSettingsOpen, setPrintSettingsOpen] = useState(false);
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
