@@ -411,6 +411,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </AlertDialog>
 
       <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
+
+      <Dialog open={printSettingsOpen} onOpenChange={setPrintSettingsOpen}>
+        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Receipt Printing</DialogTitle>
+          </DialogHeader>
+          <PrintSettings />
+        </DialogContent>
+      </Dialog>
+
       <PrinterPickerHost />
     </div>
   );
