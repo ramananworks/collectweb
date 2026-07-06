@@ -9,7 +9,6 @@ import { useCompany, useAreas, useAddArea, useUpdateArea, useDeleteArea, useUpda
 import { toast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 import TallyApiIntegration from "@/components/settings/TallyApiIntegration";
-import PrintSettings from "@/components/settings/PrintSettings";
 
 export default function Settings() {
   const { data: company } = useCompany();
