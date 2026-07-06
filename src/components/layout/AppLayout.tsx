@@ -356,6 +356,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   tabIndex={-1}
                 />
               </DropdownMenuItem>
+              <DropdownMenuItem
+                className="py-3 px-3 text-base"
+                onClick={() => {
+                  hapticLight();
+                  setPrintSettingsOpen(true);
+                }}
+              >
+                <Printer className="mr-2 h-5 w-5" />
+                Receipt Printing
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="my-1.5" />
               <DropdownMenuItem
                 className="py-3 px-3 text-base text-destructive focus:text-destructive"
