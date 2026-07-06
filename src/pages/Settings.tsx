@@ -302,9 +302,6 @@ export default function Settings() {
       </div>
       )}
 
-      {/* Receipt Printing - anyone who can access settings */}
-      <PrintSettings />
-
       {/* Tally Prime Connector API - Owner only */}
       {canManageSettings && <TallyApiIntegration />}
     </div>
