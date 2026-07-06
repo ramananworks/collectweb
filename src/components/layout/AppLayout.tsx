@@ -56,6 +56,8 @@ import { useAppLock } from "@/contexts/AppLockContext";
 import { Switch } from "@/components/ui/switch";
 import ReadOnlyBanner from "@/components/billing/ReadOnlyBanner";
 import PrinterPickerHost from "@/components/shared/PrinterPickerHost";
+import PrintSettings from "@/components/settings/PrintSettings";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
