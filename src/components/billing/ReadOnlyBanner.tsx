@@ -3,15 +3,16 @@ import { Link, useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 
 export default function ReadOnlyBanner() {
-  const { isReadOnly, isOwner, plan, seats, loading } = useSubscription();
+  const { isReadOnly, isOwner, plan, loading } = useSubscription();
   const location = useLocation();
   if (loading || !isReadOnly) return null;
   if (location.pathname === "/settings/billing") return null;
 
   const reason =
     plan === "free"
-      ? `Free plan supports 1 user; your team has ${seats}.`
+      ? "An active Pro subscription is required to use CollectWeb."
       : "Your Pro subscription is inactive or has expired.";
+
 
   return (
     <div className="bg-destructive/10 border-b border-destructive/30 text-destructive px-4 py-2 text-sm flex items-center gap-2">
