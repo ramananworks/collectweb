@@ -17,6 +17,8 @@ import {
   Sun,
   Moon,
   Lock,
+  Printer,
+
 } from "lucide-react";
 import {
   DropdownMenu,
