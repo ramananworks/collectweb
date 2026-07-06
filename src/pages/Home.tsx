@@ -156,7 +156,7 @@ export default function Home() {
           <motion.div variants={fadeUp} custom={3} className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button size="lg" asChild className="rounded-full px-8 text-base">
               <Link to="/signup">
-                Start Free <ArrowRight className="ml-2 h-4 w-4" />
+                Get Started <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="rounded-full px-8 text-base">
@@ -164,7 +164,7 @@ export default function Home() {
             </Button>
           </motion.div>
 
-          <motion.p variants={fadeUp} custom={4} className="mt-4 text-sm text-muted-foreground">No credit card required · Free forever for small teams</motion.p>
+          <motion.p variants={fadeUp} custom={4} className="mt-4 text-sm text-muted-foreground">Simple per-user pricing · Cancel anytime</motion.p>
         </motion.div>
       </section>
 
@@ -275,7 +275,7 @@ export default function Home() {
               Simple, Transparent <span className="text-primary">Pricing</span>
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-4 text-lg text-muted-foreground">
-              Start free and scale as your business grows. No hidden fees, no surprises.
+              Simple per-user pricing that scales with your team. No hidden fees, no surprises.
             </motion.p>
           </motion.div>
 
@@ -416,7 +416,7 @@ export default function Home() {
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button size="lg" variant="secondary" asChild className="rounded-full px-8 text-base">
               <Link to="/signup">
-                Create Free Account <ArrowRight className="ml-2 h-4 w-4" />
+                Create Account <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button
