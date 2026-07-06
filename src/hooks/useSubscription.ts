@@ -68,17 +68,12 @@ export function useSubscription() {
   const seats = seatQuery.data ?? 1;
   const sub = subQuery.data;
 
-  // Read-only / write-allowed mirrors the DB function:
-  //   - free plan: writes allowed only when there is exactly 1 user
-  //   - paid plan: writes allowed only when subscription is active and not expired
-  let canWrite = true;
-  if (plan === "free") {
-    canWrite = seats <= 1;
-  } else {
-    const active = !!sub && ["active", "authenticated", "pending"].includes(sub.status);
-    const notExpired = !planExpiresAt || planExpiresAt.getTime() > Date.now();
-    canWrite = active && notExpired;
-  }
+  // Writes require an active paid subscription that has not expired.
+  // The Free tier has been removed — free plans are read-only.
+  const active = !!sub && ["active", "authenticated", "pending"].includes(sub.status);
+  const notExpired = !planExpiresAt || planExpiresAt.getTime() > Date.now();
+  const canWrite = plan !== "free" && active && notExpired;
+
 
   return {
     plan,
