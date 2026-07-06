@@ -123,13 +123,12 @@ export default function Billing() {
                 <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                   <CheckCircle2 className="h-3 w-3" /> Active
                 </span>
-              ) : sub.plan === "free" ? (
-                <span className="text-xs font-medium bg-muted px-2 py-0.5 rounded-full">Free</span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-xs font-medium bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">
                   <AlertCircle className="h-3 w-3" /> Inactive
                 </span>
               )}
+
             </div>
             <div className="text-sm text-muted-foreground mt-1">
               {seats} active user{seats === 1 ? "" : "s"}
