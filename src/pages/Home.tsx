@@ -285,31 +285,9 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
             variants={stagger}
-            className="grid gap-8 md:grid-cols-3"
+            className="grid gap-8 md:grid-cols-2 md:max-w-4xl md:mx-auto"
           >
-            {/* Free Plan */}
-            <motion.div
-              variants={fadeUp}
-              className="flex flex-col rounded-2xl border border-border/60 bg-card p-8"
-            >
-              <h3 className="text-lg font-semibold">Free</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Best for small shops</p>
-              <div className="mt-6">
-                <span className="text-4xl font-extrabold">₹0</span>
-                <span className="text-muted-foreground">/forever</span>
-              </div>
-              <ul className="mt-8 flex-1 space-y-3 text-sm">
-                {["1 user (Owner only)", "Core invoices & payments", "Customer management", "Basic reports", "Mobile app access"].map((item) => (
-                  <li key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" asChild className="mt-8 rounded-full">
-                <Link to="/signup">Get Started Free</Link>
-              </Button>
-            </motion.div>
+
 
             {/* Pro Monthly */}
             <motion.div
