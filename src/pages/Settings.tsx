@@ -9,7 +9,6 @@ import { useCompany, useAreas, useAddArea, useUpdateArea, useDeleteArea, useUpda
 import { toast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 import TallyApiIntegration from "@/components/settings/TallyApiIntegration";
-import PrintSettings from "@/components/settings/PrintSettings";
 
 export default function Settings() {
   const { data: company } = useCompany();
@@ -302,9 +301,6 @@ export default function Settings() {
         </ul>
       </div>
       )}
-
-      {/* Receipt Printing - anyone who can access settings */}
-      <PrintSettings />
 
       {/* Tally Prime Connector API - Owner only */}
       {canManageSettings && <TallyApiIntegration />}

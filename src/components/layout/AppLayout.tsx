@@ -17,6 +17,8 @@ import {
   Sun,
   Moon,
   Lock,
+  Printer,
+
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -54,6 +56,8 @@ import { useAppLock } from "@/contexts/AppLockContext";
 import { Switch } from "@/components/ui/switch";
 import ReadOnlyBanner from "@/components/billing/ReadOnlyBanner";
 import PrinterPickerHost from "@/components/shared/PrinterPickerHost";
+import PrintSettings from "@/components/settings/PrintSettings";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const allNavItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: null },
@@ -80,6 +84,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
   const { lockEnabled, biometricAvailable, enableLock, disableLock } = useAppLock();
   const [lockToggling, setLockToggling] = useState(false);
+  const [printSettingsOpen, setPrintSettingsOpen] = useState(false);
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -351,6 +356,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   tabIndex={-1}
                 />
               </DropdownMenuItem>
+              <DropdownMenuItem
+                className="py-3 px-3 text-base"
+                onClick={() => {
+                  hapticLight();
+                  setPrintSettingsOpen(true);
+                }}
+              >
+                <Printer className="mr-2 h-5 w-5" />
+                Receipt Printing
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="my-1.5" />
               <DropdownMenuItem
                 className="py-3 px-3 text-base text-destructive focus:text-destructive"
@@ -396,6 +411,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </AlertDialog>
 
       <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
+
+      <Dialog open={printSettingsOpen} onOpenChange={setPrintSettingsOpen}>
+        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Receipt Printing</DialogTitle>
+          </DialogHeader>
+          <PrintSettings />
+        </DialogContent>
+      </Dialog>
+
       <PrinterPickerHost />
     </div>
   );
