@@ -672,19 +672,19 @@ export type Database = {
       }
       user_roles: {
         Row: {
-          company_id: string
+          company_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
-          company_id: string
+          company_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
-          company_id?: string
+          company_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -704,6 +704,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_cancel_plan: { Args: { _company_id: string }; Returns: undefined }
+      admin_extend_plan: {
+        Args: { _company_id: string; _days: number }
+        Returns: undefined
+      }
+      admin_grant_complimentary_plan: {
+        Args: { _company_id: string; _months: number }
+        Returns: undefined
+      }
       company_has_active_plan: {
         Args: { _company_id: string }
         Returns: boolean
@@ -724,6 +733,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
@@ -732,6 +742,7 @@ export type Database = {
         | "staff"
         | "collection_staff"
         | "delivery_staff"
+        | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -865,6 +876,7 @@ export const Constants = {
         "staff",
         "collection_staff",
         "delivery_staff",
+        "super_admin",
       ],
     },
   },
