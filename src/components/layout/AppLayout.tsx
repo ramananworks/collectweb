@@ -49,6 +49,8 @@ import { toast } from "@/hooks/use-toast";
 
 import { useTheme } from "next-themes";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
+import { ShieldCheck } from "lucide-react";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
 import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
@@ -85,6 +87,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { lockEnabled, biometricAvailable, enableLock, disableLock } = useAppLock();
   const [lockToggling, setLockToggling] = useState(false);
   const [printSettingsOpen, setPrintSettingsOpen] = useState(false);
+  const { isSuperAdmin } = useIsSuperAdmin();
+
 
   const backPressedRef = useRef(false);
   const backTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -366,6 +370,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Printer className="mr-2 h-5 w-5" />
                 Receipt Printing
               </DropdownMenuItem>
+              {isSuperAdmin && (
+                <DropdownMenuItem
+                  className="py-3 px-3 text-base"
+                  onClick={() => { hapticLight(); navigate("/admin"); }}
+                >
+                  <ShieldCheck className="mr-2 h-5 w-5" />
+                  Super Admin
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator className="my-1.5" />
               <DropdownMenuItem
                 className="py-3 px-3 text-base text-destructive focus:text-destructive"

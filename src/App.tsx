@@ -24,6 +24,9 @@ import Settings from "@/pages/Settings";
 import Outstanding from "@/pages/Outstanding";
 import Billing from "@/pages/Billing";
 import PlanStatus from "@/pages/PlanStatus";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminCompany from "@/pages/admin/AdminCompany";
+import AdminRoute from "@/components/AdminRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +65,8 @@ const App = () => (
             <Route path="/outstanding" element={<ProtectedLayout><Outstanding /></ProtectedLayout>} />
             <Route path="/settings/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
             <Route path="/settings/plan-status" element={<ProtectedLayout><PlanStatus /></ProtectedLayout>} />
+            <Route path="/admin" element={<AdminRoute><AppLayout><AdminDashboard /></AppLayout></AdminRoute>} />
+            <Route path="/admin/companies/:id" element={<AdminRoute><AppLayout><AdminCompany /></AppLayout></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </AppLockProvider>
