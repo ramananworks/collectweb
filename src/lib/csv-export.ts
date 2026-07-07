@@ -1,11 +1,8 @@
 export function toCSV(rows: Record<string, any>[]): string {
   if (!rows.length) return "";
-  const headers = Array.from(
-    rows.reduce((set, r) => {
-      Object.keys(r).forEach((k) => set.add(k));
-      return set;
-    }, new Set<string>())
-  );
+  const set = new Set<string>();
+  rows.forEach((r) => Object.keys(r).forEach((k) => set.add(k)));
+  const headers = Array.from(set);
   const escape = (v: any) => {
     if (v === null || v === undefined) return "";
     const s = typeof v === "object" ? JSON.stringify(v) : String(v);

@@ -105,7 +105,7 @@ export default function AdminCompany() {
 
   const c = company.data;
   const latest = subs.data?.[0];
-  const isComplimentary = !!latest?.raw?.complimentary;
+  const isComplimentary = !!(latest?.raw as any)?.complimentary;
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -157,7 +157,7 @@ export default function AdminCompany() {
               <Button
                 className="gap-2"
                 disabled={busy !== null}
-                onClick={() => run("Grant complimentary", () => supabase.rpc("admin_grant_complimentary_plan", { _company_id: id!, _months: months }))}
+                onClick={() => run("Grant complimentary", async () => await supabase.rpc("admin_grant_complimentary_plan", { _company_id: id!, _months: months }))}
               >
                 {busy === "Grant complimentary" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gift className="h-4 w-4" />}
                 Grant complimentary
@@ -173,7 +173,7 @@ export default function AdminCompany() {
                 variant="secondary"
                 className="gap-2"
                 disabled={busy !== null}
-                onClick={() => run("Extend plan", () => supabase.rpc("admin_extend_plan", { _company_id: id!, _days: days }))}
+                onClick={() => run("Extend plan", async () => await supabase.rpc("admin_extend_plan", { _company_id: id!, _days: days }))}
               >
                 {busy === "Extend plan" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarPlus className="h-4 w-4" />}
                 Extend plan
@@ -185,7 +185,7 @@ export default function AdminCompany() {
                 variant="destructive"
                 className="gap-2"
                 disabled={busy !== null}
-                onClick={() => run("Cancel plan", () => supabase.rpc("admin_cancel_plan", { _company_id: id! }))}
+                onClick={() => run("Cancel plan", async () => await supabase.rpc("admin_cancel_plan", { _company_id: id! }))}
               >
                 {busy === "Cancel plan" ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
                 Cancel plan
