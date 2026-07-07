@@ -250,7 +250,7 @@ export default function AdminCompany() {
                       <td className="py-2">{s.plan_type}</td>
                       <td className="py-2">{s.status}</td>
                       <td className="py-2">{s.current_period_end ? formatDisplayDate(s.current_period_end) : "—"}</td>
-                      <td className="py-2">{s.raw?.complimentary ? "Yes" : ""}</td>
+                      <td className="py-2">{(s.raw as any)?.complimentary ? "Yes" : ""}</td>
                     </tr>
                   ))}
                   {!subs.data?.length && <tr><td colSpan={5} className="py-4 text-center text-muted-foreground">No subscriptions.</td></tr>}

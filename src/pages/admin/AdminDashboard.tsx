@@ -71,7 +71,7 @@ export default function AdminDashboard() {
           owner_email: ownerEmailByCompany.get(c.id) || null,
           seats: seatByCompany.get(c.id) || 0,
           active_sub_status: sub?.status || null,
-          complimentary: !!sub?.raw?.complimentary,
+          complimentary: !!(sub?.raw as any)?.complimentary,
         };
       });
     },
@@ -87,11 +87,11 @@ export default function AdminDashboard() {
       ]);
       const totalCollections = (pay.data || []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
       const active = (subs.data || []).filter((s: any) => ["active", "authenticated", "pending"].includes(s.status) && (!s.current_period_end || new Date(s.current_period_end) > new Date()));
-      const complimentaryCount = active.filter((s: any) => s?.raw?.complimentary).length;
+      const complimentaryCount = active.filter((s: any) => (s?.raw as any)?.complimentary).length;
       const priceMonthly = 499; // approx per seat
       const priceYearly = 4999;
       const mrr = active.reduce((sum, s: any) => {
-        if (s?.raw?.complimentary) return sum;
+        if ((s?.raw as any)?.complimentary) return sum;
         const seats = Number(s.quantity || 1);
         return sum + (s.plan_type === "yearly" ? (priceYearly * seats) / 12 : priceMonthly * seats);
       }, 0);

@@ -49,6 +49,8 @@ import { toast } from "@/hooks/use-toast";
 
 import { useTheme } from "next-themes";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
+import { useNavigate as _unused } from "react-router-dom";
 import { hapticLight, hapticMedium } from "@/lib/haptics";
 import GlobalFAB from "@/components/shared/GlobalFAB";
 import ChangePasswordDialog from "@/components/forms/ChangePasswordDialog";
