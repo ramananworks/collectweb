@@ -179,7 +179,12 @@ export function useAddCustomer() {
         return;
       }
       const { error } = await supabase.from("customers").insert(row);
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505") {
+          throw new Error("A customer with this phone number already exists.");
+        }
+        throw error;
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["customers"] }),
   });
@@ -213,7 +218,12 @@ export function useCreateInvoice() {
         return;
       }
       const { error } = await supabase.from("invoices").insert(row);
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505") {
+          throw new Error("An invoice with this number already exists.");
+        }
+        throw error;
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
   });
