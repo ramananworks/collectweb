@@ -5,6 +5,29 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInvoices, useCustomers, useAreas, formatCurrency } from "@/hooks/use-data";
 import { differenceInDays } from "date-fns";
+import { toast } from "sonner";
+
+function escapeCsvField(value: string | number | null | undefined): string {
+  const str = value === null || value === undefined ? "" : String(value);
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function downloadCsv(filename: string, rows: (string | number | null | undefined)[][]) {
+  const csvContent = rows.map((row) => row.map(escapeCsvField).join(",")).join("\r\n");
+  // Leading BOM so Excel on Windows correctly detects UTF-8 (needed for ₹ and Indian names/addresses)
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 
 export default function Reports() {
   const [dateFrom, setDateFrom] = useState("");
@@ -24,7 +47,10 @@ export default function Reports() {
     const matchesCustomer = customerFilter === "all" || inv.customer_id === customerFilter;
     const matchesStatus = statusFilter === "all" || inv.status === statusFilter;
     const matchesArea = areaFilter === "all" || getCustomerArea(inv.customer_id) === areaFilter;
-    return matchesCustomer && matchesStatus && matchesArea;
+    const invoiceDate = new Date(inv.invoice_date);
+    const matchesFrom = !dateFrom || invoiceDate >= new Date(dateFrom);
+    const matchesTo = !dateTo || invoiceDate <= new Date(dateTo);
+    return matchesCustomer && matchesStatus && matchesArea && matchesFrom && matchesTo;
   });
 
   const totalOutstanding = filtered.reduce((a, i) => a + (i.amount - i.paid_amount), 0);
@@ -65,6 +91,41 @@ export default function Reports() {
     return brackets;
   }, [filtered]);
 
+  const handleExport = () => {
+    if (filtered.length === 0) {
+      toast.info("No invoices match the current filters");
+      return;
+    }
+
+    const headers = [
+      "Invoice Number",
+      "Customer",
+      "Area",
+      "Invoice Date",
+      "Due Date",
+      "Amount",
+      "Paid Amount",
+      "Outstanding",
+      "Status",
+    ];
+
+    const rows = filtered.map((inv) => [
+      inv.invoice_number,
+      inv.customer_name,
+      getCustomerArea(inv.customer_id),
+      inv.invoice_date,
+      inv.due_date,
+      inv.amount,
+      inv.paid_amount,
+      inv.amount - inv.paid_amount,
+      inv.status,
+    ]);
+
+    const today = new Date().toISOString().split("T")[0];
+    downloadCsv(`invoices_report_${today}.csv`, [headers, ...rows]);
+    toast.success(`Exported ${filtered.length} invoice${filtered.length === 1 ? "" : "s"}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -72,7 +133,7 @@ export default function Reports() {
           <h1 className="text-2xl font-bold">Reports</h1>
           <p className="text-sm text-muted-foreground">Filter and analyze your collection data</p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={handleExport}>
           <Download className="h-4 w-4" /> Export
         </Button>
       </div>

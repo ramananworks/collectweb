@@ -194,11 +194,6 @@ export function DeliveryConfirmDialog({
             <p className="text-sm text-muted-foreground">
               OTP sent to <span className="font-medium">{maskedPhone}</span>. Enter the 6-digit code below.
             </p>
-            {testOtp && (
-              <div className="rounded-lg bg-warning/10 border border-warning/20 px-3 py-2 text-xs text-warning">
-                ⚠️ SMS not configured. Test OTP: <span className="font-mono font-bold">{testOtp}</span>
-              </div>
-            )}
             <div className="flex justify-center">
               <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
                 <InputOTPGroup>
