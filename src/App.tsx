@@ -1,9 +1,9 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as Sonner, toast } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import Home from "@/pages/Home";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLockProvider } from "@/contexts/AppLockContext";
@@ -29,7 +29,17 @@ import AdminCompany from "@/pages/admin/AdminCompany";
 import AdminRoute from "@/components/AdminRoute";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  mutationCache: new MutationCache({
+    onError: (error: any) => {
+       if (error?.code === "42501") {
+        toast.error("This action isn't available on your current plan. Upgrade to continue.");
+      } else {
+        toast.error(error?.message || "Something went wrong. Please try again.");
+      }
+    },
+  }),
+});
 
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (

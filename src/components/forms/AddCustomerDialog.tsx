@@ -68,9 +68,10 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
         setOpen(false);
         setOpen(false);
       },
-      onError: (err) => {
+      onError: () => {
+        // Error toast is now handled centrally by the global MutationCache
+        // handler in App.tsx — only local side effects belong here.
         hapticHeavy();
-        toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });
   }
@@ -99,8 +100,9 @@ export default function AddCustomerDialog({ open: controlledOpen, onOpenChange }
         setNewAreaName("");
         toast({ title: "Area created", description: `"${trimmed}" has been added.` });
       },
-      onError: (err) => {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
+      onError: () => {
+        // Error toast is now handled centrally by the global MutationCache
+        // handler in App.tsx.
       },
     });
   };

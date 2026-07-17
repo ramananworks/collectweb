@@ -290,9 +290,9 @@ export default function Outstanding() {
           const isOpen = expanded.has(customer.id);
           return (
              <div key={customer.id} className="rounded-xl border bg-card overflow-hidden relative">
-              {todayCollectedSet.has(customer.id) && (
+              {/* {todayCollectedSet.has(customer.id) && (
                 <CheckCircle2 className="absolute top-2 right-2 h-16 w-16 text-success opacity-25 pointer-events-none" />
-              )}
+              )} */}
               {/* Customer row */}
               <button
                 onClick={() => toggleExpand(customer.id)}
