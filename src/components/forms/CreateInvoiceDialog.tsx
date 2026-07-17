@@ -122,9 +122,10 @@ export default function CreateInvoiceDialog({ open: controlledOpen, onOpenChange
         form.reset();
         setOpen(false);
       },
-      onError: (err) => {
+      onError: () => {
+        // Error toast is now handled centrally by the global MutationCache
+        // handler in App.tsx — only local side effects belong here.
         hapticHeavy();
-        toast({ title: "Error", description: err.message, variant: "destructive" });
       },
     });
   }
