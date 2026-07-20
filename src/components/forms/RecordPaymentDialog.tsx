@@ -76,7 +76,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
   );
 
   const customerInvoices = invoices.filter(
-    (inv) => inv.customer_id === selectedCustomerId && inv.status !== "paid"
+    (inv) => inv.customer_id === selectedCustomerId && inv.status === "overdue"
   );
 
   function onSubmit(values: CollectionFormValues) {
