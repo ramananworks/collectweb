@@ -105,7 +105,6 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
     }, {
       onSuccess: () => {
         hapticSuccess();
-        toast({ title: "Collection recorded", description: `${formatCurrency(values.amount)} recorded for ${customer?.name}.` });
 
         // Compute outstanding-after for this customer using latest invoices minus this payment
         const outstandingAfter = Math.max(0,
@@ -135,6 +134,7 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
             if (!ready.cancelled) printReceipt(receiptData);
           })();
         } else {
+          // Single success toast — carries the Print Receipt action.
           sonnerToast.success("Collection recorded", {
             description: `${formatCurrency(values.amount ?? 0)} from ${customer?.name}`,
             action: {
@@ -150,9 +150,10 @@ export default function RecordPaymentDialog({ open: controlledOpen, onOpenChange
         setIsSubmitting(false);
         setOpen(false);
       },
-      onError: (err) => {
+      onError: () => {
+        // Error toast is now handled centrally by the global MutationCache
+        // handler in App.tsx — only local side effects belong here.
         hapticHeavy();
-        toast({ title: "Error", description: err.message, variant: "destructive" });
         setIsSubmitting(false);
       },
     });

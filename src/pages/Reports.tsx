@@ -15,10 +15,21 @@ function escapeCsvField(value: string | number | null | undefined): string {
   return str;
 }
 
-function downloadCsv(filename: string, rows: (string | number | null | undefined)[][]) {
+async function downloadCsv(filename: string, rows: (string | number | null | undefined)[][]) {
   const csvContent = rows.map((row) => row.map(escapeCsvField).join(",")).join("\r\n");
-  // Leading BOM so Excel on Windows correctly detects UTF-8 (needed for ₹ and Indian names/addresses)
   const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+
+  const android = (window as any).Android;
+  if (android?.saveFile) {
+    const base64 = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
+      reader.readAsDataURL(blob);
+    });
+    android.saveFile(base64, filename, "text/csv");
+    return;
+  }
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
